@@ -1,0 +1,121 @@
+================================================================
+First Version (March,2012)
+V1.0
+----------------------------------------------------------------
+MainFOSDLIN851.m
+Main_DynmNL851.m
+Main_DynmNL851_CDA.m
+Main_DynmNL851_Refined.m
+SF_ElemComptLIN851.m
+SF_ElemComptNL851.m
+
+SF_Assembling.m
+SF_Condensation.m
+SF_GetFusVect.m
+SF_GetInputData.m
+SF_GetMateProp.m
+SF_GetTQFdva.m
+SF_GetUsedData.m
+SF_InitGlobMatr.m
+SF_InputFileCheck.m
+SF_NewmarkRefined.m
+SF_NewmarkSolution.m
+SF_StartInfo.m
+
+SF_GetAnMatr_LRT56.m
+SF_GetAnMatr_LRT5.m
+SF_GetAnMatr_MRT5.m
+SF_GetAnMatr_RVK5.m
+
+SF_GetSugMatr_LRT56.m
+SF_GetSugMatr_LRT5.m
+SF_GetSugMatr_MRT5.m
+SF_GetSugMatr_RVK5.m
+
+
+================================================================
+Second Version (22.04.2012)
+V2.0
+----------------------------------------------------------------
+Remarks: Doesnot calculate Fut
+----------------------------------------------------------------
+MainFOSDLIN851T5.m
+Main_DynmNL851T5T56_CDA.m
+Main_DynmNL851T5T56_Nmk.m
+SF_ElemComptLIN851T5.m
+SF_ElemComptNL851T5.m
+SF_ElemComptNL851T56.m
+
+
+================================================================
+Third Version (24.04.2012)
+V3.0
+----------------------------------------------------------------
+Remarks: seperate the voltage for actuator and sensor
+----------------------------------------------------------------
+Main_DynmNL851T5T56_CDA_V3.m
+Main_DynmNL851T5T56_Nmk_V3.m
+Main_StaticNL851T5T56_NR_V3.m
+SF_ElemComptNL851T5_V3.m
+SF_ElemComptNL851T56_V3.m
+SF_GetTQFdva_V3.m
+
+
+================================================================
+Modification (02.05.2012)
+
+Found a mistake in the subfunction
+SF_Condensation.m
+But it doesnot influence the results for one smart layer
+or more than two layers with full smart material layer
+----------------------------------------------------------------
+
+
+================================================================
+Fourth Version (12.06.2012)
+V4.0
+----------------------------------------------------------------
+Remarks: add integration schemes, Gauss2 and Gauss3
+----------------------------------------------------------------
+New program
+Main_StaticNL851T5T56_NR_V41  :newton raphson algorithm 1
+Main_StaticNL851T5T56_NR_V43  :newton raphson algorithm 2
+Main_StaticNL851T5T56_RWR_V4  :Riks-Wempner-Ramm arc-length control method
+SF_ElemComptLIN851T5_8ANS_V4
+SF_ElemComptNL851T5_8ANS_V4
+
+----------------------------------------------------------------
+Remarks: modification on 14.04.2013
+----------------------------------------------------------------
+SF_GetMateProp.m
+   Change:
+     MCTran(4,5) = RT3;
+     MCTran(5,4) = -RT3;
+   to
+     MCTran(4,5) = -RT3;
+     MCTran(5,4) = RT3;
+
+----------------------------------------------------------------
+Remarks: modification on 10.01.2014
+----------------------------------------------------------------
+Main_StaticNL851T5T56_NR_V44: new program for actuation problem, 
+	Based on Main_StaticNL851T5T56_NR_V41,	
+	remove external force, can apply actuation voltage step by step.
+Main_StaticNL851T5T56_NR_V53: simlar as V44
+	Based on Main_StaticNL851T5T56_NR_V43.
+
+----------------------------------------------------------------
+Remarks: modification on 10.07.2014
+----------------------------------------------------------------
+Add two subfunctions
+SF_NewmarkRefined_VFC_Final
+Main_DynmNL851T5T56_Nmk_VFC_V4_Final
+for velocity feedback control, see Tzou semicircular example
+
+
+----------------------------------------------------------------
+Remarks: modification on 10.07.2014
+----------------------------------------------------------------
+Extended to MFC materials
+
+

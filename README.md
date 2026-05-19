@@ -1,121 +1,133 @@
 # fg-meet-workbench
 
-功能梯度磁-电-弹性（FG-MEE）板在 **热-磁-电-弹性全耦合** 下的参数化仿真工作区：在钱沈云热耦合 MEET 程序上，叠加赵亚飞式 FG 分层材料输入（体积分数 × 分布模式交叉组合）。
-
-**注意：上游 MEET 源码为课题组私有材料，本仓库仅包含工作流脚本与试点输入文件，不包含完整 MEET 求解器。**
+功能梯度磁-电-弹性（FG-MEE）板在 **热-磁-电-弹性全耦合** 下的参数化仿真一体化仓库：含 **MATLAB 板壳有限元主程序**、**FG 输入生成工具**、**COMSOL 验证流程**。
 
 ---
 
-## 仓库内容
+## 仓库结构
 
-| 目录/文件 | 说明 |
-|-----------|------|
-| `materials/` | BaTiO3/CoFe2O4 混合律、FG 分布 U/V/X/O/P |
-| `tools/generate_cases.py` | 批量生成 MEET 输入文件（无需 MATLAB） |
-| `tools/*.m` | MATERIAL 段替换、与参考文件对比 |
-| `templates/` | 30×30×10 方板 CFFF 网格模板 |
-| `cases/` | 已生成的试点 InputFile + `pilot_cases.csv` |
-| `run_phase1_static_elastic.m` | 单工况静力（力载荷） |
-| `TODO.md` | 分阶段任务清单 |
+```
+fg-meet-workbench/
+├── matlab/
+│   ├── meet-fem-core/           # 八节点板壳 MEET 有限元核心（单元、材料、求解器）
+│   ├── meet-elastic-thermal/    # Case A：力-热耦合
+│   ├── meet-electro-thermal/    # Case B：电-热耦合
+│   ├── meet-magneto-thermal/    # Case C：磁-热耦合
+│   └── run_meet_static.m        # 统一静力入口
+├── comsol/                      # COMSOL 对照验证（文档、选点、结果表模板）
+├── materials/                   # FG 分布 + BaTiO3/CoFe2O4 混合律
+├── tools/                       # Python/MATLAB 输入生成与 COMSOL 导出
+├── cases/                       # 生成的 MEET 输入文件（试点 + 可扩展全组合）
+├── templates/                   # 30×30×10 方板 CFFF 网格模板
+├── reference/                   # 历史 FG-MEEP 输入样例（格式对照）
+├── output/                      # 运行结果（gitignore）
+├── setup_paths.m
+├── run_phase1_static_elastic.m  # 阶段 1 冒烟测试
+└── TODO.md
+```
 
 ---
 
-## 新电脑配置（换机跑结果）
+## MATLAB 做什么
 
-### 1. 克隆本仓库
+| 职责 | 说明 |
+|------|------|
+| **主求解** | 全耦合静力/动力：位移 + 变形诱导厚度温差 θ |
+| **参数扫描** | 体积分数 × FG 分布 × 三种载荷（力/电/磁） |
+| **入口** | `run_meet_static(caseFile, 'elastic' \| 'electro' \| 'magneto')` |
+
+**载荷对应：**
+
+| loadCase | 物理 | 典型设置 |
+|----------|------|----------|
+| `elastic` | Case A | 上表面 15000 Pa |
+| `electro` | Case B | 上下 ±300 V |
+| `magneto` | Case C | 上下 ±200 A 磁势 |
+
+---
+
+## COMSOL 做什么
+
+| 职责 | 说明 |
+|------|------|
+| **验证** | 代表性工况独立建模，与 MATLAB 对比 |
+| **不做** | 全参数 45×3 批量主算例（太慢） |
+| **方法** | 分层固体 + 压电模块等效全耦合（见 `comsol/docs/`） |
+| **导出** | `python3 tools/export_comsol_layers.py cases/xxx.txt` → 分层 CSV |
+
+详见 [comsol/README.md](comsol/README.md)。
+
+---
+
+## 快速开始
+
+### 1. 克隆
 
 ```bash
-git clone <你的仓库地址> fg-meet-workbench
+git clone git@github.com:Cybing521/fg-meet-workbench.git
 cd fg-meet-workbench
 ```
 
-### 2. 拷贝私有 MEET 程序（勿提交到 Git）
-
-在 `fg-meet-workbench` 的**上一级目录**放置（推荐文件夹名）：
-
-```
-your-workdir/
-├── fg-meet-workbench/          # 本仓库
-├── meet-elastic-thermal/       # 来自：钱沈云/双向耦合程序-new/.../MEET-elastic-thermal
-├── meet-electro-thermal/       # 可选，电-热工况
-├── meet-magneto-thermal/       # 可选，磁-热工况
-└── meet-subfun/                # 来自：.../SubFunMFC
-```
-
-源路径（原整合包内）：
-
-- `整合/钱沈云论文及相关代码/双向耦合程序-new/双向耦合程序-new/MEET-elastic-thermal`
-- `整合/钱沈云论文及相关代码/双向耦合程序-new/双向耦合程序-new/SubFunMFC`
-
-### 3. 配置本机路径
-
-```bash
-cp config_paths_local.example.m config_paths_local.m
-```
-
-编辑 `config_paths_local.m` 中的目录（若未使用推荐布局，改成绝对路径即可）。
-
-### 4. Python（生成输入文件，可选）
+### 2. 生成/刷新输入文件（无需 MATLAB）
 
 ```bash
 python3 tools/generate_cases.py
 ```
 
-会刷新 `cases/*.txt` 并校验 `U + Vf0=0.6` 与钱沈云参考材料一致。
-
-### 5. MATLAB（跑有限元）
+### 3. MATLAB 单工况
 
 ```matlab
 cd('path/to/fg-meet-workbench');
-paths = setup_paths;          % 自动加载 config_paths_local.m（若存在）
-
-% 生成/刷新试点输入（也可用 Python 已完成）
-% run('run_phase1_generate_cases.m');
-
-% 单工况静力：CFFF，15000 Pa，U型 Vf0=0.6
+setup_paths;
 run('run_phase1_static_elastic.m');
 ```
 
-结果保存在 `output/phase1_static_U_Vf06.mat`。
-
-### 6. 指定其他工况
-
-修改 `run_phase1_static_elastic.m` 中的：
+或：
 
 ```matlab
+paths = setup_paths;
 caseFile = fullfile(paths.cases, 'Thermal_CFFF_X_Vf0.5-30x30-10layer.txt');
+run_meet_static(caseFile, 'elastic', 'OutTag', 'X_Vf05');
 ```
 
-或在 MEET 目录中手动指定 `InputFile` 为 `cases/` 下任意文件。
+### 4. COMSOL 对照（同一 `caseFile`）
+
+```bash
+python3 tools/export_comsol_layers.py cases/Thermal_CFFF_X_Vf0.5-30x30-10layer.txt
+```
+
+在 COMSOL 中按 `comsol/export/*_layers.csv` 赋 10 层材料，边界 CFFF，载荷见 `comsol/docs/equivalent-loads.md`，结果填入 `comsol/results/validation_log_template.csv`。
 
 ---
 
-## 设计参数（任务书）
+## 设计参数
 
 | 参数 | 取值 |
 |------|------|
-| 体积分数 Vf0 | 0.1–0.9（BaTiO3:CoFe2O4 = 1:9 … 9:1） |
-| FG 分布 | U 均匀、V 线性、X 表面富集、O 中心富集、P 幂律 |
-| Case A | 均布压力 15000 Pa |
-| Case B | 上下表面 ±300 V |
-| Case C | 上下表面 ±200 A 磁势 |
+| 体积分数 Vf0 | 0.1–0.9（BaTiO3 : CoFe2O4） |
+| FG 分布 | U / V / X / O / P（幂律默认 n=2） |
+| 几何 | 300×300×6 mm 方板 |
 | 边界 | 主算例 CFFF |
 
 ---
 
-## 试点工况（已入库）
+## 路径覆盖（可选）
 
-见 `cases/pilot_cases.csv`：U/X/V × Vf0.3/0.5/0.7，以及基准 `Thermal_CFFF_U_Vf0.6-30x30-10layer.txt`。
+默认使用仓库内 `matlab/`。若程序放在其他位置：
 
----
-
-## 开发说明
-
-- 材料行字段与 `Thermal_CFFFplate_0.6Vf-30x30-10layer.txt` 一致（27 列）；`A1/A2` 为热应力模量 λ，非热膨胀系数 α。
-- 完整 5×9 组合与批量后处理见 [TODO.md](TODO.md) 阶段 2。
+```bash
+cp config_paths_local.example.m config_paths_local.m
+```
 
 ---
 
-## 许可证与保密
+## 任务进度
 
-课题组内部使用。不得将钱沈云/赵亚飞原始程序上传至公开仓库。
+见 [TODO.md](TODO.md)。
+
+---
+
+## 说明
+
+- 材料行中 `A1/A2` 为热应力模量 λ，与全耦合理论一致。
+- `reference/fg-meep-sample-inputs/` 仅作 FG 格式参考；热耦合主算例用 `cases/` 下 `Thermal_CFFF_*.txt`。

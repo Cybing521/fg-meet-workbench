@@ -1,21 +1,13 @@
 function paths = config_paths_local()
-%CONFIG_PATHS_LOCAL  Copy to config_paths_local.m and edit on the new machine.
+%CONFIG_PATHS_LOCAL  Optional path overrides (copy to config_paths_local.m).
 %
-%   cp config_paths_local.example.m config_paths_local.m
-%
-% Expected layout (sibling folders under the same parent as fg-meet-workbench):
-%
-%   your-workdir/
-%     fg-meet-workbench/          <-- this repo
-%     meet-elastic-thermal/       <-- copy from 钱沈云 .../MEET-elastic-thermal
-%     meet-electro-thermal/       <-- optional, Case B
-%     meet-magneto-thermal/       <-- optional, Case C
-%     meet-subfun/                <-- copy from .../SubFunMFC
+%   By default all paths resolve inside this repository under matlab/.
+%   Only edit this file if you keep solvers in a non-standard location.
 
-    parent = fileparts(fileparts(mfilename('fullpath')));
-
-    paths.meet_elastic = fullfile(parent, 'meet-elastic-thermal');
-    paths.meet_electro = fullfile(parent, 'meet-electro-thermal');
-    paths.meet_magneto = fullfile(parent, 'meet-magneto-thermal');
-    paths.subfun = fullfile(parent, 'meet-subfun');
+    thisDir = fileparts(fileparts(mfilename('fullpath')));
+    paths.meet_fem_core = fullfile(thisDir, 'matlab', 'meet-fem-core');
+    paths.meet_elastic = fullfile(thisDir, 'matlab', 'meet-elastic-thermal');
+    paths.meet_electro = fullfile(thisDir, 'matlab', 'meet-electro-thermal');
+    paths.meet_magneto = fullfile(thisDir, 'matlab', 'meet-magneto-thermal');
+    paths.subfun = paths.meet_fem_core;
 end

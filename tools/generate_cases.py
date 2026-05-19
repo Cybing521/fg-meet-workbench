@@ -12,9 +12,9 @@ from pathlib import Path
 WORKBENCH = Path(__file__).resolve().parents[1]
 TEMPLATE = WORKBENCH / "templates" / "Thermal_CFFFplate_30x30_10layer_template.txt"
 CASES_DIR = WORKBENCH / "cases"
-REF_QIAN = (
-    WORKBENCH.parent
-    / "钱沈云论文及相关代码/双向耦合程序-new/双向耦合程序-new/MEET-elastic-thermal/InputFile/Thermal_CFFFplate_0.6Vf-30x30-10layer.txt"
+REF_UNIFORM_VF06 = (
+    WORKBENCH
+    / "matlab/meet-elastic-thermal/InputFile/Thermal_CFFFplate_0.6Vf-30x30-10layer.txt"
 )
 
 
@@ -176,15 +176,15 @@ def main() -> None:
         for vf0 in (0.3, 0.5, 0.7):
             name = f"Thermal_CFFF_{mode}_Vf{vf0:.1f}-30x30-10layer.txt"
             p = generate(vf0, mode, name)
-            manifest.append((mode, vf0, str(p)))
+            manifest.append((mode, vf0, f"cases/{name}"))
             print(f"Generated {p}")
 
     ref_out = generate(0.6, "U", "Thermal_CFFF_U_Vf0.6-30x30-10layer.txt")
-    manifest.append(("U", 0.6, str(ref_out)))
+    manifest.append(("U", 0.6, "cases/Thermal_CFFF_U_Vf0.6-30x30-10layer.txt"))
 
-    if REF_QIAN.is_file():
-        diff = max_rel_diff(ref_out, REF_QIAN)
-        print(f"\nCalibration U/Vf0=0.6 vs Qian reference: maxRelDiff={diff:.4e}")
+    if REF_UNIFORM_VF06.is_file():
+        diff = max_rel_diff(ref_out, REF_UNIFORM_VF06)
+        print(f"\nCalibration U/Vf0=0.6 vs bundled reference: maxRelDiff={diff:.4e}")
         if diff > 0.02:
             print("  WARNING: >2% difference — review get_bto_cfo calibration")
 

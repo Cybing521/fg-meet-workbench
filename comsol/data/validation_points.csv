@@ -1,0 +1,13 @@
+bc,load_pa,matlab_mesh,comsol_mesh,matlab_elem_x_m,matlab_elem_y_m,comsol_x_m,comsol_y_m,quantity,notes
+CFCF,15000,20x20,30x30,0.075,0.075,0.0825,0.0825,w_center,plate center region
+CFCF,15000,20x20,30x30,0.195,0.045,0.2025,0.0525,w,evaluation point
+CFCF,15000,30x30,50x50,0.05,0.05,0.055,0.055,w_center,refined mesh
+CFFF,15000,20x20,50x50,0.195,0.045,0.2025,0.0525,w,evaluation point D vicinity
+CFFF,15000,30x30,50x50,0.1,0.1,0.105,0.105,w_center,centerline study
+CFFF,15000,30x30,50x50,0.15,0.1,0.155,0.105,w,centerline
+CFFF,15000,30x30,50x50,0.2,0.2,0.205,0.205,w,free end region
+CFFC,15000,30x30,50x50,0.05,0.05,0.055,0.055,w_center,
+CCFC,15000,30x30,50x50,0.05,0.05,0.055,0.055,w_center,
+CFFF,0,30x30,50x50,0.05,0.05,0.055,0.055,w_center,electric +/-300V Case B
+CFCF,0,30x30,50x50,0.1,0.1,0.105,0.105,w_center,electric Case B
+CFFF,0,30x30,50x50,0.05,0.05,0.055,0.055,w_center,magnetic +/-200A Case C
