@@ -24,3 +24,5 @@ __pycache__/
 
 # Optional local overrides
 config_paths_local.m
+*.xlsx
+~$*
