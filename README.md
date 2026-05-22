@@ -171,6 +171,18 @@ $env:FG_MODAL_DT='0.0001'
 
 30x30 模态输出 `output/dynamic_modal_30x30_U_Vf06_elastic_8modes_*.csv`，并整理为 `reports/2026-05-22-modal30x30/README.md`。当前结果：8 阶模态静态捕获比例 1.00037，耦合静态中心挠度 -2.1275 mm，机械静态中心挠度 -2.2947 mm，动力峰值 -4.4279 mm，峰值时间 9.50 ms，第一阶频率 52.20 Hz。
 
+已补充 30x30 模态阶数敏感性，采用一次装配、一次求前 16 阶，再分别保留 4/6/8/12/16 阶恢复时程：
+
+```powershell
+$env:FG_MODAL_SENS_MODES='4,6,8,12,16'
+$env:FG_MODAL_SENS_TTOTAL='0.04'
+$env:FG_MODAL_SENS_DT='0.0001'
+& 'D:\MATLAB\R2026a\bin\matlab.exe' -batch "run_dynamic_modal_sensitivity_30x30"
+python tools\build_modal_sensitivity_report.py
+```
+
+敏感性输出 `output/dynamic_modal_30x30_U_Vf06_elastic_sensitivity_*.csv`，并整理为 `reports/2026-05-22-modal-sensitivity/README.md`。当前 16 阶结果：静态捕获比例 0.999965，动力峰值 -4.4270 mm，峰值时间 9.60 ms，最大层温差跨度 5.0363 K。与 8 阶相比，峰值绝对值差约 0.0009 mm、最大温差跨度差约 0.0035 K，说明 8 阶结果已基本收敛，汇报中可把 16 阶作为更稳妥口径。
+
 ---
 
 ## 设计参数
