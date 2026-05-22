@@ -1,0 +1,475 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{colortbl}
+
+\definecolor{passgreen}{RGB}{34,139,34}
+\definecolor{failred}{RGB}{220,20,60}
+\definecolor{warnblue}{RGB}{30,80,180}
+\definecolor{lightgray}{RGB}{240,240,240}
+
+\title{\textbf{功能梯度磁--电--弹性板热--力全耦合仿真\\月度工作汇报}}
+\author{组会汇报}
+\date{2026年5月23日}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{研究模型与目标}
+% ============================================================
+
+\subsection{模型概述}
+
+研究对象为功能梯度磁--电--弹性（FG-MEE）方板在热--磁--电--弹性全耦合条件下的静力与动力响应。
+
+\begin{table}[H]
+\centering
+\caption{FG-MEE 板模型基本参数}
+\label{tab:model-params}
+\begin{tabular}{lll}
+\toprule
+\textbf{参数} & \textbf{取值} & \textbf{说明} \\
+\midrule
+几何尺寸 & $300\times300\times6$\,mm & 方板 \\
+边界条件 & CFFF & 单边固支三边自由 \\
+材料组分 & BaTiO$_3$ / CoFe$_2$O$_4$ & 压电/压磁复合 \\
+FG 分布 & U, V, X, O, P & 5种梯度模式 \\
+体积分数 $V_{f0}$ & 0.1--0.9 & 9个水平 \\
+厚度分层 & 10 层 & 混合律逐层赋值 \\
+网格 & $30\times30$ 八节点板壳 & 961节点/900单元 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{研究目标}
+
+\begin{enumerate}[leftmargin=2em]
+\item 完成 $5\times9\times3=135$ 组静力参数扫描（FG模式$\times$体积分数$\times$载荷类型）；
+\item 建立 2\,mm 参考挠度下的磁电耦合转化验证体系；
+\item 用 COMSOL 独立建模对代表工况进行验证，关键误差控制在 5\% 以内；
+\item 完成动力代表算例（Newmark 直接积分 + 模态降阶），获取瞬态响应特征。
+\end{enumerate}
+
+% ============================================================
+\section{计算与仿真方法}
+% ============================================================
+
+\subsection{总体技术路线}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.0cm and 2.2cm,
+  block/.style={rectangle, draw, rounded corners, minimum width=3cm, minimum height=0.8cm, align=center, font=\small},
+  arrow/.style={-{Stealth[length=2.5mm]}, thick}
+]
+\node[block, fill=blue!10] (mat) {材料混合律\\BaTiO$_3$/CoFe$_2$O$_4$};
+\node[block, fill=blue!10, right=of mat] (fg) {FG分布生成\\U/V/X/O/P};
+\node[block, fill=green!10, below=of mat] (fem) {MATLAB板壳FEM\\八节点全耦合};
+\node[block, fill=green!10, below=of fg] (batch) {135组静力扫描\\+2mm耦合验证};
+\node[block, fill=orange!10, below=of fem] (comsol) {COMSOL独立验证\\10层CSV分域};
+\node[block, fill=orange!10, below=of batch] (dynamic) {动力分析\\Newmark+模态降阶};
+\node[block, fill=red!10, below=1.2cm of $(comsol)!0.5!(dynamic)$] (report) {结果汇报\\误差$<$5\%};
+
+\draw[arrow] (mat) -- (fg);
+\draw[arrow] (fg) -- (batch);
+\draw[arrow] (mat) -- (fem);
+\draw[arrow] (fem) -- (batch);
+\draw[arrow] (fem) -- (comsol);
+\draw[arrow] (batch) -- (dynamic);
+\draw[arrow] (comsol) -- (report);
+\draw[arrow] (dynamic) -- (report);
+\end{tikzpicture}
+\caption{总体技术路线流程图}
+\label{fig:workflow}
+\end{figure}
+
+\subsection{方法分工}
+
+\begin{table}[H]
+\centering
+\caption{计算方法分工表}
+\label{tab:method-division}
+\begin{tabular}{p{2.5cm}p{4cm}p{5.5cm}}
+\toprule
+\textbf{模块} & \textbf{实现方式} & \textbf{目的} \\
+\midrule
+MATLAB 静力扫描 & \texttt{run\_batch\_static.m} & 完整参数矩阵，输出挠度、温差、磁电效率 \\
+2\,mm 转化验证 & \texttt{run\_coupling\_validation\_2mm.m} & 统一参考挠度，验证正向驱动和反向传感 \\
+沈式回代 & $[K_{ff},K_{fz};K_{zf},K_{zz}]\backslash[-K_{fu}u;-K_{zu}u]$ & 从位移场直接回算感生电/磁势 \\
+COMSOL 对照 & Java API + comsolbatch & 绕开 LiveLink 登录依赖，命令行可复现 \\
+动力分析 & Newmark-$\beta$ + 模态叠加 & 瞬态响应、固有频率、超调特征 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{载荷工况设计}
+
+\begin{table}[H]
+\centering
+\caption{三种载荷工况定义}
+\label{tab:load-cases}
+\begin{tabular}{clll}
+\toprule
+\textbf{工况} & \textbf{物理含义} & \textbf{载荷设置} & \textbf{响应变量} \\
+\midrule
+Case A & 机械压力 & 上表面 $-15000$\,Pa & $w$, $\theta$ \\
+Case B & 电势驱动 & 上下 $\pm300$\,V & $w$, $\theta$ \\
+Case C & 磁势驱动 & 上下 $\pm200$\,A & $w$, $\theta$, ME效率 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+\section{实际遇到的问题与解决思路}
+% ============================================================
+
+\subsection{问题总览}
+
+\begin{table}[H]
+\centering
+\caption{本月遇到的主要问题及解决方案}
+\label{tab:problems}
+\small
+\begin{tabularx}{\textwidth}{>{\centering}p{0.6cm}|p{3.2cm}|p{3.2cm}|X}
+\toprule
+\textbf{编号} & \textbf{问题描述} & \textbf{尝试的思路} & \textbf{最终解决方案} \\
+\midrule
+P1 & MATLAB reduced $Q_d$ 后处理错位，固定边节点自由度被跳过 & 检查节点编号映射；对比有/无约束时的向量长度 & 新增完整节点自由度还原 $TQ_d$，刷新全部135行 \\
+\midrule
+P2 & COMSOL 自由四面体网格误差 $>6\%$，细化无法收敛 & mesh size 3/4/5 对比 & 改用 swept quad/hex 网格 \\
+\midrule
+P3 & 10层CSV分域1单元/层误差达 49.7\% & 增加每层扫掠单元 & 7单元/层为最优（误差3.77\%） \\
+\midrule
+P4 & 30$\times$30 全量 Newmark 超过5分钟 & 减小步长/减少步数 & 模态降阶（8--16阶叠加） \\
+\midrule
+P5 & LiveLink 需登录授权 & 尝试 LiveLink 连接 & Java API + comsolbatch \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{问题P1：reduced $Q_d$ 还原}
+
+原先 \texttt{Qd} 是去除约束自由度后的 reduced 向量。修正方法：建立完整节点自由度向量 $TQ_d$，将 reduced 解映射回全局编号。修正后135行结果全部刷新。
+
+\subsection{问题P2--P3：COMSOL 网格收敛}
+
+共进行 9 组网格实验，逐步排查误差来源：
+
+\begin{table}[H]
+\centering
+\caption{COMSOL 网格方案对比实验（U分布 Vf0.6 Case A）}
+\label{tab:comsol-experiments}
+\small
+\begin{tabular}{p{3.6cm}rrrl}
+\toprule
+\textbf{方案} & \textbf{中心\%} & \textbf{最大\%} & \textbf{平均\%} & \textbf{结论} \\
+\midrule
+forcearea\_mesh3 & 6.80 & 7.44 & 6.91 & \textcolor{failred}{不通过} \\
+forcearea\_mesh4 & 6.66 & 7.31 & 6.74 & \textcolor{failred}{不通过} \\
+forcearea\_mesh5 & 6.26 & 6.84 & 6.24 & \textcolor{failred}{不通过} \\
+sweep10\_mesh4 & 2.52 & 4.70 & 3.08 & \textcolor{passgreen}{通过} \\
+sweep10\_mesh5 & 2.52 & 4.71 & 3.08 & \textcolor{passgreen}{通过} \\
+csv\_sweep1\_mesh4 & 49.66 & 60.29 & 48.88 & \textcolor{failred}{偏硬} \\
+csv\_sweep5\_mesh4 & 1.54 & 6.41 & 2.71 & \textcolor{warnblue}{局部超} \\
+\rowcolor{lightgray}\textbf{csv\_sweep7\_mesh4} & \textbf{3.77} & \textbf{4.93} & \textbf{3.51} & \textcolor{passgreen}{\textbf{最终}} \\
+csv\_sweep10\_mesh4 & 5.25 & 6.03 & 5.04 & \textcolor{failred}{偏柔} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{问题P4：30$\times$30动力计算策略}
+
+30$\times$30 全量 Newmark 直接积分在 1\,ms 冒烟测试中超过 5 分钟未完成（自由度 $\approx13800$）。解决策略：先用 10$\times$10 pilot 验证功能，再改用模态降阶（一次装配、一次求解前 $N$ 阶模态，模态叠加重构时程），最后通过 4/6/8/12/16 阶敏感性分析确认收敛。
+
+% ============================================================
+\section{结果展示}
+% ============================================================
+
+\subsection{工作量总览}
+
+\begin{table}[H]
+\centering
+\caption{本月完成工作量统计}
+\label{tab:workload}
+\begin{tabular}{lrl}
+\toprule
+\textbf{工作项} & \textbf{数量} & \textbf{说明} \\
+\midrule
+MATLAB 静力算例 & 135 组 & 5种FG $\times$ 9个Vf $\times$ 3种载荷 \\
+2\,mm 耦合验证 & 6 项 & 正向驱动+反向传感+沈式回代 \\
+COMSOL 网格实验 & 9 组 & 不同网格类型/密度/分层方案 \\
+COMSOL 15点验证 & 15 点 & 最终方案全板面验证 \\
+动力 Newmark pilot & 401 步 & 10$\times$10 冒烟测试 \\
+30$\times$30 模态降阶 & 8 阶 & 模态叠加+热响应回代 \\
+模态敏感性分析 & 5 组 & 4/6/8/12/16 阶收敛性检查 \\
+Python/MATLAB 脚本 & 20+ 个 & 输入生成、后处理、对比绘图 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{静力参数扫描结果}
+
+\subsubsection{Case A：机械压力 $-15000$\,Pa}
+
+\begin{table}[H]
+\centering
+\caption{Case A 中心挠度 $w_c$ (mm)——各FG分布与体积分数}
+\label{tab:elastic-results}
+\small
+\begin{tabular}{c*{9}{r}}
+\toprule
+\textbf{FG} & \textbf{0.1} & \textbf{0.2} & \textbf{0.3} & \textbf{0.4} & \textbf{0.5} & \textbf{0.6} & \textbf{0.7} & \textbf{0.8} & \textbf{0.9} \\
+\midrule
+U & $-1.357$ & $-1.466$ & $-1.591$ & $-1.737$ & $-1.913$ & $-2.128$ & $-2.396$ & $-2.744$ & $-3.210$ \\
+V & $-1.307$ & $-1.358$ & $-1.414$ & $-1.475$ & $-1.543$ & $-1.621$ & $-1.710$ & $-1.813$ & $-1.935$ \\
+X & $-1.330$ & $-1.407$ & $-1.491$ & $-1.585$ & $-1.690$ & $-1.810$ & $-1.948$ & $-2.108$ & $-2.297$ \\
+O & $-1.384$ & $-1.528$ & $-1.703$ & $-1.921$ & $-2.202$ & $-2.571$ & $-3.011$ & $-3.454$ & $-3.832$ \\
+P & $-1.297$ & $-1.337$ & $-1.380$ & $-1.426$ & $-1.477$ & $-1.534$ & $-1.597$ & $-1.669$ & $-1.750$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Case C：磁势驱动 $\pm200$\,A}
+
+\begin{table}[H]
+\centering
+\caption{Case C 中心挠度 $w_c$ (mm)——各FG分布与体积分数}
+\label{tab:magneto-results}
+\small
+\begin{tabular}{c*{9}{r}}
+\toprule
+\textbf{FG} & \textbf{0.1} & \textbf{0.2} & \textbf{0.3} & \textbf{0.4} & \textbf{0.5} & \textbf{0.6} & \textbf{0.7} & \textbf{0.8} & \textbf{0.9} \\
+\midrule
+U & $1.080$ & $0.960$ & $0.817$ & $0.645$ & $0.435$ & $0.175$ & $-0.156$ & $-0.589$ & $-1.181$ \\
+V & $1.130$ & $1.076$ & $1.014$ & $0.944$ & $0.865$ & $0.774$ & $0.669$ & $0.546$ & $0.399$ \\
+X & $1.076$ & $0.960$ & $0.828$ & $0.677$ & $0.504$ & $0.305$ & $0.074$ & $-0.198$ & $-0.522$ \\
+O & $1.082$ & $0.960$ & $0.804$ & $0.605$ & $0.343$ & $-0.015$ & $-0.515$ & $-1.173$ & $-1.955$ \\
+P & $1.130$ & $1.076$ & $1.017$ & $0.951$ & $0.878$ & $0.797$ & $0.706$ & $0.604$ & $0.487$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Case C 磁电效率}
+
+\begin{table}[H]
+\centering
+\caption{Case C 磁电效率 $\alpha_{ME}$——各FG分布与体积分数}
+\label{tab:me-efficiency}
+\small
+\begin{tabular}{c*{9}{r}}
+\toprule
+\textbf{FG} & \textbf{0.1} & \textbf{0.2} & \textbf{0.3} & \textbf{0.4} & \textbf{0.5} & \textbf{0.6} & \textbf{0.7} & \textbf{0.8} & \textbf{0.9} \\
+\midrule
+U & 5.41 & 4.51 & 3.56 & 2.60 & 1.61 & 0.59 & 0.48 & 1.62 & 2.87 \\
+V & 12.08 & 15.17 & 16.26 & 16.46 & 16.20 & 15.63 & 14.83 & 13.85 & 12.69 \\
+X & 3.98 & 3.40 & 2.76 & 2.12 & 1.47 & 0.82 & 0.18 & 0.45 & 1.08 \\
+O & 6.55 & 5.35 & 4.10 & 2.82 & 1.45 & 0.06 & 1.63 & 3.08 & 4.21 \\
+P & 12.91 & 22.46 & 30.64 & 37.52 & 43.19 & 47.65 & 51.02 & 53.16 & 54.10 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{COMSOL 验证结果}
+
+最终方案：10层CSV分域材料 + swept quad/hex 网格（mesh size 4，每层7个扫掠单元）。
+
+\begin{table}[H]
+\centering
+\caption{COMSOL vs MATLAB 15点位移对比（U分布 Vf0.6 Case A）}
+\label{tab:15point}
+\small
+\begin{tabular}{cccrrrc}
+\toprule
+\textbf{点} & $x$ (m) & $y$ (m) & \textbf{MATLAB} (mm) & \textbf{COMSOL} (mm) & \textbf{差值} (mm) & \textbf{误差\%} \\
+\midrule
+p1  & 0.05 & 0.05 & $-0.287$ & $-0.290$ & $-0.003$ & 0.91 \\
+p2  & 0.10 & 0.05 & $-1.023$ & $-1.059$ & $-0.036$ & 3.48 \\
+p3  & 0.15 & 0.05 & $-2.065$ & $-2.153$ & $-0.089$ & 4.31 \\
+p4  & 0.20 & 0.05 & $-3.288$ & $-3.443$ & $-0.155$ & 4.70 \\
+p5  & 0.25 & 0.05 & $-4.600$ & $-4.827$ & $-0.227$ & 4.93 \\
+p6  & 0.05 & 0.15 & $-0.305$ & $-0.303$ & $+0.002$ & 0.63 \\
+p7  & 0.10 & 0.15 & $-1.071$ & $-1.098$ & $-0.027$ & 2.51 \\
+p8  & 0.15 & 0.15 & $-2.128$ & $-2.208$ & $-0.080$ & 3.77 \\
+p9  & 0.20 & 0.15 & $-3.352$ & $-3.499$ & $-0.148$ & 4.40 \\
+p10 & 0.25 & 0.15 & $-4.659$ & $-4.880$ & $-0.221$ & 4.74 \\
+p11 & 0.05 & 0.25 & $-0.287$ & $-0.290$ & $-0.003$ & 0.91 \\
+p12 & 0.10 & 0.25 & $-1.023$ & $-1.059$ & $-0.036$ & 3.48 \\
+p13 & 0.15 & 0.25 & $-2.065$ & $-2.153$ & $-0.089$ & 4.31 \\
+p14 & 0.20 & 0.25 & $-3.288$ & $-3.443$ & $-0.155$ & 4.70 \\
+p15 & 0.25 & 0.25 & $-4.600$ & $-4.827$ & $-0.227$ & 4.93 \\
+\midrule
+\multicolumn{4}{l}{\textbf{统计}} & \multicolumn{2}{r}{最大误差} & \textbf{4.93\%} \\
+\multicolumn{4}{l}{} & \multicolumn{2}{r}{平均误差} & \textbf{3.51\%} \\
+\multicolumn{4}{l}{} & \multicolumn{2}{r}{中心点误差} & \textbf{3.77\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{2\,mm 耦合转化验证}
+
+以中心挠度绝对值 2\,mm 为统一参考，验证磁电耦合正向驱动和反向传感。
+
+\begin{table}[H]
+\centering
+\caption{2\,mm 参考挠度耦合转化验证结果}
+\label{tab:coupling}
+\small
+\begin{tabular}{p{1.8cm}p{2.5cm}lrrc}
+\toprule
+\textbf{检查项} & \textbf{方法} & \textbf{驱动} & \textbf{驱动值} & $w_c$ (mm) & \textbf{状态} \\
+\midrule
+E$\to$w & 正向2mm & 电势 & 90075\,V & $-2.000$ & \textcolor{passgreen}{pass} \\
+M$\to$w & 正向2mm & 磁势 & 17974\,A & $+2.000$ & \textcolor{passgreen}{pass} \\
+w$\to$E & 沈式传感 & 力 & $-83134$\,Pa & $-2.000$ & \textcolor{passgreen}{pass} \\
+w$\to$M & 沈式传感 & 力 & $-83134$\,Pa & $-2.000$ & \textcolor{passgreen}{pass} \\
+M$\to$w$\to$E & 沈式直接 & 磁势 & 17974\,A & $+2.000$ & \textcolor{passgreen}{pass} \\
+E$\to$w$\to$M & 沈式直接 & 电势 & 90075\,V & $-2.000$ & \textcolor{passgreen}{pass} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{磁电转化系数}
+\label{tab:coupling-coeff}
+\begin{tabular}{lrl}
+\toprule
+\textbf{转化路径} & \textbf{系数} & \textbf{单位} \\
+\midrule
+$w \to E$ & 1941.40 & V$\cdot$span/mm \\
+$w \to M$ & 2.009 & A$\cdot$span/mm \\
+$M \to w \to E$ & 0.5905 & V$\cdot$span/(2$\times$A) \\
+$E \to w \to M$ & $1.22\times10^{-4}$ & A$\cdot$span/(2$\times$V) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{动力分析结果}
+
+\subsubsection{10$\times$10 Newmark Pilot}
+
+\begin{table}[H]
+\centering
+\caption{10$\times$10 Newmark 动力代表算例结果摘要}
+\label{tab:dynamic-10x10}
+\begin{tabular}{lr}
+\toprule
+\textbf{项目} & \textbf{结果} \\
+\midrule
+网格规模 & 10$\times$10，121节点 \\
+时间步长 & 0.1\,ms \\
+总步数 & 401步（40\,ms） \\
+静态中心挠度 & $-2.1284$\,mm \\
+动力峰值 & $-4.4995$\,mm \\
+峰值时间 & 28.90\,ms \\
+超调倍数 & 2.114 \\
+最大温差跨度 & 5.1311\,K \\
+第一阶频率 & 52.20\,Hz \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{30$\times$30 模态降阶（8阶）}
+
+\begin{table}[H]
+\centering
+\caption{30$\times$30 模态降阶动力结果}
+\label{tab:dynamic-30x30}
+\begin{tabular}{lr}
+\toprule
+\textbf{项目} & \textbf{结果} \\
+\midrule
+计算方法 & 30$\times$30 + 8阶模态叠加 \\
+计算时长 & 约 7.6\,min \\
+耦合静态中心挠度 & $-2.1275$\,mm \\
+机械静态中心挠度 & $-2.2947$\,mm \\
+模态静态捕获比例 & 1.000370 \\
+动力峰值 & $-4.4279$\,mm \\
+峰值时间 & 9.50\,ms \\
+超调倍数 & 1.930 \\
+最大温差跨度 & 5.0398\,K \\
+第一阶频率 & 52.20\,Hz \\
+阻尼比 & 0.8\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{模态阶数敏感性分析}
+
+\begin{table}[H]
+\centering
+\caption{30$\times$30 模态阶数敏感性分析}
+\label{tab:modal-sensitivity}
+\begin{tabular}{crrrrr}
+\toprule
+\textbf{阶数} & \textbf{捕获比} & \textbf{峰值 (mm)} & \textbf{峰值时间 (ms)} & \textbf{超调} & $\theta_{\max}$ \textbf{(K)} \\
+\midrule
+4  & 1.000349 & $-4.4281$ & 9.50 & 1.930 & 5.026 \\
+6  & 1.000053 & $-4.4271$ & 9.60 & 1.929 & 5.028 \\
+8  & 1.000370 & $-4.4279$ & 9.50 & 1.930 & 5.040 \\
+12 & 1.000361 & $-4.4278$ & 9.50 & 1.930 & 5.040 \\
+16 & 0.999965 & $-4.4270$ & 9.60 & 1.929 & 5.036 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+收敛性结论：8阶与16阶峰值差仅 0.0009\,mm，最大温差跨度差 0.0035\,K，8阶已基本收敛。汇报推荐以16阶为更稳妥口径。
+
+% ============================================================
+\section{总结与下一步计划}
+% ============================================================
+
+\subsection{本月工作总结}
+
+\begin{table}[H]
+\centering
+\caption{本月工作完成情况总结}
+\label{tab:summary}
+\begin{tabular}{p{4cm}cc}
+\toprule
+\textbf{任务} & \textbf{状态} & \textbf{关键指标} \\
+\midrule
+135组静力参数扫描 & \textcolor{passgreen}{完成} & 5FG$\times$9Vf$\times$3载荷 \\
+reduced $Q_d$ 还原修正 & \textcolor{passgreen}{完成} & 135行全部刷新 \\
+2\,mm 耦合转化验证 & \textcolor{passgreen}{完成} & 6/6 pass \\
+COMSOL 独立验证 & \textcolor{passgreen}{完成} & 最大误差4.93\% \\
+10$\times$10 动力pilot & \textcolor{passgreen}{完成} & 峰值$-4.50$\,mm \\
+30$\times$30 模态降阶 & \textcolor{passgreen}{完成} & 峰值$-4.43$\,mm \\
+模态敏感性分析 & \textcolor{passgreen}{完成} & 8阶已收敛 \\
+\midrule
+非U分布COMSOL验证 & \textcolor{warnblue}{待推进} & 脚本已支持 \\
+论文 main.tex & \textcolor{warnblue}{待推进} & 数据已齐备 \\
+阻尼比敏感性 & \textcolor{warnblue}{待推进} & 可选补充 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{下一步计划}
+
+\begin{enumerate}
+\item 选择 1--2 个非 U 分布（如 V、X）进行 COMSOL 分层验证补充；
+\item 建立论文 \texttt{paper/main.tex} 目录，整理正式图表；
+\item 可选：补充阻尼比敏感性（0\%、0.5\%、0.8\%、1.5\%）；
+\item 可选：夜间长时程 30$\times$30 Newmark 对照验证模态降阶精度。
+\end{enumerate}
+
+\end{document}
