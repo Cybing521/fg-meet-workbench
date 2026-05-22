@@ -11,7 +11,9 @@
 | 2 mm 转化验证 | 6 个检查项全部 pass，覆盖电势、磁势、机械回代和沈式直接矩阵法 |
 | COMSOL 最终模型 | 10 层 CSV 分域材料 + swept quad/hex 网格，mesh size 4，每层 7 个扫掠单元 |
 | 最终误差 | 中心点 3.771%，15 点最大 4.927%，平均 3.513% |
-| 仍待推进 | 动力代表算例（Newmark）与论文 main.tex 尚未建立，当前先输出 Word/README 汇报材料 |
+| 动力补充 | 10×10 Newmark 峰值 -4.4995 mm；30×30 16 阶模态峰值 -4.4270 mm |
+| 阻尼敏感性 | 0/0.5/0.8/1.5% 已补算；0.8% 口径峰值 -4.4270 mm |
+| 仍待推进 | 论文 main.tex 尚未建立；如需论文最终动态图，建议补夜间长时程 Newmark 对照 |
 
 ![工作流](figures/01_workflow.png)
 
@@ -39,7 +41,8 @@
 | 2 mm 转化验证 | run_coupling_validation_2mm.m | 统一参考挠度，验证正向驱动和反向传感 |
 | 沈式回代 | [Kff,Kfz;Kzf,Kzz]\[-Kfu*u-Kft*T;-Kzu*u-Kzt*T] | 从位移场直接回算感生电/磁势 |
 | COMSOL 对照 | Java API + comsolbatch | 绕开 LiveLink 登录依赖，可命令行复现 |
-| 结果汇报 | Markdown + Word + 图片化表格 | 便于直接截取到 PPT |
+| 动力计算 | Newmark pilot + 30×30 模态降阶 | 先验证频率/峰值，再做阶数敏感性 |
+| 结果汇报 | Markdown + Word/PDF + 图片化表格 | 便于直接截取到 PPT |
 ## 3. 实际途中遇到的问题与解决思路
 
 ![问题解决表](figures/04_problem_solution_table.png)
@@ -132,21 +135,84 @@
 | w_to_M | shen_sensor_mechanical_2mm | mechanical_load | -83134.178827 | -2.0 | pass | 2.009152 | magnetic_span/mm |
 | M_to_w_to_E | shen_direct_matrix | magnetic_potential | 17974.262465 | 2.0 | pass | 0.590535 | electric_span/(2*magnetic) |
 | E_to_w_to_M | shen_direct_matrix | electric_potential | 90075.32987 | -2.0 | pass | 0.000122 | magnetic_span/(2*V) |
-## 9. 当前未解决/下一步
+## 9. 动力代表算例与 30×30 模态结果
+
+| 方法 | 静态中心 mm | 动力峰值 mm | 峰值时间 ms | 一阶频率 Hz | 最大 θ 跨度 K |
+| --- | --- | --- | --- | --- | --- |
+| 10×10 Newmark pilot | -2.1284 | -4.4995 | 28.90 | 52.20 | 5.1311 |
+| 30×30 8 阶模态 | -2.2947 | -4.4279 | 9.50 | 52.20 | 5.0398 |
+| 30×30 16 阶模态 | -2.2947 | -4.4270 | 9.60 | 52.20 | 5.0363 |
+
+![动力总览](figures/16_dynamic_overview_table.png)
+
+![10x10 Newmark 摘要](figures/18_dynamic_summary_table.png)
+
+![10x10 中心挠度时程](figures/19_dynamic_center_timeseries.png)
+
+![30x30 模态摘要](figures/22_modal30x30_summary_table.png)
+
+![30x30 模态时程](figures/23_modal30x30_center_timeseries.png)
+
+![10x10 与 30x30 对比](figures/27_10x10_vs_30x30_center.png)
+
+## 10. 模态阶数敏感性
+
+| 阶数 | 静态捕获 | 峰值 mm | 峰值时间 ms | 超调 | 最大 θ 跨度 K |
+| --- | --- | --- | --- | --- | --- |
+| 4.0 | 1.000349 | -4.428136 | 9.5 | 1.929725 | 5.025591 |
+| 6.0 | 1.000053 | -4.427098 | 9.6 | 1.929273 | 5.027648 |
+| 8.0 | 1.00037 | -4.427879 | 9.5 | 1.929613 | 5.039809 |
+| 12.0 | 1.000361 | -4.427848 | 9.5 | 1.929599 | 5.03984 |
+| 16.0 | 0.999965 | -4.426965 | 9.6 | 1.929214 | 5.036322 |
+
+![阶数敏感性摘要](figures/28_modal_sensitivity_summary_table.png)
+
+![静态捕获收敛](figures/29_capture_ratio_vs_modes.png)
+
+![峰值收敛](figures/30_peak_vs_modes.png)
+
+![不同阶数中心挠度时程](figures/31_center_timeseries_by_modes.png)
+
+![收敛性判断](figures/35_convergence_assessment_table.png)
+
+
+结论：16 阶峰值为 -4.4270 mm，与 8 阶峰值绝对值差约 0.0009 mm；8 阶结果已基本收敛，汇报中可把 16 阶作为稳妥口径。
+
+## 11. 阻尼敏感性
+
+| 阻尼比 | 峰值 mm | 峰值时间 ms | 超调 | 40 ms 位移 mm | 最大 θ 跨度 K |
+| --- | --- | --- | --- | --- | --- |
+| 0.0% | -4.503943 | 28.9 | 1.96276 | -0.412865 | 5.113388 |
+| 0.5% | -4.444669 | 9.6 | 1.93693 | -0.520488 | 5.064735 |
+| 0.8% | -4.426965 | 9.6 | 1.929214 | -0.582984 | 5.036322 |
+| 1.5% | -4.38578 | 9.6 | 1.911267 | -0.721649 | 4.972045 |
+
+![阻尼敏感性摘要](figures/36_damping_summary_table.png)
+
+![峰值随阻尼变化](figures/37_peak_vs_damping.png)
+
+![不同阻尼中心挠度时程](figures/39_center_timeseries_by_damping.png)
+
+![阻尼敏感性判断](figures/41_damping_assessment_table.png)
+
+## 12. 当前未解决/下一步
 
 | 事项 | 当前状态 | 建议处理 |
 | --- | --- | --- |
-| 动力代表算例 | 仓库有 Newmark 函数和历史动态脚本，但还未包装成统一入口 | 下一步写 `run_dynamic_representative.m`，输出中心时程、峰值、频率信息 |
+| 长时程 Newmark 对照 | 30×30 全量 Newmark 交互运行过慢 | 可作为夜间长任务跑 1 个短窗或降采样对照 |
 | 论文文件 | 当前无 `paper/main.tex` 目录 | 动力数据稳定后再创建论文图表和 LaTeX |
 | 非 U 的 COMSOL 分层验证 | 脚本已支持 `FG_COMSOL_LAYER_CSV`，但还未批量验证 V/X/O/P | 选择 1-2 个代表 FG 模式做补充对照 |
 | COMSOL .mph 大文件 | 已生成但未纳入 Git | 保留本地，GitHub 提交轻量 CSV/图表/脚本 |
-## 10. 附：文件索引
+## 13. 附：文件索引
 
 | 文件 | 路径 |
 | --- | --- |
 | Word 汇报文件 | FG_MEET_progress_report_2026-05-22.docx |
+| PDF 汇报文件 | rendered-word/FG_MEET_progress_report_2026-05-22.pdf |
 | 本文 README | README.md |
 | 图表目录 | figures/ |
 | 轻量结果 CSV | data/ |
 | 最终 COMSOL 验证表 | data/validation_log.csv |
 | 最终 15 点验证表 | data/validation_points_U_Vf06_elastic.csv |
+| 动力敏感性表 | data/dynamic_modal_30x30_U_Vf06_elastic_sensitivity_summary.csv |
+| 阻尼敏感性表 | data/dynamic_modal_30x30_U_Vf06_elastic_damping_sensitivity_summary.csv |
