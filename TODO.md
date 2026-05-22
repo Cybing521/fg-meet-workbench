@@ -31,7 +31,13 @@
 - [x] 填写 `comsol/results/validation_log.csv`
 - [x] COMSOL 偏差收敛到 &lt; 5%：10 层 CSV 分域材料 + swept quad/hex 网格、mesh size 4、每层 7 个扫掠单元时中心点 3.77%，15 点最大 4.927%
 
-## 阶段 4 — 论文
+## 阶段 4 — 动力代表算例
 
-- [ ] 动力代表算例（Newmark）
+- [x] 新增 `run_dynamic_representative.m`，统一 Newmark 动力代表算例入口
+- [x] 完成 U / Vf0.6 / CFFF / Case A 的 10x10 pilot 动力结果：401 步、40 ms、峰值 -4.4995 mm、第一阶频率 52.20 Hz
+- [x] 输出动态补充汇报材料 `reports/2026-05-22-dynamic/README.md` 与 5 张可截取图片
+- [ ] 30x30 全量 Newmark 暂不适合作为交互式计算入口：1 ms 冒烟测试超过 5 min，下一步改做 30x30 模态降阶
+
+## 阶段 5 — 论文
+
 - [ ] 更新 `paper/main.tex` 图表

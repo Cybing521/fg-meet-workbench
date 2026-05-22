@@ -148,6 +148,20 @@ python tools\compare_comsol_meet_validation.py --comsol-csv output\comsol_elasti
 
 ---
 
+## 动力代表算例
+
+已新增 `run_dynamic_representative.m` 作为 Newmark 动力入口。当前完成的是可快速复现的 10x10 pilot：
+
+```powershell
+$env:FG_DYNAMIC_TTOTAL='0.04'
+$env:FG_DYNAMIC_DT='0.0001'
+& 'D:\MATLAB\R2026a\bin\matlab.exe' -batch "run_dynamic_representative"
+```
+
+输出 `output/dynamic_U_Vf06_elastic_10x10_timeseries.csv`、`output/dynamic_U_Vf06_elastic_10x10_summary.csv`，并整理为 `reports/2026-05-22-dynamic/README.md`。当前结果：静态中心挠度 -2.1284 mm，动力峰值 -4.4995 mm，峰值时间 28.90 ms，第一阶频率 52.20 Hz。30x30 直接 Newmark 冒烟测试超过 5 min，下一步建议转为 30x30 模态降阶。
+
+---
+
 ## 设计参数
 
 | 参数 | 取值 |
