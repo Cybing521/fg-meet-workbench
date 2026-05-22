@@ -1,0 +1,2 @@
+case_id,fg_mode,vf0,load_case,bc,matlab_w_mm,comsol_w_mm,rel_err_w_pct,matlab_theta_K,comsol_theta_K,rel_err_theta_pct,matlab_mesh,comsol_mesh,notes,date
+U_Vf06_elastic,U,0.6,elastic,CFFF,-2.1275198619369178,-2.2077392409838303,3.770558408506699,,,,30x30 MEET,"3D solid 10-domain CSV materials, swept quad/hex mesh, hauto size 4, 7 elements per material layer, force area",15-point comparison; max_abs_diff_mm=0.226637; max_rel_err_pct=4.92676; mean_rel_err_pct=3.51281; Layer CSV import check; U material is uniform across layers,2026-05-22

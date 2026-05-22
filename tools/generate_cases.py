@@ -16,6 +16,10 @@ REF_UNIFORM_VF06 = (
     WORKBENCH
     / "matlab/meet-elastic-thermal/InputFile/Thermal_CFFFplate_0.6Vf-30x30-10layer.txt"
 )
+FG_MODES_FULL = ("U", "V", "X", "O", "P")
+VF0_FULL = tuple(round(i / 10, 1) for i in range(1, 10))
+FG_MODES_PILOT = ("U", "X", "V")
+VF0_PILOT = (0.3, 0.5, 0.7)
 
 
 @dataclass
@@ -104,7 +108,7 @@ def fg_vf(z: float, h: float, vf0: float, mode: str, power_n: int = 2) -> float:
     return max(0.0, min(1.0, vf))
 
 
-def build_layers(n_layer: int, h: float, vf0: float, mode: str) -> list[str]:
+def build_layers(n_layer: int, h: float, vf0: float, mode: str, power_n: int = 2) -> list[str]:
     bto, cfo = get_bto_cfo()
     dz = h / n_layer
     rows = []
@@ -112,7 +116,7 @@ def build_layers(n_layer: int, h: float, vf0: float, mode: str) -> list[str]:
         z1 = -h / 2 + (k - 1) * dz
         z2 = -h / 2 + k * dz
         zmid = 0.5 * (z1 + z2)
-        vf = fg_vf(zmid, h, vf0, mode)
+        vf = fg_vf(zmid, h, vf0, mode, power_n)
         props = bto.mix(cfo, vf)
         rows.append(props.format_row(k, z1, z2))
     return rows
@@ -121,8 +125,6 @@ def build_layers(n_layer: int, h: float, vf0: float, mode: str) -> list[str]:
 def patch_material(path: Path, layer_rows: list[str], comment: str = "") -> None:
     text = path.read_text(encoding="utf-8", errors="replace")
     block = "MATERIAL START\n"
-    if comment:
-        block += f"% {comment}\n"
     block += "\n".join(layer_rows) + "\nMATERIAL END"
     new_text, n = re.subn(
         r"MATERIAL START.*?MATERIAL END",
@@ -158,29 +160,43 @@ def max_rel_diff(a: Path, b: Path) -> float:
     return mx
 
 
-def generate(vf0: float, mode: str, out_name: str) -> Path:
+def case_name(mode: str, vf0: float) -> str:
+    return f"Thermal_CFFF_{mode}_Vf{vf0:.1f}-30x30-10layer.txt"
+
+
+def generate(vf0: float, mode: str, out_name: str, power_n: int = 2) -> Path:
     CASES_DIR.mkdir(parents=True, exist_ok=True)
     out = CASES_DIR / out_name
     shutil.copy2(TEMPLATE, out)
-    rows = build_layers(10, 6e-3, vf0, mode)
+    rows = build_layers(10, 6e-3, vf0, mode, power_n)
     patch_material(out, rows, f"FG {mode} Vf0={vf0:.2f} auto-generated")
     return out
+
+
+def write_manifest(path: Path, rows: list[tuple[str, float, str]]) -> None:
+    with path.open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(["fg_mode", "vf0", "input_file"])
+        w.writerows(rows)
+    print(f"Manifest: {path} ({len(rows)} cases)")
 
 
 def main() -> None:
     if not TEMPLATE.is_file():
         raise SystemExit(f"Missing template: {TEMPLATE}")
 
-    manifest = []
-    for mode in ("U", "X", "V"):
-        for vf0 in (0.3, 0.5, 0.7):
-            name = f"Thermal_CFFF_{mode}_Vf{vf0:.1f}-30x30-10layer.txt"
+    manifest_full = []
+    generated_by_key = {}
+    for mode in FG_MODES_FULL:
+        for vf0 in VF0_FULL:
+            name = case_name(mode, vf0)
             p = generate(vf0, mode, name)
-            manifest.append((mode, vf0, f"cases/{name}"))
+            row = (mode, vf0, f"cases/{name}")
+            manifest_full.append(row)
+            generated_by_key[(mode, vf0)] = row
             print(f"Generated {p}")
 
-    ref_out = generate(0.6, "U", "Thermal_CFFF_U_Vf0.6-30x30-10layer.txt")
-    manifest.append(("U", 0.6, "cases/Thermal_CFFF_U_Vf0.6-30x30-10layer.txt"))
+    ref_out = CASES_DIR / case_name("U", 0.6)
 
     if REF_UNIFORM_VF06.is_file():
         diff = max_rel_diff(ref_out, REF_UNIFORM_VF06)
@@ -188,12 +204,13 @@ def main() -> None:
         if diff > 0.02:
             print("  WARNING: >2% difference — review get_bto_cfo calibration")
 
-    csv_path = CASES_DIR / "pilot_cases.csv"
-    with csv_path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["fg_mode", "vf0", "input_file"])
-        w.writerows(manifest)
-    print(f"\nManifest: {csv_path} ({len(manifest)} cases)")
+    pilot_keys = [(mode, vf0) for mode in FG_MODES_PILOT for vf0 in VF0_PILOT]
+    pilot_keys.append(("U", 0.6))
+    manifest_pilot = [generated_by_key[key] for key in pilot_keys]
+
+    print()
+    write_manifest(CASES_DIR / "manifest_full.csv", manifest_full)
+    write_manifest(CASES_DIR / "pilot_cases.csv", manifest_pilot)
 
 
 if __name__ == "__main__":

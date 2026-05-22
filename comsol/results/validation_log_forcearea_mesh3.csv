@@ -1,0 +1,2 @@
+case_id,fg_mode,vf0,load_case,bc,matlab_w_mm,comsol_w_mm,rel_err_w_pct,matlab_theta_K,comsol_theta_K,rel_err_theta_pct,matlab_mesh,comsol_mesh,notes,date
+U_Vf06_elastic,U,0.6,elastic,CFFF,-2.1275198619369178,-2.2722107664097053,6.8009190918226885,,,,30x30 MEET,"3D solid auto mesh size 3, force area, equivalent homogeneous U layer",15-point comparison; max_abs_diff_mm=0.332619; max_rel_err_pct=7.43739; mean_rel_err_pct=6.90513; Corrected MATLAB reduced-DOF restoration; mesh refinement check,2026-05-22

@@ -33,6 +33,25 @@
 4. **记录结果**  
    填写 `comsol/results/validation_log.csv`（模板见同目录）。
 
+## 当前自动化基准（2026-05-22）
+
+已通过本地 COMSOL 6.0 批处理跑通一个弹性对照：
+
+- 工况：U / Vf0.6 / CFFF / Case A，顶面压力 15000 Pa。
+- COMSOL 脚本：`tools/comsol/RunElasticCfffValidation.java`。
+- MATLAB 对比脚本：`tools/compare_comsol_meet_validation.py`。
+- 输出：`output/comsol_elastic_cfff_U_Vf06_layered_csv_sweep7_mesh4_points.csv`、`comsol/results/validation_points_U_Vf06_elastic.csv`、`comsol/results/validation_log.csv`。
+
+当前通过结果：中心点 p8 为 MATLAB -2.12752 mm、COMSOL -2.20774 mm，相对误差 3.77%；15 点最大相对误差 4.927%，平均 3.51%。关键处理包括：
+
+- MATLAB reduced `Qd` 先按节点约束标志还原为完整 5-DOF 节点位移，再取对比点。
+- COMSOL 使用 10 层 CSV 分域材料 + 扫掠 quad/hex 网格（mesh size 4，每个材料层 7 个扫掠单元）替代自由四面体网格。
+- `ForceArea` 与 `FollowerPressure` 在该线性小变形算例中结果一致；偏差主要来自网格/单元类型一致性。
+
+后续非 U 分布算例可复用 `FG_COMSOL_LAYER_CSV` 指向对应 `comsol/export/*_layers.csv`。
+
+批处理运行前，COMSOL Security Preferences 需要允许方法/Java 库访问文件系统（`File system access = All files`），否则 `.class` 批处理会在 recovery 文件写入阶段失败。
+
 ## 目录
 
 ```

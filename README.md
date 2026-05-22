@@ -54,6 +54,7 @@ fg-meet-workbench/
 | **不做** | 全参数 45×3 批量主算例（太慢） |
 | **方法** | 分层固体 + 压电模块等效全耦合（见 `comsol/docs/`） |
 | **导出** | `python3 tools/export_comsol_layers.py cases/xxx.txt` → 分层 CSV |
+| **当前基准** | 已跑通 U / Vf0.6 / CFFF / Case A 的 COMSOL CLI 15 点弹性对照 |
 
 详见 [comsol/README.md](comsol/README.md)。
 
@@ -74,6 +75,8 @@ cd fg-meet-workbench
 python3 tools/generate_cases.py
 ```
 
+这会生成完整主算例清单 `cases/manifest_full.csv`（5 种 FG × 9 个 Vf0）和阶段 1 试点清单 `cases/pilot_cases.csv`。
+
 ### 3. MATLAB 单工况
 
 ```matlab
@@ -90,13 +93,58 @@ caseFile = fullfile(paths.cases, 'Thermal_CFFF_X_Vf0.5-30x30-10layer.txt');
 run_meet_static(caseFile, 'elastic', 'OutTag', 'X_Vf05');
 ```
 
-### 4. COMSOL 对照（同一 `caseFile`）
+### 4. MATLAB 全批量静力主算例
+
+```matlab
+cd('path/to/fg-meet-workbench');
+setup_paths;
+run('run_batch_static.m');
+```
+
+结果写入 `output/results_static.csv`，包含 Case A/B/C 的中心挠度、层平均温差和磁电效率指标。脚本会跳过已成功完成的 `case_id`，中断后可直接重跑续算。
+
+`run_meet_static.m` 会按节点约束标志把求解后的 reduced `Qd` 还原成完整节点自由度 `TQd`，再提取中心挠度；若更新过该逻辑，需要重跑批量表以刷新 `w_center_mm`。
+
+### 5. MATLAB 2 mm 转化验证
+
+```matlab
+cd('path/to/fg-meet-workbench');
+setup_paths;
+run('run_coupling_validation_2mm.m');
+```
+
+默认使用 `cases/Thermal_CFFF_U_Vf0.6-30x30-10layer.txt`，以中心挠度绝对值 2 mm 为参考，验证：
+
+- 电势/磁势正向转化为挠度；
+- 2 mm 挠度反向诱导出的电势/磁势；
+- 按沈的回代方式，由耦合矩阵直接计算磁势→位移→感生电势、电势→位移→感生磁势，并给出转化系数。
+
+结果写入 `output/coupling_validation_2mm.csv` 和 `output/coupling_validation_2mm.mat`。可用环境变量覆盖输入与阈值，例如 `FG_VALIDATE_CASE`、`FG_VALIDATE_TARGET_MM`、`FG_VALIDATE_REL_TOL`。
+
+### 6. COMSOL 对照（同一 `caseFile`）
 
 ```bash
 python3 tools/export_comsol_layers.py cases/Thermal_CFFF_X_Vf0.5-30x30-10layer.txt
 ```
 
 在 COMSOL 中按 `comsol/export/*_layers.csv` 赋 10 层材料，边界 CFFF，载荷见 `comsol/docs/equivalent-loads.md`，结果填入 `comsol/results/validation_log_template.csv`。
+
+已自动化的弹性基准算例：
+
+```powershell
+& 'D:\comsol\COMSOL60\Multiphysics\bin\win64\comsolcompile.exe' tools\comsol\RunElasticCfffValidation.java
+$env:FG_COMSOL_LOAD_MODE='forcearea'
+$env:FG_COMSOL_MESH_MODE='sweep'
+$env:FG_COMSOL_MESH_SIZE='4'
+$env:FG_COMSOL_SWEEP_LAYERS='7'
+$env:FG_COMSOL_LAYERED='true'
+$env:FG_COMSOL_LAYER_CSV='G:\fg-meet-workbench\comsol\export\Thermal_CFFF_U_Vf0.6-30x30-10layer_layers.csv'
+$env:FG_COMSOL_RUN_TAG='layered_csv_sweep7_mesh4'
+& 'D:\comsol\COMSOL60\Multiphysics\bin\win64\comsolbatch.exe' -inputfile tools\comsol\RunElasticCfffValidation.class -outputfile output\comsol_elastic_cfff_U_Vf06_layered_csv_sweep7_mesh4.mph -batchlog output\comsol_elastic_cfff_U_Vf06_layered_csv_sweep7_mesh4.log
+python tools\compare_comsol_meet_validation.py --comsol-csv output\comsol_elastic_cfff_U_Vf06_layered_csv_sweep7_mesh4_points.csv --comsol-mesh "3D solid 10-domain CSV materials, swept quad/hex mesh, hauto size 4, 7 elements per material layer, force area"
+```
+
+输出 `output/comsol_elastic_cfff_U_Vf06_layered_csv_sweep7_mesh4_points.csv`、`comsol/results/validation_points_U_Vf06_elastic.csv` 和 `comsol/results/validation_log.csv`。当前通过基准：中心点 p8 为 MATLAB -2.12752 mm、COMSOL -2.20774 mm，相对误差 3.77%；15 点最大相对误差 4.927%，平均 3.51%。
 
 ---
 

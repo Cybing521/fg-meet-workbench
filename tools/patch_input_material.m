@@ -20,10 +20,6 @@ function patch_input_material(inputPath, layers, headerComment)
     i1 = i1(1) + length(endTok) - 1;
 
     block = [startTok newline];
-    if ~isempty(headerComment)
-        block = [block, '% ', headerComment, newline];
-    end
-
     for k = 1:numel(layers)
         block = [block, format_material_line(k, layers(k)), newline]; %#ok<AGROW>
     end
