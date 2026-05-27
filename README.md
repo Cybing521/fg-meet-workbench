@@ -195,6 +195,23 @@ python tools\build_modal_damping_report.py
 
 阻尼敏感性输出 `reports/2026-05-23-modal-damping/README.md`。当前结果：无阻尼峰值 -4.5039 mm，0.8% 默认口径峰值 -4.4270 mm，1.5% 阻尼峰值 -4.3858 mm；可用于说明动力峰值范围和默认阻尼口径。
 
+已补充 10x10 完整 Newmark FG 分布扫描，固定 Vf0=0.6、CFFF、Case A、40 ms、dt=0.1 ms，比较 U/V/X/O/P 五种分布：
+
+```powershell
+python tools\generate_dynamic_10x10_cases.py
+$modes = @('U','V','X','O','P')
+foreach ($mode in $modes) {
+    $env:FG_DYNAMIC_CASE_FILE = "cases\dynamic_10x10\Thermal_CFFF_${mode}_Vf0.6-10x10-10layer.txt"
+    $env:FG_DYNAMIC_TAG = "dynamic_10x10_${mode}_Vf06_elastic_fgsweep"
+    $env:FG_DYNAMIC_TTOTAL = '0.04'
+    $env:FG_DYNAMIC_DT = '0.0001'
+    & 'D:\MATLAB\R2026a\bin\matlab.exe' -batch "run_dynamic_representative"
+}
+python tools\build_dynamic_fg_sweep_report.py
+```
+
+FG 分布扫描输出 `reports/2026-05-27-dynamic-fg-sweep/README.md`。当前结果：峰值绝对值最小的是 P（3.2158 mm），最大的是 O（5.5157 mm）；P 的一阶频率最高 62.93 Hz，O 最低 46.57 Hz，可作为后续 30x30 FG 分布模态实验的低成本先验。
+
 ---
 
 ## 设计参数

@@ -43,6 +43,8 @@
 - [x] 输出阶数敏感性汇报材料 `reports/2026-05-22-modal-sensitivity/README.md` 与 8 张可截取图片
 - [x] 完成 30x30 16 阶模态阻尼敏感性（0/0.5/0.8/1.5%）：峰值从 -4.5039 mm 降到 -4.3858 mm
 - [x] 输出阻尼敏感性汇报材料 `reports/2026-05-23-modal-damping/README.md` 与 6 张可截取图片
+- [x] 完成 10x10 完整 Newmark FG 分布扫描（U/V/X/O/P，Vf0=0.6）：P 峰值最小 3.2158 mm，O 峰值最大 5.5157 mm
+- [x] 输出 10x10 FG 分布扫描汇报材料 `reports/2026-05-27-dynamic-fg-sweep/README.md` 与 6 张可截取图片
 - [ ] 如需论文最终动态图，可继续补完整 Newmark 夜间长任务对照
 
 ## 阶段 5 — 论文
