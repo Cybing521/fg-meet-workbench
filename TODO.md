@@ -64,25 +64,26 @@
 - [ ] 整理 `汇报格式-MatlabComsol仿真记录.docx` 中已有的多边界条件逐层温差数据，纳入仓库 `comsol/results/`
 - [ ] 可选：阻尼比敏感性（0%/0.5%/0.8%/1.5%），为动力部分论文图补充
 
-## 阶段 6 — 版本二核心：含孔隙 FG-MEE 🔲
+## 阶段 6 — 版本二核心：含孔隙 FG-MEE 🟡
 
-> 目标：实现论文核心创新——孔隙效应，预计 150 组主算例
+> 目标：实现论文核心创新——孔隙效应；当前参数空间按 e0=0 去重后为 130 个输入算例、390 行三载荷结果
 > 参考：`建模思路_版本二_含孔隙FG-MEE板.docx`
 
 ### 6.1 孔隙材料模块实现
 
-- [ ] 在 `materials/` 新增 `porosity_correction.m`，实现三种孔隙分布修正：
+- [x] 在 `materials/` 新增 `porosity_correction.m`，实现三种孔隙分布修正：
   - 模式 I（均匀）：`P_eff = P_dense × (1 − e₀)`
   - 模式 II（非均匀，中心富集）：`P_eff = P_dense × [1 − e₀(1 − 2|z|/h)]`
   - 模式 III（对数非均匀）：`P_eff = P_dense − (e₀/2)ln(1−2|z|/h) × P_mix`
-- [ ] 修改 `build_layer_materials.m`：接受 `porosity_mode` 和 `e0` 参数
-- [ ] 单元测试：e₀=0 时结果与无孔隙完全一致
+- [x] 修改 `build_layer_materials.m`：接受 `porosity_mode` 和 `e0` 参数
+- [x] 验证 e₀=0 时结果与无孔隙基线一致（U/Vf0.1 三载荷与 `results_static.csv` 完全一致）
 
 ### 6.2 参数化算例扩展
 
-- [ ] 扩展 `generate_cases.py`：新增 e₀ 和孔隙分布模式参数
-- [ ] 设计参数空间：2种FG(U,X) × 5个e₀(0,0.1,0.2,0.3,0.4) × 3种孔隙模式 × 5个Vf₀(0.1,0.3,0.5,0.7,0.9) = 150组
-- [ ] 新增 `run_batch_static_porous.m`：循环 Case A/B/C，输出 `output/results_static_porous.csv`
+- [x] 新增 `tools/generate_porous_cases.py`：生成含孔隙输入文件与 manifest
+- [x] 设计参数空间：2种FG(U,X) × 5个e₀ × 3种孔隙模式 × 5个Vf₀；e₀=0 模式等价去重后为 130 组
+- [x] 新增 `run_batch_static_porous.m`：循环 Case A/B/C，输出 `output/results_static_porous.csv`
+- [x] 完成 30x30 含孔隙静力扫描：390 行结果全部 ok，并整理 `reports/2026-05-28-porous-static/`
 - [ ] CFFF 为主、CFCF 为辅
 
 ### 6.3 含孔隙 COMSOL 验证
@@ -130,5 +131,5 @@
 | 4 动力算例 | ✅ 完成 | 模态降阶+敏感性 |
 | 4.5 汇报材料 | ✅ 完成 | LaTeX+Word+图表 |
 | 5 版本一收尾 | 🔲 进行中 | 多边界+非U验证 |
-| 6 含孔隙扩展 | 🔲 待启动 | 论文核心创新 |
+| 6 含孔隙扩展 | 🟡 进行中 | 材料模块+130算例静力扫描已完成 |
 | 7 论文撰写 | 🔲 待启动 | SCI四区目标 |

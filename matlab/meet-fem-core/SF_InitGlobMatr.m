@@ -18,45 +18,45 @@ NumNode = length(Node(:,1));             % NumNode: Number of nodes
 NodePerElem = ElemType(1);
 DOFPerNodeM = ElemType(2);
 NumLay = ElemType(3);
-DOFPerMEELay = ElemType(4);  
+DOFPerMEELay = ElemType(4);
 NumMEELay = ElemType(5);                  % Number of MEE layer
 % DOFPerTLay = 1;
 % NumLayT = NumLay;
 
-DOFPerElemM=NodePerElem*DOFPerNodeM;      % Mechanical DOF per element   
+DOFPerElemM=NodePerElem*DOFPerNodeM;      % Mechanical DOF per element
 DOFPerElemMEE = NumMEELay*DOFPerMEELay;   % Electrical DOF per element
 DOFTotalM=NumNode*DOFPerNodeM;            % Total Mechanical DOF
 DOFTotalMEE=NumElem*DOFPerElemMEE;        % Total Electrical DOF
 %% Initiate global matrices for mass, stiffness......
-MuuT = zeros(DOFTotalM,DOFTotalM);         % Global mass matrix
-KuuT = zeros(DOFTotalM,DOFTotalM);         % Global stiffness matrix
-CuuT = zeros(DOFTotalM,DOFTotalM);         % Global damping matrix
+MuuT = sparse(DOFTotalM,DOFTotalM);         % Global mass matrix
+KuuT = sparse(DOFTotalM,DOFTotalM);         % Global stiffness matrix
+CuuT = sparse(DOFTotalM,DOFTotalM);         % Global damping matrix
 %%%%%%%双向耦合动力学可能用到的矩阵
 % MutT = zeros(DOFTotalM,DOFTotalMEE);
 % MtuT = zeros(DOFTotalMEE,DOFTotalM);
 % MttT = zeros(DOFTotalMEE,DOFTotalMEE);
-% 
+%
 % CutT = zeros(DOFTotalM,DOFTotalMEE);
 % CtuT = zeros(DOFTotalMEE,DOFTotalM);
 % CttT = zeros(DOFTotalMEE,DOFTotalMEE);
 %%%%%%%%%%%%%%%%%%%%%
-KufMT = zeros(DOFTotalM,DOFTotalMEE);      % Global coupling matrix u弹 f电 z磁 t热
-KfuMT = zeros(DOFTotalMEE,DOFTotalM); 
-KffMT = zeros(DOFTotalMEE,DOFTotalMEE);
+KufMT = sparse(DOFTotalM,DOFTotalMEE);      % Global coupling matrix u弹 f电 z磁 t热
+KfuMT = sparse(DOFTotalMEE,DOFTotalM);
+KffMT = sparse(DOFTotalMEE,DOFTotalMEE);
 
-KuzT=zeros(DOFTotalM,DOFTotalMEE); 
-KzuT=zeros(DOFTotalMEE,DOFTotalM); 
-KfzT=zeros(DOFTotalMEE,DOFTotalMEE);
-KzfT=zeros(DOFTotalMEE,DOFTotalMEE);
-KzzT=zeros(DOFTotalMEE,DOFTotalMEE);
+KuzT=sparse(DOFTotalM,DOFTotalMEE);
+KzuT=sparse(DOFTotalMEE,DOFTotalM);
+KfzT=sparse(DOFTotalMEE,DOFTotalMEE);
+KzfT=sparse(DOFTotalMEE,DOFTotalMEE);
+KzzT=sparse(DOFTotalMEE,DOFTotalMEE);
 
-KutT = zeros(DOFTotalM,DOFTotalMEE);
-KtuT = zeros(DOFTotalMEE,DOFTotalM);
-KftT = zeros(DOFTotalMEE,DOFTotalMEE);
-KtfT = zeros(DOFTotalMEE,DOFTotalMEE);
-KztT = zeros(DOFTotalMEE,DOFTotalMEE);
-KtzT = zeros(DOFTotalMEE,DOFTotalMEE);
-KttT=zeros(DOFTotalMEE,DOFTotalMEE);
+KutT = sparse(DOFTotalM,DOFTotalMEE);
+KtuT = sparse(DOFTotalMEE,DOFTotalM);
+KftT = sparse(DOFTotalMEE,DOFTotalMEE);
+KtfT = sparse(DOFTotalMEE,DOFTotalMEE);
+KztT = sparse(DOFTotalMEE,DOFTotalMEE);
+KtzT = sparse(DOFTotalMEE,DOFTotalMEE);
+KttT=sparse(DOFTotalMEE,DOFTotalMEE);
 
 FuiT = zeros(DOFTotalM,1);           % Global in-balance force, mechanical
 FusT = zeros(DOFTotalM,1);           % Global external surface force vector
@@ -65,7 +65,7 @@ GfiMT = zeros(DOFTotalMEE,1);        % Global in-balance force, electrical
 GfMT = zeros(DOFTotalMEE,1);         % Global equvilent force vector电力
 MziT = zeros(DOFTotalMEE,1);         % Global in-balance force, magnetical
 MzT = zeros(DOFTotalMEE,1);          %磁力
-FtT = zeros(DOFTotalMEE,1); 
+FtT = zeros(DOFTotalMEE,1);
 
 %%% GlobMatrix include all the global matrices of smart structure
 GlobMatr = struct('MuuT',MuuT,'KuuT',KuuT,'CuuT',CuuT, ...

@@ -31,19 +31,19 @@ DOFTotalE = NumElem*DOFPerElemE;
 
 %% If Qd,Qv,Qa,Phi is empty, set them to zero as default
 if isempty(Qd)
-    Qd = zeros(DOFTotalM);
+    Qd = zeros(DOFTotalM,1);
 end
 
 if isempty(Qv)
-    Qv = zeros(DOFTotalM);
+    Qv = zeros(DOFTotalM,1);
 end
 
 if isempty(Qa)
-    Qa = zeros(DOFTotalM);
+    Qa = zeros(DOFTotalM,1);
 end
 
 if isempty(Phi)
-    Phi = zeros(DOFTotalE);
+    Phi = zeros(DOFTotalE,1);
 end
 
 %% Initial TQd,TQv,TQa, before adding boundary condition
@@ -54,7 +54,7 @@ TPhi = zeros(DOFTotalE,1);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Construct TQd,TQv,TQa
-DOFMStart = 5;              % The start position of mechanical dof 
+DOFMStart = 5;              % The start position of mechanical dof
 QIndex = 1;                 % QIndex: for Qd,Qv,Qa, after boundary condition
 for NodeIndex = 1:NumNode
     for DOFIndex = 1:DOFPerNodeM
@@ -69,16 +69,16 @@ for NodeIndex = 1:NumNode
             TQd(TQIndex) = 0;
             TQv(TQIndex) = 0;
             TQa(TQIndex) = 0;
-        end  
+        end
     end
 end
 
 %% Construct TPhi
-LayStart = NodePerElem+1;       % LayStart = 9 
+LayStart = NodePerElem+1;       % LayStart = 9
 PhiIndex = 1;                    % PhiIndex: for Phi, after boundary condition
 for ElemIndex = 1:NumElem
     SmtLayIndex = 1;
-    for LayIndex = 1:NumLay  
+    for LayIndex = 1:NumLay
         if MateProp{LayIndex,1}.IsSmtLay == 1
             %%% TPhiIndex: for TPhi, before boundary condition
             TPhiIndex = (ElemIndex-1)*DOFPerSmtLayE + SmtLayIndex;
@@ -89,7 +89,7 @@ for ElemIndex = 1:NumElem
                 TPhi(TPhiIndex) = 0;
             end
             SmtLayIndex = SmtLayIndex+1;
-        end  
+        end
     end
 end
 

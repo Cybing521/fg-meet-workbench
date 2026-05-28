@@ -17,6 +17,9 @@
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{colortbl}
+\makeatletter
+\let\insert@pcolumn\insert@column
+\makeatother
 
 \definecolor{passgreen}{RGB}{34,139,34}
 \definecolor{failred}{RGB}{220,20,60}
@@ -464,6 +467,94 @@ P & $-1.535$ & $-3.216$ & 39.7 & 2.096 & 62.93 & 5.316 \\
 
 收敛性结论：8阶与16阶峰值差仅 0.0009\,mm，最大温差跨度差 0.0035\,K，8阶已基本收敛。汇报推荐以16阶为更稳妥口径。
 
+\subsection{含孔隙FG-MEE静力扩展}
+
+在版本二工作中，已完成含孔隙FG-MEE板的 $30\times30$ 静力参数扫描。参数空间包含 U/X 两种FG分布、5个体积分数、5个孔隙率水平和3种孔隙分布模式。由于 $e_0=0$ 时三种孔隙分布完全等价，仅保留 Even 基线，因此共生成130个输入算例；每个算例计算 Case A/B/C 三种载荷，最终得到390行结果，全部计算成功。
+
+\begin{table}[H]
+\centering
+\caption{含孔隙静力扫描数据覆盖情况}
+\label{tab:porous-coverage}
+\begin{tabular}{lrl}
+\toprule
+\textbf{项目} & \textbf{数量} & \textbf{说明} \\
+\midrule
+输入算例 & 130 & $e_0=0$ 时只保留 Even 基线 \\
+结果行数 & 390 & 130个输入 $\times$ 3种载荷 \\
+FG分布 & 2 & U/X \\
+体积分数 & 5 & $V_{f0}=0.1,0.3,0.5,0.7,0.9$ \\
+孔隙率 & 5 & $e_0=0,0.1,0.2,0.3,0.4$ \\
+孔隙模式 & 3 & Even / Uneven / LogUneven \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{主要发现：}
+\begin{itemize}[leftmargin=2em]
+\item 机械挠度对孔隙率最敏感。Case A中，U-Even-$e_0=0.4$ 的平均挠度放大最强，相对无孔隙基线为 1.742 倍；X-Even-$e_0=0.4$ 为 1.738 倍。
+\item 非均匀中心富集孔隙（Uneven）对整体刚度削弱最弱；U-Uneven-$e_0=0.1$ 的平均挠度倍率仅为 1.031。
+\item 层温差跨度与机械挠度呈相似放大趋势，Even-$e_0=0.4$ 的温差跨度倍率最高，说明孔隙导致刚度退化后，热--力耦合响应同步增强。
+\item 磁电效率随孔隙率和分布模式非单调变化。当前平均效率最高组合为 U-Uneven-$e_0=0.1$，平均效率为 2.7678；最低组合为 X-LogUneven-$e_0=0.4$，平均效率为 1.3178。
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../reports/2026-05-28-porous-static/figures/02_U_elastic_deflection_ratio_vs_e0.png}
+\caption{U分布挠度倍率}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../reports/2026-05-28-porous-static/figures/02_X_elastic_deflection_ratio_vs_e0.png}
+\caption{X分布挠度倍率}
+\end{subfigure}
+\caption{孔隙率对Case A机械挠度放大倍率的影响}
+\label{fig:porous-deflection-ratio}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../reports/2026-05-28-porous-static/figures/03_U_theta_ratio_vs_e0.png}
+\caption{U分布温差倍率}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../reports/2026-05-28-porous-static/figures/03_X_theta_ratio_vs_e0.png}
+\caption{X分布温差倍率}
+\end{subfigure}
+\caption{孔隙率对层温差跨度的影响}
+\label{fig:porous-theta-ratio}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../reports/2026-05-28-porous-static/figures/04_U_me_efficiency_vs_e0.png}
+\caption{U分布磁电效率}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../reports/2026-05-28-porous-static/figures/04_X_me_efficiency_vs_e0.png}
+\caption{X分布磁电效率}
+\end{subfigure}
+\caption{孔隙率对Case C磁电效率的影响}
+\label{fig:porous-me-efficiency}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{../reports/2026-05-28-porous-static/figures/06_top_deflection_amplification_table.png}
+\caption{孔隙导致的最大机械挠度放大组合}
+\label{fig:porous-ranking}
+\end{figure}
+
 % ============================================================
 \section{总结与下一步计划}
 % ============================================================
@@ -485,6 +576,7 @@ COMSOL 独立验证 & \textcolor{passgreen}{完成} & 最大误差4.93\% \\
 10$\times$10 动力pilot & \textcolor{passgreen}{完成} & 峰值$-4.50$\,mm \\
 30$\times$30 模态降阶 & \textcolor{passgreen}{完成} & 峰值$-4.43$\,mm \\
 模态敏感性分析 & \textcolor{passgreen}{完成} & 8阶已收敛 \\
+含孔隙静力扫描 & \textcolor{passgreen}{完成} & 130算例/390行结果 \\
 \midrule
 非U分布COMSOL验证 & \textcolor{warnblue}{待推进} & 脚本已支持 \\
 论文 main.tex & \textcolor{warnblue}{待推进} & 数据已齐备 \\
@@ -496,9 +588,9 @@ COMSOL 独立验证 & \textcolor{passgreen}{完成} & 最大误差4.93\% \\
 \subsection{下一步计划}
 
 \begin{enumerate}
-\item 选择 1--2 个非 U 分布（如 V、X）进行 COMSOL 分层验证补充；
-\item 建立论文 \texttt{paper/main.tex} 目录，整理正式图表；
-\item 可选：补充阻尼比敏感性（0\%、0.5\%、0.8\%、1.5\%）；
+\item 选择 1--2 个含孔隙代表工况进行 COMSOL 分层验证，优先覆盖 Even-$e_0=0.4$ 和 Uneven-$e_0=0.2$；
+\item 建立论文 \texttt{paper/main.tex} 目录，将含孔隙挠度、温差和磁电效率规律整理为正式论文图；
+\item 补充含孔隙动力代表算例，建议采用 $e_0=0.2$ / U / $V_{f0}=0.5$；
 \item 可选：夜间长时程 30$\times$30 Newmark 对照验证模态降阶精度。
 \end{enumerate}
 

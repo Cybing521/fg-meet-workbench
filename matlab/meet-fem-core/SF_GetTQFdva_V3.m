@@ -19,37 +19,37 @@ NumElem = length(Element(:,1));
 NodePerElem = ElemType(1);
 DOFPerNodeM = ElemType(2);
 NumLay = ElemType(3);                             % Number of MEE layer
-DOFPerMEELay = ElemType(4);             % MEE dof per layer 
-NumMEELay = ElemType(5);  
+DOFPerMEELay = ElemType(4);             % MEE dof per layer
+NumMEELay = ElemType(5);
 DOFPerElemMEE = NumMEELay*DOFPerMEELay;  % Number of MEE dof per element
 DOFTotalM = NumNode*DOFPerNodeM;
 DOFTotalMEE = NumElem*DOFPerElemMEE;
 %% If Qd,Qv,Qa,Phis,Phia is empty, set them to zero as default
 if isempty(Qd)
-    Qd = zeros(DOFTotalM);
+    Qd = zeros(DOFTotalM,1);
 end
 
 if isempty(Qv)
-    Qv = zeros(DOFTotalM);
+    Qv = zeros(DOFTotalM,1);
 end
 
 if isempty(Qa)
-    Qa = zeros(DOFTotalM);
+    Qa = zeros(DOFTotalM,1);
 end
 
 if isempty(PhisM)
-    PhisM = zeros(DOFTotalMEE);
+    PhisM = zeros(DOFTotalMEE,1);
 end
 
 if isempty(PhiaM)
-    PhiaM = zeros(DOFTotalMEE);
+    PhiaM = zeros(DOFTotalMEE,1);
 end
 
 if isempty(Mga)
-    Mga = zeros(DOFTotalMEE);
+    Mga = zeros(DOFTotalMEE,1);
 end
 if isempty(Mgs)
-    Mgs = zeros(DOFTotalMEE);
+    Mgs = zeros(DOFTotalMEE,1);
 end
 %% Initial TQd,TQv,TQa, before adding boundary condition
 TQd = zeros(DOFTotalM,1);
@@ -61,7 +61,7 @@ TMgs = zeros(DOFTotalMEE,1);
 TMga = zeros(DOFTotalMEE,1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Construct TQd,TQv,TQa
-DOFMStart = 5;              % The start position of mechanical dof 
+DOFMStart = 5;              % The start position of mechanical dof
 QIndex = 1;                 % QIndex: for Qd,Qv,Qa, after boundary condition
 for NodeIndex = 1:NumNode
     for DOFIndex = 1:DOFPerNodeM
@@ -76,15 +76,15 @@ for NodeIndex = 1:NumNode
             TQd(TQIndex) = 0;
             TQv(TQIndex) = 0;
             TQa(TQIndex) = 0;
-        end  
+        end
     end
 end
 %% Construct TPhiM
-LayStart = NodePerElem+1;       % LayStart = 9 
+LayStart = NodePerElem+1;       % LayStart = 9
 PhiMIndex = 1;                    % PhiIndex: for Phis(a), after boundary condition
 for ElemIndex = 1:NumElem
     SmtLayIndex = 1;
-    for LayIndex = 1:NumLay  
+    for LayIndex = 1:NumLay
         if MateProp{LayIndex,1}.IsSmtLay == 2
             %%% TPhiIndex: for TPhi, before boundary condition
             TPhiMIndex = (ElemIndex-1)*DOFPerMEELay + SmtLayIndex;
@@ -97,15 +97,15 @@ for ElemIndex = 1:NumElem
                 TPhiaM(TPhiMIndex) = 0;
             end
             SmtLayIndex = SmtLayIndex+1;
-        end  
+        end
     end
 end
 %% Construct Mg
-LayStart = NodePerElem+1;       % LayStart = 9 
+LayStart = NodePerElem+1;       % LayStart = 9
 MgIndex = 1;                    % PhiIndex: for Phis(a), after boundary condition
 for ElemIndex = 1:NumElem
     SmtLayIndex = 1;
-    for LayIndex = 1:NumLay  
+    for LayIndex = 1:NumLay
         if MateProp{LayIndex,1}.IsSmtLay == 2
             %%% TPhiIndex: for TPhi, before boundary condition
             TMgIndex = (ElemIndex-1)*DOFPerMEELay + SmtLayIndex;
@@ -118,7 +118,7 @@ for ElemIndex = 1:NumElem
                 TMga(TMgIndex) = 0;
             end
             SmtLayIndex = SmtLayIndex+1;
-        end  
+        end
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
