@@ -369,7 +369,7 @@ $E \to w \to M$ & $1.22\times10^{-4}$ & A$\cdot$span/(2$\times$V) \\
 
 \begin{table}[H]
 \centering
-\caption{10$\times$10 Newmark 动力代表算例结果摘要}
+\caption{10$\times$10 Newmark 动力代表算例结果摘要（U分布 Vf0.6）}
 \label{tab:dynamic-10x10}
 \begin{tabular}{lr}
 \toprule
@@ -387,6 +387,36 @@ $E \to w \to M$ & $1.22\times10^{-4}$ & A$\cdot$span/(2$\times$V) \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsubsection{10$\times$10 FG分布动力扫描（5种分布对比）}
+
+固定 Vf0=0.6、CFFF、Case A，比较 U/V/X/O/P 五种功能梯度分布的动力响应差异。
+
+\begin{table}[H]
+\centering
+\caption{10$\times$10 FG分布动力扫描结果对比}
+\label{tab:dynamic-fg-sweep}
+\small
+\begin{tabular}{crrrrrc}
+\toprule
+\textbf{FG} & \textbf{静态} (mm) & \textbf{峰值} (mm) & \textbf{峰值时间} (ms) & \textbf{超调} & $f_1$ \textbf{(Hz)} & $\theta_{\max}$ \textbf{(K)} \\
+\midrule
+U & $-2.128$ & $-4.499$ & 28.9 & 2.114 & 52.20 & 5.129 \\
+V & $-1.622$ & $-3.403$ & 25.0 & 2.098 & 60.91 & 5.374 \\
+X & $-1.811$ & $-3.805$ & 26.3 & 2.101 & 57.62 & 4.480 \\
+O & $-2.572$ & $-5.516$ & 32.8 & 2.144 & 46.57 & 6.101 \\
+P & $-1.535$ & $-3.216$ & 39.7 & 2.096 & 62.93 & 5.316 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{关键发现：}
+\begin{itemize}[leftmargin=2em]
+\item 刚度排序：P $>$ V $>$ X $>$ U $>$ O（P最硬，O最柔）
+\item 动力峰值：O分布最大（5.52\,mm），P分布最小（3.22\,mm），差异达71\%
+\item 超调倍数：所有分布均在2.10附近，FG分布对超调影响不大
+\item X分布温差跨度最小（4.48\,K），表面富集特性使热响应更均匀
+\end{itemize}
 
 \subsubsection{30$\times$30 模态降阶（8阶）}
 
