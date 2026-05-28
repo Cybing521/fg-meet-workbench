@@ -1,0 +1,6 @@
+fg_mode,vf0,input_file
+U,0.6,cases/dynamic_10x10/Thermal_CFFF_U_Vf0.6-10x10-10layer.txt
+V,0.6,cases/dynamic_10x10/Thermal_CFFF_V_Vf0.6-10x10-10layer.txt
+X,0.6,cases/dynamic_10x10/Thermal_CFFF_X_Vf0.6-10x10-10layer.txt
+O,0.6,cases/dynamic_10x10/Thermal_CFFF_O_Vf0.6-10x10-10layer.txt
+P,0.6,cases/dynamic_10x10/Thermal_CFFF_P_Vf0.6-10x10-10layer.txt
