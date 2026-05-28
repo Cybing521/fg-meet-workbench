@@ -24,6 +24,10 @@ FIG_DIR = REPORT_DIR / "figures"
 DATA_DIR = REPORT_DIR / "data"
 DOCX_PATH = REPORT_DIR / "FG_MEET_progress_report_2026-05-22.docx"
 README_PATH = REPORT_DIR / "README.md"
+DYNAMIC_REPORT_DIR = ROOT / "reports" / "2026-05-22-dynamic"
+MODAL_REPORT_DIR = ROOT / "reports" / "2026-05-22-modal30x30"
+SENS_REPORT_DIR = ROOT / "reports" / "2026-05-22-modal-sensitivity"
+DAMPING_REPORT_DIR = ROOT / "reports" / "2026-05-23-modal-damping"
 
 FONT = Path("C:/Windows/Fonts/msyh.ttc")
 FONT_BOLD = Path("C:/Windows/Fonts/msyhbd.ttc")
@@ -298,10 +302,11 @@ def flowchart(path: Path) -> None:
         ("模型目标", "FG-MEE 30×30×10 CFFF 方板\n位移/温差/电磁势耦合验证"),
         ("MATLAB 主算例", "5 种 FG × 9 个 Vf0 × 3 载荷\n135 行静力结果"),
         ("耦合验证", "2 mm 参考挠度\n电/磁正向 + 沈式回代"),
-        ("COMSOL 对照", "10 层 CSV 分域材料\nswept quad/hex 网格"),
-        ("最终证据", "15 点验证最大误差 4.927%\n结果表 + Word/README"),
+        ("COMSOL 对照", "10 层 CSV 分域材料\n15 点最大误差 4.927%"),
+        ("动力扩展", "10×10 Newmark pilot\n30×30 模态降阶"),
+        ("敏感性检查", "4/6/8/12/16 阶收敛\n16 阶作为稳妥口径"),
     ]
-    x0, y0, bw, bh, gap = 70, 240, 285, 220, 35
+    x0, y0, bw, bh, gap = 45, 240, 245, 220, 28
     for i, (head, body) in enumerate(boxes):
         x = x0 + i * (bw + gap)
         draw.rounded_rectangle([x, y0, x + bw, y0 + bh], radius=18, fill=hex_to_rgb("#F8FAFD"), outline=hex_to_rgb("#B7C7D9"), width=3)
@@ -328,6 +333,11 @@ def load_data() -> dict[str, pd.DataFrame]:
         "validation": pd.read_csv(ROOT / "comsol" / "results" / "validation_points_U_Vf06_elastic.csv"),
         "experiments": pd.read_csv(ROOT / "comsol" / "results" / "validation_experiments_U_Vf06_elastic_corrected.csv"),
         "vlog": pd.read_csv(ROOT / "comsol" / "results" / "validation_log.csv"),
+        "dynamic_summary": pd.read_csv(DYNAMIC_REPORT_DIR / "data" / "dynamic_U_Vf06_elastic_10x10_summary.csv"),
+        "modal_summary": pd.read_csv(MODAL_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_8modes_summary.csv"),
+        "modal_sensitivity": pd.read_csv(SENS_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_sensitivity_summary.csv"),
+        "modal_sensitivity_modes": pd.read_csv(SENS_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_sensitivity_modes.csv"),
+        "damping_sensitivity": pd.read_csv(DAMPING_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_damping_sensitivity_summary.csv"),
     }
     return data
 
@@ -341,10 +351,29 @@ def copy_data_files() -> None:
         ROOT / "comsol" / "results" / "validation_points_U_Vf06_elastic.csv",
         ROOT / "comsol" / "results" / "validation_experiments_U_Vf06_elastic_corrected.csv",
         ROOT / "comsol" / "export" / "Thermal_CFFF_U_Vf0.6-30x30-10layer_layers.csv",
+        DYNAMIC_REPORT_DIR / "data" / "dynamic_U_Vf06_elastic_10x10_summary.csv",
+        DYNAMIC_REPORT_DIR / "data" / "dynamic_U_Vf06_elastic_10x10_timeseries.csv",
+        MODAL_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_8modes_summary.csv",
+        MODAL_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_8modes_modes.csv",
+        MODAL_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_8modes_timeseries.csv",
+        SENS_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_sensitivity_summary.csv",
+        SENS_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_sensitivity_modes.csv",
+        SENS_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_sensitivity_timeseries.csv",
+        DAMPING_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_damping_sensitivity_summary.csv",
+        DAMPING_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_damping_sensitivity_modes.csv",
+        DAMPING_REPORT_DIR / "data" / "dynamic_modal_30x30_U_Vf06_elastic_damping_sensitivity_timeseries.csv",
     ]
     for src in files:
         if src.exists():
             copy2(src, DATA_DIR / src.name)
+
+
+def copy_report_figure(figs: dict[str, Path], key: str, src: Path, dst_name: str) -> None:
+    dst = FIG_DIR / dst_name
+    if not src.exists():
+        raise FileNotFoundError(f"Missing report figure: {src}")
+    copy2(src, dst)
+    figs[key] = dst
 
 
 def generate_figures(data: dict[str, pd.DataFrame]) -> dict[str, Path]:
@@ -361,6 +390,10 @@ def generate_figures(data: dict[str, pd.DataFrame]) -> dict[str, Path]:
         ["COMSOL 对照实验", str(len(data["experiments"])), "载荷、四面体、扫掠、分层 CSV 网格对照"],
         ["COMSOL 验证点", "15", "5×3 空间选点，MATLAB/COMSOL 逐点对比"],
         ["最终最大误差", "4.927%", "10 层 CSV + swept quad/hex 后达标"],
+        ["10×10 Newmark 动力", "401 步", "40 ms 时程，峰值/频率/温差输出"],
+        ["30×30 模态动力", "8 阶", "保留全尺寸空间模型，用模态叠加替代全量 Newmark"],
+        ["模态阶数敏感性", "5 组", "4/6/8/12/16 阶，验证 8 阶与 16 阶基本一致"],
+        ["阻尼敏感性", "4 组", "0/0.5/0.8/1.5% 阻尼，给出峰值范围"],
     ]
     table_image(FIG_DIR / "02_workload_table.png", "工作量总览（可作为月度汇报封面图）", ["项目", "数量", "说明"], workload_rows, [310, 160, 900])
     figs["workload_table"] = FIG_DIR / "02_workload_table.png"
@@ -383,7 +416,8 @@ def generate_figures(data: dict[str, pd.DataFrame]) -> dict[str, Path]:
         ["四面体网格无法 <5%", "自由 tetra 与板壳/厚度离散差异", "改 swept quad/hex 网格"],
         ["CSV 分层 1 单元/层偏硬", "厚度方向离散太粗", "每材料层 7 个 swept 单元"],
         ["10 单元/层又偏柔", "局部点误差重新增大", "保留 sweep=7 作为 canonical"],
-        ["paper/main.tex 不存在", "当前仓库未建论文目录", "先输出 Word/README 汇报材料"],
+        ["30×30 Newmark 过慢", "1 ms 冒烟超过 5 min", "改用 30×30 模态降阶并做阶数敏感性"],
+        ["paper/main.tex 不存在", "当前仓库未建论文目录", "先输出 Word/PDF/README 汇报材料"],
     ]
     table_image(FIG_DIR / "04_problem_solution_table.png", "实际问题与解决思路", ["问题", "原因判断", "处理方案"], issue_rows, [360, 430, 650])
     figs["problem_solution_table"] = FIG_DIR / "04_problem_solution_table.png"
@@ -491,6 +525,77 @@ def generate_figures(data: dict[str, pd.DataFrame]) -> dict[str, Path]:
     table_image(FIG_DIR / "15_coupling_table.png", "2 mm 耦合验证结果", ["检查项", "方法", "中心挠度(mm)", "状态", "系数/单位"], c_rows, [250, 420, 230, 120, 420])
     figs["coupling_table"] = FIG_DIR / "15_coupling_table.png"
 
+    dyn = data["dynamic_summary"].iloc[0]
+    modal = data["modal_summary"].iloc[0]
+    sens = data["modal_sensitivity"].sort_values("n_modes")
+    sens16 = sens.iloc[-1]
+    damping = data["damping_sensitivity"].sort_values("damping_ratio")
+    damping_default = damping.iloc[(damping["damping_ratio"] - 0.008).abs().argmin()]
+    dynamic_rows = [
+        [
+            "10×10 Newmark pilot",
+            f"{float(dyn['static_center_mm']):.4f}",
+            f"{float(dyn['peak_center_mm']):.4f}",
+            f"{float(dyn['peak_time_s']) * 1000:.2f}",
+            f"{float(dyn['freq_01_Hz']):.2f}",
+            f"{float(dyn['theta_span_max_K']):.4f}",
+        ],
+        [
+            "30×30 8 阶模态",
+            f"{float(modal['mechanical_static_center_mm']):.4f}",
+            f"{float(modal['peak_center_mm']):.4f}",
+            f"{float(modal['peak_time_s']) * 1000:.2f}",
+            f"{float(modal['freq_01_Hz']):.2f}",
+            f"{float(modal['theta_span_max_K']):.4f}",
+        ],
+        [
+            "30×30 16 阶敏感性",
+            f"{float(sens16['mechanical_static_center_mm']):.4f}",
+            f"{float(sens16['peak_center_mm']):.4f}",
+            f"{float(sens16['peak_time_s']) * 1000:.2f}",
+            f"{float(sens16['freq_01_Hz']):.2f}",
+            f"{float(sens16['theta_span_max_K']):.4f}",
+        ],
+    ]
+    table_image(
+        FIG_DIR / "16_dynamic_overview_table.png",
+        "动力结果总览",
+        ["工况/方法", "静态中心(mm)", "动力峰值(mm)", "峰时(ms)", "一阶频率(Hz)", "最大θ跨度(K)"],
+        dynamic_rows,
+        [280, 190, 190, 150, 170, 190],
+        "从 10×10 Newmark pilot 推进到 30×30 模态与阶数敏感性",
+    )
+    figs["dynamic_overview_table"] = FIG_DIR / "16_dynamic_overview_table.png"
+
+    copy_report_figure(figs, "dynamic_strategy_table", DYNAMIC_REPORT_DIR / "figures" / "01_dynamic_strategy_table.png", "17_dynamic_strategy_table.png")
+    copy_report_figure(figs, "dynamic_summary_table", DYNAMIC_REPORT_DIR / "figures" / "02_dynamic_summary_table.png", "18_dynamic_summary_table.png")
+    copy_report_figure(figs, "dynamic_center_timeseries", DYNAMIC_REPORT_DIR / "figures" / "03_center_displacement_timeseries.png", "19_dynamic_center_timeseries.png")
+    copy_report_figure(figs, "dynamic_theta_timeseries", DYNAMIC_REPORT_DIR / "figures" / "04_theta_span_timeseries.png", "20_dynamic_theta_timeseries.png")
+    copy_report_figure(figs, "dynamic_frequency_bar", DYNAMIC_REPORT_DIR / "figures" / "05_modal_frequency_bar.png", "21_dynamic_frequency_bar.png")
+
+    copy_report_figure(figs, "modal30_summary_table", MODAL_REPORT_DIR / "figures" / "01_modal30x30_summary_table.png", "22_modal30x30_summary_table.png")
+    copy_report_figure(figs, "modal30_center_timeseries", MODAL_REPORT_DIR / "figures" / "02_modal30x30_center_timeseries.png", "23_modal30x30_center_timeseries.png")
+    copy_report_figure(figs, "modal30_theta_timeseries", MODAL_REPORT_DIR / "figures" / "03_modal30x30_theta_timeseries.png", "24_modal30x30_theta_timeseries.png")
+    copy_report_figure(figs, "modal30_contribution", MODAL_REPORT_DIR / "figures" / "04_modal_static_contribution.png", "25_modal30x30_contribution.png")
+    copy_report_figure(figs, "modal30_frequency_bar", MODAL_REPORT_DIR / "figures" / "05_modal_frequency_bar.png", "26_modal30x30_frequency_bar.png")
+    copy_report_figure(figs, "modal30_compare_10x10", MODAL_REPORT_DIR / "figures" / "06_10x10_vs_30x30_center.png", "27_10x10_vs_30x30_center.png")
+
+    copy_report_figure(figs, "sens_summary_table", SENS_REPORT_DIR / "figures" / "01_modal_sensitivity_summary_table.png", "28_modal_sensitivity_summary_table.png")
+    copy_report_figure(figs, "sens_capture_ratio", SENS_REPORT_DIR / "figures" / "02_capture_ratio_vs_modes.png", "29_capture_ratio_vs_modes.png")
+    copy_report_figure(figs, "sens_peak_vs_modes", SENS_REPORT_DIR / "figures" / "03_peak_vs_modes.png", "30_peak_vs_modes.png")
+    copy_report_figure(figs, "sens_center_timeseries", SENS_REPORT_DIR / "figures" / "04_center_timeseries_by_modes.png", "31_center_timeseries_by_modes.png")
+    copy_report_figure(figs, "sens_theta_timeseries", SENS_REPORT_DIR / "figures" / "05_theta_span_timeseries_by_modes.png", "32_theta_span_timeseries_by_modes.png")
+    copy_report_figure(figs, "sens_modal_contribution", SENS_REPORT_DIR / "figures" / "06_first16_modal_contribution.png", "33_first16_modal_contribution.png")
+    copy_report_figure(figs, "sens_frequency_bar", SENS_REPORT_DIR / "figures" / "07_first16_frequency_bar.png", "34_first16_frequency_bar.png")
+    copy_report_figure(figs, "sens_assessment_table", SENS_REPORT_DIR / "figures" / "08_convergence_assessment_table.png", "35_convergence_assessment_table.png")
+
+    copy_report_figure(figs, "damping_summary_table", DAMPING_REPORT_DIR / "figures" / "01_damping_summary_table.png", "36_damping_summary_table.png")
+    copy_report_figure(figs, "damping_peak_vs", DAMPING_REPORT_DIR / "figures" / "02_peak_vs_damping.png", "37_peak_vs_damping.png")
+    copy_report_figure(figs, "damping_theta_vs", DAMPING_REPORT_DIR / "figures" / "03_theta_span_vs_damping.png", "38_theta_span_vs_damping.png")
+    copy_report_figure(figs, "damping_center_timeseries", DAMPING_REPORT_DIR / "figures" / "04_center_timeseries_by_damping.png", "39_center_timeseries_by_damping.png")
+    copy_report_figure(figs, "damping_theta_timeseries", DAMPING_REPORT_DIR / "figures" / "05_theta_span_timeseries_by_damping.png", "40_theta_span_timeseries_by_damping.png")
+    copy_report_figure(figs, "damping_assessment_table", DAMPING_REPORT_DIR / "figures" / "06_damping_assessment_table.png", "41_damping_assessment_table.png")
+
     return figs
 
 
@@ -506,6 +611,12 @@ def generate_readme(data: dict[str, pd.DataFrame], figs: dict[str, Path]) -> Non
     vlog = data["vlog"].iloc[0]
     exp = data["experiments"]
     results = data["results"]
+    dyn = data["dynamic_summary"].iloc[0]
+    modal = data["modal_summary"].iloc[0]
+    sens = data["modal_sensitivity"].sort_values("n_modes")
+    sens16 = sens.iloc[-1]
+    damping = data["damping_sensitivity"].sort_values("damping_ratio")
+    damping_default = damping.iloc[(damping["damping_ratio"] - 0.008).abs().argmin()]
     content: list[str] = []
     content.append("# FG-MEET Workbench 月度/组会汇报材料（2026-05-22）\n")
     content.append("> 用途：明天组会可直接截取表格和图片做 PPT。本文按“模型目标 → 预计方法 → 实际问题 → 解决路径 → 正确/错误结果展示”的逻辑组织。\n")
@@ -516,7 +627,9 @@ def generate_readme(data: dict[str, pd.DataFrame], figs: dict[str, Path]) -> Non
         ["2 mm 转化验证", "6 个检查项全部 pass，覆盖电势、磁势、机械回代和沈式直接矩阵法"],
         ["COMSOL 最终模型", "10 层 CSV 分域材料 + swept quad/hex 网格，mesh size 4，每层 7 个扫掠单元"],
         ["最终误差", f"中心点 {float(vlog['rel_err_w_pct']):.3f}%，15 点最大 {float(val['rel_err_w_pct'].max()):.3f}%，平均 {float(val['rel_err_w_pct'].mean()):.3f}%"],
-        ["仍待推进", "动力代表算例（Newmark）与论文 main.tex 尚未建立，当前先输出 Word/README 汇报材料"],
+        ["动力补充", f"10×10 Newmark 峰值 {float(dyn['peak_center_mm']):.4f} mm；30×30 16 阶模态峰值 {float(sens16['peak_center_mm']):.4f} mm"],
+        ["阻尼敏感性", f"0/0.5/0.8/1.5% 已补算；0.8% 口径峰值 {float(damping_default['peak_center_mm']):.4f} mm"],
+        ["仍待推进", "论文 main.tex 尚未建立；如需论文最终动态图，建议补夜间长时程 Newmark 对照"],
     ]
     content.append(markdown_table(["项目", "结论"], summary_rows))
     content.append("\n![工作流](figures/01_workflow.png)\n")
@@ -540,7 +653,8 @@ def generate_readme(data: dict[str, pd.DataFrame], figs: dict[str, Path]) -> Non
         ["2 mm 转化验证", "run_coupling_validation_2mm.m", "统一参考挠度，验证正向驱动和反向传感"],
         ["沈式回代", "[Kff,Kfz;Kzf,Kzz]\\[-Kfu*u-Kft*T;-Kzu*u-Kzt*T]", "从位移场直接回算感生电/磁势"],
         ["COMSOL 对照", "Java API + comsolbatch", "绕开 LiveLink 登录依赖，可命令行复现"],
-        ["结果汇报", "Markdown + Word + 图片化表格", "便于直接截取到 PPT"],
+        ["动力计算", "Newmark pilot + 30×30 模态降阶", "先验证频率/峰值，再做阶数敏感性"],
+        ["结果汇报", "Markdown + Word/PDF + 图片化表格", "便于直接截取到 PPT"],
     ]
     content.append(markdown_table(["模块", "实现", "目的"], method_table))
 
@@ -588,23 +702,65 @@ def generate_readme(data: dict[str, pd.DataFrame], figs: dict[str, Path]) -> Non
         cdf[col] = pd.to_numeric(cdf[col], errors="coerce").round(6)
     content.append(markdown_table(["检查项", "方法", "驱动", "驱动值", "中心挠度 mm", "状态", "系数", "单位"], cdf.values.tolist()))
 
-    content.append("## 9. 当前未解决/下一步\n")
+    content.append("## 9. 动力代表算例与 30×30 模态结果\n")
+    dynamic_rows = [
+        ["10×10 Newmark pilot", f"{float(dyn['static_center_mm']):.4f}", f"{float(dyn['peak_center_mm']):.4f}", f"{float(dyn['peak_time_s']) * 1000:.2f}", f"{float(dyn['freq_01_Hz']):.2f}", f"{float(dyn['theta_span_max_K']):.4f}"],
+        ["30×30 8 阶模态", f"{float(modal['mechanical_static_center_mm']):.4f}", f"{float(modal['peak_center_mm']):.4f}", f"{float(modal['peak_time_s']) * 1000:.2f}", f"{float(modal['freq_01_Hz']):.2f}", f"{float(modal['theta_span_max_K']):.4f}"],
+        ["30×30 16 阶模态", f"{float(sens16['mechanical_static_center_mm']):.4f}", f"{float(sens16['peak_center_mm']):.4f}", f"{float(sens16['peak_time_s']) * 1000:.2f}", f"{float(sens16['freq_01_Hz']):.2f}", f"{float(sens16['theta_span_max_K']):.4f}"],
+    ]
+    content.append(markdown_table(["方法", "静态中心 mm", "动力峰值 mm", "峰值时间 ms", "一阶频率 Hz", "最大 θ 跨度 K"], dynamic_rows))
+    content.append("\n![动力总览](figures/16_dynamic_overview_table.png)\n")
+    content.append("![10x10 Newmark 摘要](figures/18_dynamic_summary_table.png)\n")
+    content.append("![10x10 中心挠度时程](figures/19_dynamic_center_timeseries.png)\n")
+    content.append("![30x30 模态摘要](figures/22_modal30x30_summary_table.png)\n")
+    content.append("![30x30 模态时程](figures/23_modal30x30_center_timeseries.png)\n")
+    content.append("![10x10 与 30x30 对比](figures/27_10x10_vs_30x30_center.png)\n")
+
+    content.append("## 10. 模态阶数敏感性\n")
+    sens_rows = sens[["n_modes", "modal_capture_ratio", "peak_center_mm", "peak_time_s", "overshoot_ratio", "theta_span_max_K"]].copy()
+    sens_rows["peak_time_s"] = (sens_rows["peak_time_s"].astype(float) * 1000).round(2)
+    for col in ["modal_capture_ratio", "peak_center_mm", "overshoot_ratio", "theta_span_max_K"]:
+        sens_rows[col] = sens_rows[col].astype(float).round(6)
+    content.append(markdown_table(["阶数", "静态捕获", "峰值 mm", "峰值时间 ms", "超调", "最大 θ 跨度 K"], sens_rows.values.tolist()))
+    content.append("\n![阶数敏感性摘要](figures/28_modal_sensitivity_summary_table.png)\n")
+    content.append("![静态捕获收敛](figures/29_capture_ratio_vs_modes.png)\n")
+    content.append("![峰值收敛](figures/30_peak_vs_modes.png)\n")
+    content.append("![不同阶数中心挠度时程](figures/31_center_timeseries_by_modes.png)\n")
+    content.append("![收敛性判断](figures/35_convergence_assessment_table.png)\n")
+    content.append(f"\n结论：16 阶峰值为 {float(sens16['peak_center_mm']):.4f} mm，与 8 阶峰值绝对值差约 {abs(float(sens.iloc[2]['peak_abs_delta_vs_max_mm'])):.4f} mm；8 阶结果已基本收敛，汇报中可把 16 阶作为稳妥口径。\n")
+
+    content.append("## 11. 阻尼敏感性\n")
+    damping_rows = damping[["damping_ratio", "peak_center_mm", "peak_time_s", "overshoot_ratio", "final_center_mm", "theta_span_max_K"]].copy()
+    damping_rows["damping_ratio"] = (damping_rows["damping_ratio"].astype(float) * 100).round(2).astype(str) + "%"
+    damping_rows["peak_time_s"] = (damping_rows["peak_time_s"].astype(float) * 1000).round(2)
+    for col in ["peak_center_mm", "overshoot_ratio", "final_center_mm", "theta_span_max_K"]:
+        damping_rows[col] = damping_rows[col].astype(float).round(6)
+    content.append(markdown_table(["阻尼比", "峰值 mm", "峰值时间 ms", "超调", "40 ms 位移 mm", "最大 θ 跨度 K"], damping_rows.values.tolist()))
+    content.append("\n![阻尼敏感性摘要](figures/36_damping_summary_table.png)\n")
+    content.append("![峰值随阻尼变化](figures/37_peak_vs_damping.png)\n")
+    content.append("![不同阻尼中心挠度时程](figures/39_center_timeseries_by_damping.png)\n")
+    content.append("![阻尼敏感性判断](figures/41_damping_assessment_table.png)\n")
+
+    content.append("## 12. 当前未解决/下一步\n")
     next_rows = [
-        ["动力代表算例", "仓库有 Newmark 函数和历史动态脚本，但还未包装成统一入口", "下一步写 `run_dynamic_representative.m`，输出中心时程、峰值、频率信息"],
+        ["长时程 Newmark 对照", "30×30 全量 Newmark 交互运行过慢", "可作为夜间长任务跑 1 个短窗或降采样对照"],
         ["论文文件", "当前无 `paper/main.tex` 目录", "动力数据稳定后再创建论文图表和 LaTeX"],
         ["非 U 的 COMSOL 分层验证", "脚本已支持 `FG_COMSOL_LAYER_CSV`，但还未批量验证 V/X/O/P", "选择 1-2 个代表 FG 模式做补充对照"],
         ["COMSOL .mph 大文件", "已生成但未纳入 Git", "保留本地，GitHub 提交轻量 CSV/图表/脚本"],
     ]
     content.append(markdown_table(["事项", "当前状态", "建议处理"], next_rows))
 
-    content.append("## 10. 附：文件索引\n")
+    content.append("## 13. 附：文件索引\n")
     file_rows = [
         ["Word 汇报文件", "FG_MEET_progress_report_2026-05-22.docx"],
+        ["PDF 汇报文件", "rendered-word/FG_MEET_progress_report_2026-05-22.pdf"],
         ["本文 README", "README.md"],
         ["图表目录", "figures/"],
         ["轻量结果 CSV", "data/"],
         ["最终 COMSOL 验证表", "data/validation_log.csv"],
         ["最终 15 点验证表", "data/validation_points_U_Vf06_elastic.csv"],
+        ["动力敏感性表", "data/dynamic_modal_30x30_U_Vf06_elastic_sensitivity_summary.csv"],
+        ["阻尼敏感性表", "data/dynamic_modal_30x30_U_Vf06_elastic_damping_sensitivity_summary.csv"],
     ]
     content.append(markdown_table(["文件", "路径"], file_rows))
     README_PATH.write_text("\n".join(content), encoding="utf-8")
@@ -691,6 +847,11 @@ def add_section_heading(doc: Document, text: str) -> None:
 
 
 def generate_docx(data: dict[str, pd.DataFrame], figs: dict[str, Path]) -> None:
+    dyn = data["dynamic_summary"].iloc[0]
+    modal = data["modal_summary"].iloc[0]
+    sens = data["modal_sensitivity"].sort_values("n_modes")
+    sens16 = sens.iloc[-1]
+    damping = data["damping_sensitivity"].sort_values("damping_ratio")
     doc = Document()
     configure_doc(doc)
     title = doc.add_paragraph()
@@ -701,7 +862,7 @@ def generate_docx(data: dict[str, pd.DataFrame], figs: dict[str, Path]) -> None:
     run.font.size = Pt(24)
     run.bold = True
     run.font.color.rgb = RGBColor.from_string("1F3A5F")
-    subtitle = doc.add_paragraph("模型目标、方法路线、问题排查、正确/错误结果与最终验证证据 | 2026-05-22")
+    subtitle = doc.add_paragraph("模型目标、方法路线、问题排查、正确/错误结果、动力补充与 PDF 版汇报 | 2026-05-22/23")
     subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
     doc.add_paragraph()
     add_picture(doc, "workflow", "图 1 技术路线与实际收敛流程", figs)
@@ -752,9 +913,47 @@ def generate_docx(data: dict[str, pd.DataFrame], figs: dict[str, Path]) -> None:
     cdf["w_center_mm"] = pd.to_numeric(cdf["w_center_mm"]).round(6)
     add_doc_table(doc, ["检查项", "方法", "驱动", "中心挠度 mm", "状态"], cdf.values.tolist())
 
-    add_section_heading(doc, "8. 下一步")
+    add_section_heading(doc, "8. 动力代表算例与 30x30 模态结果")
+    add_doc_table(doc, ["方法", "静态中心 mm", "动力峰值 mm", "峰值时间 ms", "一阶频率 Hz", "最大 θ 跨度 K"], [
+        ["10x10 Newmark pilot", f"{float(dyn['static_center_mm']):.4f}", f"{float(dyn['peak_center_mm']):.4f}", f"{float(dyn['peak_time_s']) * 1000:.2f}", f"{float(dyn['freq_01_Hz']):.2f}", f"{float(dyn['theta_span_max_K']):.4f}"],
+        ["30x30 8 阶模态", f"{float(modal['mechanical_static_center_mm']):.4f}", f"{float(modal['peak_center_mm']):.4f}", f"{float(modal['peak_time_s']) * 1000:.2f}", f"{float(modal['freq_01_Hz']):.2f}", f"{float(modal['theta_span_max_K']):.4f}"],
+        ["30x30 16 阶模态", f"{float(sens16['mechanical_static_center_mm']):.4f}", f"{float(sens16['peak_center_mm']):.4f}", f"{float(sens16['peak_time_s']) * 1000:.2f}", f"{float(sens16['freq_01_Hz']):.2f}", f"{float(sens16['theta_span_max_K']):.4f}"],
+    ])
+    add_picture(doc, "dynamic_overview_table", "图 16 动力结果总览", figs)
+    add_picture(doc, "dynamic_summary_table", "图 17 10x10 Newmark pilot 摘要", figs)
+    add_picture(doc, "dynamic_center_timeseries", "图 18 10x10 Newmark 中心挠度时程", figs)
+    add_picture(doc, "modal30_summary_table", "图 19 30x30 8 阶模态结果摘要", figs)
+    add_picture(doc, "modal30_center_timeseries", "图 20 30x30 8 阶模态中心挠度时程", figs)
+    add_picture(doc, "modal30_compare_10x10", "图 21 10x10 Newmark 与 30x30 模态对比", figs)
+
+    doc.add_page_break()
+    add_section_heading(doc, "9. 模态阶数敏感性")
+    sens_rows = sens[["n_modes", "modal_capture_ratio", "peak_center_mm", "peak_time_s", "overshoot_ratio", "theta_span_max_K"]].copy()
+    sens_rows["peak_time_s"] = (sens_rows["peak_time_s"].astype(float) * 1000).round(2)
+    for col in ["modal_capture_ratio", "peak_center_mm", "overshoot_ratio", "theta_span_max_K"]:
+        sens_rows[col] = sens_rows[col].astype(float).round(6)
+    add_doc_table(doc, ["阶数", "静态捕获", "峰值 mm", "峰值时间 ms", "超调", "最大 θ 跨度 K"], sens_rows.values.tolist())
+    add_picture(doc, "sens_summary_table", "图 22 30x30 模态阶数敏感性摘要", figs)
+    add_picture(doc, "sens_capture_ratio", "图 23 静态捕获比例收敛", figs)
+    add_picture(doc, "sens_peak_vs_modes", "图 24 动力峰值随模态阶数变化", figs)
+    add_picture(doc, "sens_center_timeseries", "图 25 不同阶数中心挠度时程", figs)
+    add_picture(doc, "sens_assessment_table", "图 26 模态阶数收敛性判断", figs)
+
+    add_section_heading(doc, "10. 阻尼敏感性")
+    damping_rows = damping[["damping_ratio", "peak_center_mm", "peak_time_s", "overshoot_ratio", "final_center_mm", "theta_span_max_K"]].copy()
+    damping_rows["damping_ratio"] = (damping_rows["damping_ratio"].astype(float) * 100).round(2).astype(str) + "%"
+    damping_rows["peak_time_s"] = (damping_rows["peak_time_s"].astype(float) * 1000).round(2)
+    for col in ["peak_center_mm", "overshoot_ratio", "final_center_mm", "theta_span_max_K"]:
+        damping_rows[col] = damping_rows[col].astype(float).round(6)
+    add_doc_table(doc, ["阻尼比", "峰值 mm", "峰值时间 ms", "超调", "40 ms 位移 mm", "最大 θ 跨度 K"], damping_rows.values.tolist())
+    add_picture(doc, "damping_summary_table", "图 27 30x30 模态阻尼敏感性摘要", figs)
+    add_picture(doc, "damping_peak_vs", "图 28 动力峰值随阻尼比变化", figs)
+    add_picture(doc, "damping_center_timeseries", "图 29 不同阻尼比中心挠度时程", figs)
+    add_picture(doc, "damping_assessment_table", "图 30 阻尼敏感性判断", figs)
+
+    add_section_heading(doc, "11. 下一步")
     add_doc_table(doc, ["事项", "状态", "下一步"], [
-        ["动力代表算例", "未完成；已有 Newmark 函数与历史脚本", "封装统一入口，输出时程和峰值"],
+        ["长时程 Newmark 对照", "30x30 全量 Newmark 交互运行过慢", "可作为夜间长任务补 1 个对照窗"],
         ["论文 main.tex", "仓库当前无 paper/ 目录", "动力数据完成后再生成论文图表"],
         ["更多 COMSOL 分布", "U/Vf0.6 已通过", "可选 V/X/O/P 代表算例补充"],
     ])

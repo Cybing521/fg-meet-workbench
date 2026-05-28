@@ -19,6 +19,7 @@
 %   FG_MODAL_SENS_TTOTAL      total time, default 4e-2
 %   FG_MODAL_SENS_MODES       comma list, default 4,6,8,12,16
 %   FG_MODAL_SENS_DAMPING     modal damping ratio, default 0.008
+%   FG_MODAL_SENS_DAMPING_LIST optional comma list for damping sensitivity
 %   FG_MODAL_SENS_TAG         output tag, default dynamic_modal_30x30_U_Vf06_elastic_sensitivity
 
 clear; clc;
@@ -47,7 +48,8 @@ volt = env_number({'FG_MODAL_SENS_VOLT', 'FG_MODAL_VOLT'}, 300);
 magnetic = env_number({'FG_MODAL_SENS_MAGNETIC', 'FG_MODAL_MAGNETIC'}, 200);
 dt = env_number({'FG_MODAL_SENS_DT', 'FG_MODAL_DT'}, 1e-4);
 tTotal = env_number({'FG_MODAL_SENS_TTOTAL', 'FG_MODAL_TTOTAL'}, 4e-2);
-dampingRatio = env_number({'FG_MODAL_SENS_DAMPING', 'FG_MODAL_DAMPING'}, 0.8 / 100);
+baseDampingRatio = env_number({'FG_MODAL_SENS_DAMPING', 'FG_MODAL_DAMPING'}, 0.8 / 100);
+dampingRatios = env_number_list({'FG_MODAL_SENS_DAMPING_LIST', 'FG_MODAL_DAMPING_LIST'}, baseDampingRatio);
 modeCounts = env_mode_list({'FG_MODAL_SENS_MODES', 'FG_MODAL_NMODES'}, [4, 6, 8, 12, 16]);
 tag = env_text({'FG_MODAL_SENS_TAG', 'FG_MODAL_TAG'}, '');
 if isempty(tag)
@@ -57,8 +59,8 @@ tag = sanitize_tag(tag);
 
 maxModes = max(modeCounts);
 fprintf('30x30 modal sensitivity case: %s\n', caseFile);
-fprintf('Load case: %s, modes = %s, damping = %.4g, dt = %.6g s, total = %.6g s\n', ...
-    loadCase, sprintf('%d ', modeCounts), dampingRatio, dt, tTotal);
+fprintf('Load case: %s, modes = %s, damping = %s, dt = %.6g s, total = %.6g s\n', ...
+    loadCase, sprintf('%d ', modeCounts), sprintf('%.4g ', dampingRatios), dt, tTotal);
 
 oldDir = pwd;
 cleanup = onCleanup(@() cd(oldDir)); %#ok<NASGU>
@@ -68,7 +70,7 @@ InputFile = caseFile;
 OutputFile = [];
 UsedDataFile = fullfile(paths.output, sprintf('%s_linear_used_data.txt', tag));
 IsANS = 0;
-DampRatio = dampingRatio;
+DampRatio = baseDampingRatio;
 IntegSchem = 'G2';
 ThermalNL = 0;
 
@@ -164,9 +166,11 @@ end
 
 timeS = (0:dt:tTotal)';
 nSteps = numel(timeS);
-nSets = numel(modeCounts);
+nSets = numel(modeCounts) * numel(dampingRatios);
 timeseries = table(timeS, 'VariableNames', {'time_s'});
 
+runModeCounts = nan(nSets, 1);
+runDampingRatios = nan(nSets, 1);
 modalStaticCenterMm = nan(nSets, 1);
 modalCaptureRatio = nan(nSets, 1);
 finalMm = nan(nSets, 1);
@@ -180,9 +184,15 @@ freqLastHz = nan(nSets, 1);
 recoveryRuntimeS = nan(nSets, 1);
 
 sensitivityTimer = tic;
-for si = 1:nSets
-    nModes = modeCounts(si);
-    fprintf('Evaluating %d retained modes...\n', nModes);
+si = 0;
+for di = 1:numel(dampingRatios)
+    dampingRatio = dampingRatios(di);
+    for mi = 1:numel(modeCounts)
+    si = si + 1;
+    nModes = modeCounts(mi);
+    runModeCounts(si) = nModes;
+    runDampingRatios(si) = dampingRatio;
+    fprintf('Evaluating %d retained modes at damping %.4g...\n', nModes, dampingRatio);
     setTimer = tic;
 
     PhiN = Phi(:, 1:nModes);
@@ -217,11 +227,16 @@ for si = 1:nSets
     freqLastHz(si) = freqHz(nModes);
     recoveryRuntimeS(si) = toc(setTimer);
 
-    label = sprintf('%02d_modes', nModes);
+    if isscalar(dampingRatios)
+        label = sprintf('%02d_modes', nModes);
+    else
+        label = sprintf('zeta_%04d_%02d_modes', round(dampingRatio * 10000), nModes);
+    end
     timeseries.(sprintf('w_center_%s_mm', label)) = wCenterMm;
     timeseries.(sprintf('theta_span_%s_K', label)) = thetaSpanK;
     for layerIndex = 1:nLayer
         timeseries.(sprintf('theta_layer_%02d_%s_K', layerIndex, label)) = thetaLayerTime(:, layerIndex);
+    end
     end
 end
 sensitivityRuntimeS = toc(sensitivityTimer);
@@ -237,7 +252,7 @@ summary = table( ...
     repmat(string(tag), nSets, 1), repmat(string(caseFile), nSets, 1), ...
     repmat(string(loadCase), nSets, 1), repmat(activeLoad, nSets, 1), ...
     repmat(activeVolt, nSets, 1), repmat(activeMagnetic, nSets, 1), ...
-    modeCounts(:), repmat(maxModes, nSets, 1), repmat(dampingRatio, nSets, 1), ...
+    runModeCounts, repmat(maxModes, nSets, 1), runDampingRatios, ...
     repmat(dt, nSets, 1), repmat(tTotal, nSets, 1), repmat(nSteps, nSets, 1), ...
     repmat(centerNodeId, nSets, 1), repmat(centerCoord(1), nSets, 1), ...
     repmat(centerCoord(2), nSets, 1), repmat(centerCoord(3), nSets, 1), ...
@@ -279,7 +294,7 @@ outMat = fullfile(paths.output, sprintf('%s.mat', tag));
 writetable(timeseries, outCsv);
 writetable(modes, outModes);
 writetable(summary, outSummary);
-save(outMat, 'summary', 'modes', 'timeseries', 'modeCounts', 'freqHz', ...
+save(outMat, 'summary', 'modes', 'timeseries', 'modeCounts', 'dampingRatios', 'freqHz', ...
     'omega', 'modalForce', 'etaStatic', 'centerShape', 'centerReducedDof', ...
     'centerNodeId', 'centerCoord', '-v7.3');
 
@@ -288,7 +303,7 @@ fprintf('Wrote %s\n', outModes);
 fprintf('Wrote %s\n', outSummary);
 fprintf('Wrote %s\n', outMat);
 disp(summary(:, {'n_modes', 'modal_capture_ratio', 'peak_center_mm', ...
-    'peak_time_s', 'overshoot_ratio', 'theta_span_max_K', ...
+    'damping_ratio', 'peak_time_s', 'overshoot_ratio', 'theta_span_max_K', ...
     'peak_abs_delta_vs_max_mm'}));
 
 function value = env_text(names, defaultValue)
@@ -316,6 +331,25 @@ function value = env_number(names, defaultValue)
         error('run_dynamic_modal_sensitivity_30x30:BadEnv', ...
             '%s must be numeric, got: %s', strjoin(names, '/'), raw);
     end
+end
+
+function values = env_number_list(names, defaultValues)
+    raw = env_text(names, '');
+    if isempty(raw)
+        values = defaultValues;
+        return;
+    end
+    parts = regexp(raw, '[,;\s]+', 'split');
+    parts = parts(~cellfun('isempty', parts));
+    values = zeros(1, numel(parts));
+    for i = 1:numel(parts)
+        values(i) = str2double(parts{i});
+        if isnan(values(i))
+            error('run_dynamic_modal_sensitivity_30x30:BadNumberList', ...
+                'Expected numeric list, got: %s', raw);
+        end
+    end
+    values = unique(values, 'stable');
 end
 
 function modes = env_mode_list(names, defaultModes)
