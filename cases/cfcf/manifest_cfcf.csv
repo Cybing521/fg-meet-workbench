@@ -1,0 +1,11 @@
+fg_mode,vf0,input_file
+U,0.1,cases/cfcf/Thermal_CFCF_U_Vf0.1-30x30-10layer.txt
+U,0.3,cases/cfcf/Thermal_CFCF_U_Vf0.3-30x30-10layer.txt
+U,0.5,cases/cfcf/Thermal_CFCF_U_Vf0.5-30x30-10layer.txt
+U,0.7,cases/cfcf/Thermal_CFCF_U_Vf0.7-30x30-10layer.txt
+U,0.9,cases/cfcf/Thermal_CFCF_U_Vf0.9-30x30-10layer.txt
+X,0.1,cases/cfcf/Thermal_CFCF_X_Vf0.1-30x30-10layer.txt
+X,0.3,cases/cfcf/Thermal_CFCF_X_Vf0.3-30x30-10layer.txt
+X,0.5,cases/cfcf/Thermal_CFCF_X_Vf0.5-30x30-10layer.txt
+X,0.7,cases/cfcf/Thermal_CFCF_X_Vf0.7-30x30-10layer.txt
+X,0.9,cases/cfcf/Thermal_CFCF_X_Vf0.9-30x30-10layer.txt
