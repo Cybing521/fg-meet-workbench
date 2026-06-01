@@ -9,6 +9,16 @@ output/
 matlab/**/CurrentComp/
 matlab/**/*.fig
 
+# LaTeX build artifacts
+latex-report/*.aux
+latex-report/*.log
+latex-report/*.out
+latex-report/*.toc
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.toc
+
 # COMSOL exports (regenerable)
 comsol/export/
 

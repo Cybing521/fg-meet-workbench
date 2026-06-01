@@ -48,7 +48,7 @@
 - COMSOL 使用 10 层 CSV 分域材料 + 扫掠 quad/hex 网格（mesh size 4，每个材料层 7 个扫掠单元）替代自由四面体网格。
 - `ForceArea` 与 `FollowerPressure` 在该线性小变形算例中结果一致；偏差主要来自网格/单元类型一致性。
 
-后续非 U 分布算例可复用 `FG_COMSOL_LAYER_CSV` 指向对应 `comsol/export/*_layers.csv`。
+后续非 U、CFCF 和含孔隙验证均已整理为手工验证计划，见 `comsol/docs/manual-validation-workflow.md` 与 `comsol/results/manual_validation_plan.csv`。这些工况的材料 CSV 已就绪，剩余工作是在 COMSOL GUI 中替换 10 层材料参数、设置对应边界条件并记录 15 点位移对比。
 
 批处理运行前，COMSOL Security Preferences 需要允许方法/Java 库访问文件系统（`File system access = All files`），否则 `.class` 批处理会在 recovery 文件写入阶段失败。
 
@@ -60,12 +60,14 @@ comsol/
 ├── docs/
 │   ├── equivalent-modeling.md   # 等效热耦合说明
 │   ├── equivalent-loads.md      # 电/磁载荷在 COMSOL 中的处理
-│   └── mesh-convergence.md      # 网格收敛记录表
+│   ├── mesh-convergence.md      # 网格收敛记录表
+│   └── manual-validation-workflow.md
 ├── data/
 │   └── validation_points.csv    # 对比点坐标
 ├── export/                      # 脚本导出的分层材料（gitignore 可选）
 └── results/
-    └── validation_log_template.csv
+    ├── validation_log_template.csv
+    └── manual_validation_plan.csv
 ```
 
 ## 与 MATLAB 的分工（摘要）

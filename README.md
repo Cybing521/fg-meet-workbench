@@ -266,7 +266,24 @@ python tools\export_nonU_comsol_layers.py
 python tools\export_porous_comsol_layers.py --validation-set
 ```
 
-输出目录为 `comsol/export/nonU/` 和 `comsol/export/porous/`，可供后续 `FG_COMSOL_LAYER_CSV` 指向对应分层材料表继续做 COMSOL 对照。
+输出目录为 `comsol/export/nonU/` 和 `comsol/export/porous/`。CFCF 代表工况也已导出 `comsol/export/Thermal_CFCF_X_Vf0.1-30x30-10layer_layers.csv`。剩余 COMSOL 验证属于 GUI 手动操作，流程见 `comsol/docs/manual-validation-workflow.md`，目标清单和 MATLAB 参考值见 `comsol/results/manual_validation_plan.csv`。
+
+当前 CSV-ready 验证目标：
+
+| 阶段 | 工况 | MATLAB 中心挠度 mm |
+|------|------|--------------------|
+| 5.1 | V/Vf0=0.6/CFFF/elastic | -1.620839 |
+| 5.1 | X/Vf0=0.6/CFFF/elastic | -1.810358 |
+| 5.4 | X/Vf0=0.1/CFCF/elastic | -0.072521 |
+| 6.3 | U/Vf0=0.5/e0=0.2/Even/CFFF/elastic | -2.454739 |
+| 6.3 | U/Vf0=0.5/e0=0.3/Even/CFFF/elastic | -2.833957 |
+| 6.3 | X/Vf0=0.5/e0=0.2/Even/CFFF/elastic | -2.165514 |
+
+---
+
+## 论文撰写工作区
+
+阶段 7 已建立 `paper/` 目录，包含论文主稿骨架 `paper/main.tex`、数据清单与写作顺序 `paper/README.md`、图表归档目录 `paper/figures/` 和 `paper/tables/`。当前数据层已经足以启动 SCI 四区论文初稿；剩余 COMSOL 手工验证可作为 Section 4 的补充行追加。
 
 ---
 

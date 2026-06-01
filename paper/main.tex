@@ -1,0 +1,62 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\title{Parametric simulation of porous FG-MEE plates under thermo-magneto-electro-elastic full coupling}
+\author{Draft workspace}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This draft studies functionally graded magneto-electro-elastic plates under fully coupled thermo-magneto-electro-elastic loading. The current data package covers non-porous CFFF static responses, CFCF boundary comparisons, porous static sensitivity, dynamic representative cases, and COMSOL validation. The manuscript will use these results to identify how volume fraction, grading profile, porosity level, porosity distribution, and boundary restraint affect deflection, induced temperature difference, magnetoelectric efficiency, and transient response.
+\end{abstract}
+
+\section{Introduction}
+
+Introduce FG-MEE plate applications, the need for coupled thermal-magnetic-electric-elastic analysis, and the gap around porosity-aware parametric simulation.
+
+\section{Theoretical formulation}
+
+Describe the MEE constitutive relation, through-thickness functionally graded material law, porosity correction models, and plate displacement assumptions.
+
+\section{Finite element implementation}
+
+Summarize the eight-node plate/shell discretization, layer-wise material integration, coupled mechanical/electric/magnetic/thermal degrees of freedom, and static/dynamic solution procedures.
+
+\section{Validation}
+
+Report the completed U/Vf0=0.6/CFFF COMSOL validation and reserve rows for the CSV-ready manual checks listed in \texttt{comsol/results/manual\_validation\_plan.csv}.
+
+\begin{table}[htbp]
+\centering
+\caption{Current validation status}
+\begin{tabular}{llll}
+\toprule
+Target & Boundary & Status & Reference \\
+\midrule
+U/Vf0=0.6 & CFFF & Passed & 15-point max error 4.927\% \\
+V/X/Vf0=0.6 & CFFF & CSV ready & Phase 5.1 manual check \\
+X/Vf0=0.1 & CFCF & CSV ready & Phase 5.4 manual check \\
+Porous representatives & CFFF & CSV ready & Phase 6.3 manual check \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Static parametric results}
+
+Use the 135-row non-porous CFFF sweep, 30-row CFCF comparison, and 390-row porous sweep to discuss deflection, induced temperature span, and magnetoelectric efficiency.
+
+\section{Dynamic representative results}
+
+Compare non-porous FG dynamic representatives, 30x30 modal reduction, damping/mode sensitivity, and the porous U/Vf0=0.5/e0=0.2/Even Newmark pilot.
+
+\section{Conclusions}
+
+Summarize the governing design rules and note that remaining COMSOL manual rows are validation extensions rather than blockers for the first manuscript draft.
+
+\end{document}
