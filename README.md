@@ -228,6 +228,48 @@ python tools\build_porous_static_report.py
 
 ---
 
+## CFCF 静力边界扩展
+
+已补充版本一多边界条件数据，跑通 CFCF / 30x30 / 10 层静力扫描。参数空间为 U/X 两种 FG 分布、Vf0=0.1/0.3/0.5/0.7/0.9、elastic/electro/magneto 三载荷，共 30 行结果。
+
+```powershell
+python tools\generate_cfcf_cases.py
+& 'D:\MATLAB\R2026a\bin\matlab.exe' -batch "run_batch_static_cfcf"
+python tools\build_cfcf_static_report.py
+```
+
+结果文件为 `output/results_static_cfcf.csv`，报告整理在 `reports/2026-06-01-cfcf-static/README.md`。当前结论：CFCF 相对 CFFF 显著抑制中心挠度，elastic 工况中最强抑制为 X/Vf0=0.1，CFCF/CFFF 挠度比 0.055；CFCF 下最大 elastic 中心挠度为 U/Vf0=0.9，|w_center|=0.1764 mm。
+
+---
+
+## 含孔隙动力代表算例
+
+已补充 Phase 6.4 的含孔隙 10x10 完整 Newmark pilot，工况为 U / Vf0=0.5 / e0=0.2 / Even / CFFF / Case A。
+
+```powershell
+python tools\generate_porous_dynamic_case.py U 0.5 0.2 Even
+$env:FG_POROUS_DYN_GRID='10x10'
+& 'D:\MATLAB\R2026a\bin\matlab.exe' -batch "run_dynamic_porous_representative"
+python tools\build_porous_dynamic_report.py
+```
+
+输出 `output/dynamic_porous_U_Vf50_e20_Even_10x10_summary.csv` 和 `output/dynamic_porous_U_Vf50_e20_Even_10x10_timeseries.csv`，报告整理在 `reports/2026-06-01-porous-dynamic/README.md`。当前结果：静力中心挠度 -2.4558 mm，动态峰值 -5.2218 mm，峰值时间 27.80 ms，超调比 2.126，一阶频率 54.62 Hz。
+
+---
+
+## COMSOL 分层导出补充
+
+已补充非 U 分布与含孔隙代表工况的 COMSOL 10 层材料 CSV 导出：
+
+```powershell
+python tools\export_nonU_comsol_layers.py
+python tools\export_porous_comsol_layers.py --validation-set
+```
+
+输出目录为 `comsol/export/nonU/` 和 `comsol/export/porous/`，可供后续 `FG_COMSOL_LAYER_CSV` 指向对应分层材料表继续做 COMSOL 对照。
+
+---
+
 ## 设计参数
 
 | 参数 | 取值 |
@@ -235,7 +277,7 @@ python tools\build_porous_static_report.py
 | 体积分数 Vf0 | 0.1–0.9（BaTiO3 : CoFe2O4） |
 | FG 分布 | U / V / X / O / P（幂律默认 n=2） |
 | 几何 | 300×300×6 mm 方板 |
-| 边界 | 主算例 CFFF |
+| 边界 | 主算例 CFFF，补充 CFCF 对照 |
 
 ---
 

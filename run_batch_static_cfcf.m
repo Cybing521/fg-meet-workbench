@@ -6,6 +6,10 @@
 %    cd('path/to/fg-meet-workbench');
 %    setup_paths;
 %    run('run_batch_static_cfcf.m');
+%
+%  Environment variables:
+%    FG_CFCF_ROWS  - restrict to specific manifest rows (e.g. '1:5')
+%    FG_CFCF_OUT   - output CSV name (default: results_static_cfcf.csv)
 
 clear; clc;
 paths = setup_paths();
@@ -26,6 +30,12 @@ end
 
 %% Read manifest
 T = readtable(manifest, 'TextType', 'string');
+rowSpec = getenv('FG_CFCF_ROWS');
+if ~isempty(rowSpec)
+    rowIdx = parse_row_spec(rowSpec, height(T));
+    T = T(rowIdx, :);
+    fprintf('Restricting batch to manifest rows: %s (%d cases)\n', rowSpec, height(T));
+end
 fprintf('CFCF batch: %d cases\n', height(T));
 
 %% Setup output
@@ -36,7 +46,11 @@ varNames = {'case_id', 'fg_mode', 'vf0', 'load_case', 'input_file', ...
     'volt', 'magnetic', 'status', 'message', 'output_mat'};
 rows = {};
 
-outCsv = fullfile(paths.output, 'results_static_cfcf.csv');
+outName = getenv('FG_CFCF_OUT');
+if isempty(outName)
+    outName = 'results_static_cfcf.csv';
+end
+outCsv = fullfile(paths.output, outName);
 completed = containers.Map('KeyType', 'char', 'ValueType', 'logical');
 if isfile(outCsv)
     existing = readtable(outCsv, 'TextType', 'string');
@@ -51,6 +65,7 @@ end
 
 %% Main loop
 for i = 1:height(T)
+    clear run_meet_static
     fgMode = char(T.fg_mode(i));
     vf0 = T.vf0(i);
     inputFile = char(T.input_file(i));
@@ -107,4 +122,21 @@ function rows = drop_case_rows(rows, caseId)
         keep(i) = ~strcmp(char(rows{i, 1}), caseId);
     end
     rows = rows(keep, :);
+end
+
+function rowIdx = parse_row_spec(rowSpec, nRows)
+    rowSpec = strtrim(char(rowSpec));
+    if contains(rowSpec, ':')
+        parts = strsplit(rowSpec, ':');
+        first = str2double(parts{1});
+        last = str2double(parts{2});
+        rowIdx = first:last;
+    else
+        parts = strsplit(rowSpec, ',');
+        rowIdx = str2double(parts);
+    end
+    if any(isnan(rowIdx)) || any(rowIdx < 1) || any(rowIdx > nRows)
+        error('parse_row_spec:Bad', 'Bad FG_CFCF_ROWS: %s', rowSpec);
+    end
+    rowIdx = unique(round(rowIdx), 'stable');
 end

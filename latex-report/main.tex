@@ -555,6 +555,42 @@ FG分布 & 2 & U/X \\
 \label{fig:porous-ranking}
 \end{figure}
 
+\subsection{多边界与含孔隙动力补充}
+
+在最新补充实验中，已完成 CFCF 边界条件下的 $30\times30$ 静力扫描，以及含孔隙代表工况的 $10\times10$ 完整 Newmark 动力 pilot。
+
+\begin{table}[H]
+\centering
+\caption{新增补充实验概览}
+\label{tab:cfcf-porous-dynamic}
+\begin{tabular}{p{4.0cm}p{4.0cm}p{5.0cm}}
+\toprule
+\textbf{实验} & \textbf{数据规模} & \textbf{关键结果} \\
+\midrule
+CFCF静力扫描 & U/X $\times$ 5个$V_{f0}$ $\times$ 3载荷，共30行 & 结果全部成功；elastic 中最强边界抑制为 X/$V_{f0}=0.1$，CFCF/CFFF 挠度比 0.055 \\
+含孔隙动力代表 & U/$V_{f0}=0.5$/$e_0=0.2$/Even，$10\times10$，401步 & 静态中心挠度 $-2.4558$\,mm；动力峰值 $-5.2218$\,mm；超调比 2.126；一阶频率 54.62\,Hz \\
+COMSOL分层导出 & 非U分布2组、含孔隙3组代表CSV & 已生成 \texttt{comsol/export/nonU/} 与 \texttt{comsol/export/porous/}，可直接供后续COMSOL验证调用 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../reports/2026-06-01-cfcf-static/figures/04_X_cfcf_over_cfff_w_ratio.png}
+\caption{X分布CFCF/CFFF挠度比}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{../reports/2026-06-01-porous-dynamic/figures/02_porous_dynamic_center_timeseries.png}
+\caption{含孔隙代表工况中心挠度时程}
+\end{subfigure}
+\caption{新增边界条件和含孔隙动力结果}
+\label{fig:cfcf-porous-dynamic}
+\end{figure}
+
 % ============================================================
 \section{总结与下一步计划}
 % ============================================================
@@ -577,6 +613,8 @@ COMSOL 独立验证 & \textcolor{passgreen}{完成} & 最大误差4.93\% \\
 30$\times$30 模态降阶 & \textcolor{passgreen}{完成} & 峰值$-4.43$\,mm \\
 模态敏感性分析 & \textcolor{passgreen}{完成} & 8阶已收敛 \\
 含孔隙静力扫描 & \textcolor{passgreen}{完成} & 130算例/390行结果 \\
+CFCF边界补充 & \textcolor{passgreen}{完成} & U/X共30行结果 \\
+含孔隙动力pilot & \textcolor{passgreen}{完成} & 10$\times$10 Newmark 401步 \\
 \midrule
 非U分布COMSOL验证 & \textcolor{warnblue}{待推进} & 脚本已支持 \\
 论文 main.tex & \textcolor{warnblue}{待推进} & 数据已齐备 \\
@@ -590,7 +628,7 @@ COMSOL 独立验证 & \textcolor{passgreen}{完成} & 最大误差4.93\% \\
 \begin{enumerate}
 \item 选择 1--2 个含孔隙代表工况进行 COMSOL 分层验证，优先覆盖 Even-$e_0=0.4$ 和 Uneven-$e_0=0.2$；
 \item 建立论文 \texttt{paper/main.tex} 目录，将含孔隙挠度、温差和磁电效率规律整理为正式论文图；
-\item 补充含孔隙动力代表算例，建议采用 $e_0=0.2$ / U / $V_{f0}=0.5$；
+\item 将含孔隙动力从 $10\times10$ Newmark pilot 推进到 $30\times30$ 模态降阶，并比较孔隙引起的频率退化；
 \item 可选：夜间长时程 30$\times$30 Newmark 对照验证模态降阶精度。
 \end{enumerate}
 

@@ -8,6 +8,7 @@
 %   FG_POROUS_DYN_VF       volume fraction, default 0.5
 %   FG_POROUS_DYN_E0       porosity parameter, default 0.2
 %   FG_POROUS_DYN_PMODE    porosity mode (1=Even,2=Uneven,3=LogUneven), default 1
+%   FG_POROUS_DYN_GRID     10x10 or 30x30, default 10x10
 %   FG_POROUS_DYN_DT       time step, default 1e-4
 %   FG_POROUS_DYN_TTOTAL   total time, default 4e-2
 
@@ -21,6 +22,8 @@ if isempty(fgMode), fgMode = 'U'; end
 vf0 = env_number('FG_POROUS_DYN_VF', 0.5);
 e0 = env_number('FG_POROUS_DYN_E0', 0.2);
 poroMode = env_number('FG_POROUS_DYN_PMODE', 1);
+gridTag = char(getenv('FG_POROUS_DYN_GRID'));
+if isempty(gridTag), gridTag = '10x10'; end
 dt = env_number('FG_POROUS_DYN_DT', 1e-4);
 tTotal = env_number('FG_POROUS_DYN_TTOTAL', 4e-2);
 loadScale = -15000;
@@ -32,26 +35,42 @@ e0Tag = sprintf('e%02d', round(e0 * 100));
 tag = sprintf('dynamic_porous_%s_%s_%s_%s', fgMode, vfTag, e0Tag, poroName);
 
 %% Locate input file
-caseName = sprintf('Porous_CFFF_%s_Vf%.1f_%s_%s-30x30-10layer.txt', ...
-    fgMode, vf0, e0Tag, poroName);
+caseName = sprintf('Porous_CFFF_%s_Vf%.1f_%s_%s-%s-10layer.txt', ...
+    fgMode, vf0, e0Tag, poroName, gridTag);
 caseFile = fullfile(paths.workbench, 'cases', 'porous', caseName);
 
-% If 30x30 porous file doesn't exist, try 10x10
+if strcmpi(gridTag, '10x10') && ~isfile(caseFile)
+    generator = fullfile(paths.tools, 'generate_porous_dynamic_case.py');
+    status = system(sprintf('python "%s" %s %.12g %.12g %s', ...
+        generator, fgMode, vf0, e0, poroName));
+    if status ~= 0
+        error('run_dynamic_porous:GenerateFailed', ...
+            'Cannot generate 10x10 porous dynamic case.');
+    end
+end
+
+% If the requested grid doesn't exist, fall back to the other available grid.
 if ~isfile(caseFile)
-    caseName10 = sprintf('Porous_CFFF_%s_Vf%.1f_%s_%s-10x10-10layer.txt', ...
-        fgMode, vf0, e0Tag, poroName);
-    caseFile10 = fullfile(paths.workbench, 'cases', 'porous', caseName10);
-    if isfile(caseFile10)
-        caseFile = caseFile10;
-        tag = [tag '_10x10'];
+    altGrid = '30x30';
+    if strcmpi(gridTag, '30x30')
+        altGrid = '10x10';
+    end
+    altName = sprintf('Porous_CFFF_%s_Vf%.1f_%s_%s-%s-10layer.txt', ...
+        fgMode, vf0, e0Tag, poroName, altGrid);
+    altFile = fullfile(paths.workbench, 'cases', 'porous', altName);
+    if isfile(altFile)
+        caseFile = altFile;
+        gridTag = altGrid;
     else
         error('run_dynamic_porous:NoInput', ...
             'Input file not found: %s\nRun generate_porous_cases.py first.', caseFile);
     end
 end
+tag = sprintf('%s_%s', tag, gridTag);
 
 fprintf('=== Porous Dynamic Representative ===\n');
-fprintf('FG=%s, Vf0=%.1f, e0=%.1f, Porosity=%s\n', fgMode, vf0, e0, poroName);
+fprintf('FG=%s, Vf0=%.1f, e0=%.1f, Porosity=%s, Grid=%s\n', ...
+    fgMode, vf0, e0, poroName, gridTag);
 fprintf('Input: %s\n', caseFile);
 fprintf('dt=%.6g s, total=%.6g s\n', dt, tTotal);
 
@@ -173,3 +192,84 @@ if strcmp(freqStatus, 'ok')
 end
 fprintf('\nTimeseries: %s\n', outCsv);
 fprintf('Summary:    %s\n', outSummary);
+
+function value = env_number(name, defaultValue)
+    raw = getenv(name);
+    if isempty(raw)
+        value = defaultValue;
+        return;
+    end
+    value = str2double(raw);
+    if isnan(value)
+        error('run_dynamic_porous:BadEnv', '%s must be numeric, got: %s', name, raw);
+    end
+end
+
+function nLayer = count_material_layers(caseFile)
+    nLayer = 0;
+    raw = fileread(caseFile);
+    i0 = strfind(raw, 'MATERIAL START');
+    i1 = strfind(raw, 'MATERIAL END');
+    if isempty(i0) || isempty(i1)
+        return;
+    end
+    block = raw(i0(1) + length('MATERIAL START'):i1(1) - 1);
+    lines = splitlines(block);
+    for i = 1:numel(lines)
+        if ~isempty(regexp(strtrim(lines{i}), '^\d', 'once'))
+            nLayer = nLayer + 1;
+        end
+    end
+end
+
+function [nodeIndex, nodeId, coord] = find_nearest_node(Node, targetCoord)
+    diff = Node(:, 2:4) - targetCoord;
+    [~, nodeIndex] = min(sum(diff .^ 2, 2));
+    nodeId = Node(nodeIndex, 1);
+    coord = Node(nodeIndex, 2:4);
+end
+
+function reducedDof = find_reduced_mechanical_dof(Node, nodeIndex, localDof)
+    dofPerNode = 5;
+    dofFlagStart = 5;
+    reducedDof = 0;
+    for ni = 1:nodeIndex
+        for di = 1:dofPerNode
+            if Node(ni, dofFlagStart + di - 1) == 0
+                reducedDof = reducedDof + 1;
+            end
+            if ni == nodeIndex && di == localDof
+                if Node(ni, dofFlagStart + di - 1) ~= 0
+                    error('run_dynamic_porous:ConstrainedCenter', ...
+                        'Requested center DOF is constrained.');
+                end
+                return;
+            end
+        end
+    end
+end
+
+function layerTime = average_layers_over_time(sensorTime, nLayer)
+    layerTime = nan(size(sensorTime, 1), nLayer);
+    for i = 1:nLayer
+        layerTime(:, i) = mean(sensorTime(:, i:nLayer:end), 2);
+    end
+end
+
+function [freqHz, status] = estimate_modes(K, M, nModes)
+    freqHz = nan(1, nModes);
+    status = "not_run";
+    try
+        opts = struct();
+        opts.disp = 0;
+        opts.isreal = true;
+        [~, D] = eigs(K, M, nModes, 'smallestabs', opts);
+        vals = sort(real(diag(D)), 'ascend');
+        vals = vals(vals > 0);
+        n = min(nModes, numel(vals));
+        freqHz(1:n) = sqrt(vals(1:n)) / (2 * pi);
+        status = "ok";
+    catch ME
+        status = "failed: " + string(ME.message);
+    end
+end
