@@ -30,19 +30,19 @@ Summarize the eight-node plate/shell discretization, layer-wise material integra
 
 \section{Validation}
 
-Report the completed U/Vf0=0.6/CFFF COMSOL validation and reserve rows for the CSV-ready manual checks listed in \texttt{comsol/results/manual\_validation\_plan.csv}.
+Report the completed U/Vf0=0.6/CFFF COMSOL validation, the new non-U and CFCF passing rows, and the porous COMSOL deviation listed in the generated validation summary.
 
 \begin{table}[htbp]
 \centering
 \caption{Current validation status}
-\begin{tabular}{llll}
+\begin{tabular}{p{32mm}p{18mm}p{24mm}p{65mm}}
 \toprule
 Target & Boundary & Status & Reference \\
 \midrule
 U/Vf0=0.6 & CFFF & Passed & 15-point max error 4.927\% \\
-V/X/Vf0=0.6 & CFFF & CSV ready & Phase 5.1 manual check \\
-X/Vf0=0.1 & CFCF & CSV ready & Phase 5.4 manual check \\
-Porous representatives & CFFF & CSV ready & Phase 6.3 manual check \\
+V/X/Vf0=0.6 & CFFF & Passed & 15-point max error below 4.20\% \\
+X/Vf0=0.1 & CFCF & Passed & refined mesh max error 3.831\% \\
+Porous representatives & CFFF & Needs review & center error 4.349--5.598\%; 15-point max 5.434--6.594\% \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -25,6 +25,10 @@ public class RunElasticCfffValidation {
     private static final boolean LAYERED_GEOMETRY = boolEnv("FG_COMSOL_LAYERED", false);
     private static final String LAYER_CSV = env("FG_COMSOL_LAYER_CSV",
         "G:\\fg-meet-workbench\\comsol\\export\\Thermal_CFFF_U_Vf0.6-30x30-10layer_layers.csv");
+    private static final String CASE_ID = env("FG_COMSOL_CASE_ID", "U_Vf06_elastic");
+    private static final String FG_MODE = env("FG_COMSOL_FG_MODE", "U");
+    private static final String VF0 = env("FG_COMSOL_VF0", "0.6");
+    private static final String BC = env("FG_COMSOL_BC", "CFFF").toUpperCase();
 
     private static final double[][] POINTS = new double[][] {
         {0.050, 0.050, 0.0},
@@ -83,16 +87,12 @@ public class RunElasticCfffValidation {
         }
         model.component("comp1").geom("geom1").run();
 
-        model.component("comp1").selection().create("sel_fixed", "Box");
-        model.component("comp1").selection("sel_fixed").label("CFFF fixed edge x=0");
-        model.component("comp1").selection("sel_fixed").set("entitydim", "2");
-        model.component("comp1").selection("sel_fixed").set("condition", "allvertices");
-        model.component("comp1").selection("sel_fixed").set("xmin", "-1e-9");
-        model.component("comp1").selection("sel_fixed").set("xmax", "1e-9");
-        model.component("comp1").selection("sel_fixed").set("ymin", "-1e-9");
-        model.component("comp1").selection("sel_fixed").set("ymax", "0.300000001");
-        model.component("comp1").selection("sel_fixed").set("zmin", "-0.003000001");
-        model.component("comp1").selection("sel_fixed").set("zmax", "0.003000001");
+        createFixedEdgeSelection(model, "sel_fixed_x0", "Fixed edge x=0", "-1e-9", "1e-9");
+        if ("CFCF".equals(BC)) {
+            createFixedEdgeSelection(model, "sel_fixed_xL", "Fixed edge x=L", "0.299999999", "0.300000001");
+        } else if (!"CFFF".equals(BC)) {
+            throw new IllegalArgumentException("Unsupported FG_COMSOL_BC: " + BC + " (use CFFF or CFCF)");
+        }
 
         model.component("comp1").selection().create("sel_top", "Box");
         model.component("comp1").selection("sel_top").label("Top pressure face");
@@ -105,14 +105,18 @@ public class RunElasticCfffValidation {
         model.component("comp1").selection("sel_top").set("zmin", "0.002999999");
         model.component("comp1").selection("sel_top").set("zmax", "0.003000001");
 
-        int fixedBoundaryCount = model.component("comp1").selection("sel_fixed").entities(2).length;
+        int fixedBoundaryCount = model.component("comp1").selection("sel_fixed_x0").entities(2).length;
+        if ("CFCF".equals(BC)) {
+            fixedBoundaryCount += model.component("comp1").selection("sel_fixed_xL").entities(2).length;
+        }
         int topBoundaryCount = model.component("comp1").selection("sel_top").entities(2).length;
         System.out.println("SELECTION_COUNTS,fixed_boundary_count," + fixedBoundaryCount
             + ",top_boundary_count," + topBoundaryCount);
         System.out.println("RUN_CONFIG,run_tag," + displayRunTag()
             + ",mesh_mode," + MESH_MODE + ",mesh_size," + MESH_SIZE
             + ",sweep_layers," + SWEEP_LAYERS + ",load_mode," + LOAD_MODE
-            + ",layered_geometry," + LAYERED_GEOMETRY + ",layer_csv," + LAYER_CSV);
+            + ",layered_geometry," + LAYERED_GEOMETRY + ",layer_csv," + LAYER_CSV
+            + ",case_id," + CASE_ID + ",bc," + BC);
 
         if (LAYERED_GEOMETRY) {
             createLayerMaterials(model, layers);
@@ -126,7 +130,11 @@ public class RunElasticCfffValidation {
 
         model.component("comp1").physics().create("solid", "SolidMechanics", "geom1");
         model.component("comp1").physics("solid").create("fix1", "Fixed", 2);
-        model.component("comp1").physics("solid").feature("fix1").selection().named("sel_fixed");
+        model.component("comp1").physics("solid").feature("fix1").selection().named("sel_fixed_x0");
+        if ("CFCF".equals(BC)) {
+            model.component("comp1").physics("solid").create("fix2", "Fixed", 2);
+            model.component("comp1").physics("solid").feature("fix2").selection().named("sel_fixed_xL");
+        }
         model.component("comp1").physics("solid").create("bndl1", "BoundaryLoad", 2);
         model.component("comp1").physics("solid").feature("bndl1").selection().named("sel_top");
         if ("forcearea".equals(LOAD_MODE)) {
@@ -179,7 +187,7 @@ public class RunElasticCfffValidation {
         writeCsvHeaderAndRows(values);
         for (int i = 0; i < POINTS.length; i++) {
             double w = valueAtPoint(values, i);
-            System.out.println("U_Vf06_elastic,U,0.6,elastic,CFFF,p" + (i + 1) + ","
+            System.out.println(CASE_ID + "," + FG_MODE + "," + VF0 + ",elastic," + BC + ",p" + (i + 1) + ","
                 + POINTS[i][0] + "," + POINTS[i][1] + "," + POINTS[i][2] + ","
                 + w + "," + (1000.0 * w));
         }
@@ -207,7 +215,7 @@ public class RunElasticCfffValidation {
             writer.println("case_id,fg_mode,vf0,load_case,bc,point_id,x_m,y_m,z_m,comsol_w_m,comsol_w_mm");
             for (int i = 0; i < POINTS.length; i++) {
                 double w = valueAtPoint(values, i);
-                writer.println("U_Vf06_elastic,U,0.6,elastic,CFFF,p" + (i + 1) + ","
+                writer.println(CASE_ID + "," + FG_MODE + "," + VF0 + ",elastic," + BC + ",p" + (i + 1) + ","
                     + POINTS[i][0] + "," + POINTS[i][1] + "," + POINTS[i][2] + ","
                     + w + "," + (1000.0 * w));
             }
@@ -254,9 +262,9 @@ public class RunElasticCfffValidation {
 
     private static String baseName() {
         if (RUN_TAG.length() == 0) {
-            return "comsol_elastic_cfff_U_Vf06";
+            return "comsol_elastic_validation_" + safeName(CASE_ID);
         }
-        return "comsol_elastic_cfff_U_Vf06_" + RUN_TAG;
+        return "comsol_elastic_validation_" + safeName(RUN_TAG);
     }
 
     private static String modelLabel() {
@@ -265,6 +273,23 @@ public class RunElasticCfffValidation {
 
     private static String csvPath() {
         return "G:\\fg-meet-workbench\\output\\" + baseName() + "_points.csv";
+    }
+
+    private static void createFixedEdgeSelection(Model model, String tag, String label, String xmin, String xmax) {
+        model.component("comp1").selection().create(tag, "Box");
+        model.component("comp1").selection(tag).label(label);
+        model.component("comp1").selection(tag).set("entitydim", "2");
+        model.component("comp1").selection(tag).set("condition", "allvertices");
+        model.component("comp1").selection(tag).set("xmin", xmin);
+        model.component("comp1").selection(tag).set("xmax", xmax);
+        model.component("comp1").selection(tag).set("ymin", "-1e-9");
+        model.component("comp1").selection(tag).set("ymax", "0.300000001");
+        model.component("comp1").selection(tag).set("zmin", "-0.003000001");
+        model.component("comp1").selection(tag).set("zmax", "0.003000001");
+    }
+
+    private static String safeName(String value) {
+        return value.replaceAll("[^A-Za-z0-9_\\-]+", "_");
     }
 
     private static void createLayerMaterials(Model model, double[][] layers) {
@@ -315,7 +340,7 @@ public class RunElasticCfffValidation {
                     continue;
                 }
                 String[] parts = line.split(",");
-                if (parts.length < 27) {
+                if (parts.length < 26) {
                     throw new IOException("Bad layer CSV row: " + line);
                 }
                 layers[index][0] = Double.parseDouble(parts[0].trim());

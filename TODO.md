@@ -59,11 +59,11 @@
 > 目标：把版本一（纯 FG 无孔隙）的数据做完整，为论文 Section 4/5 提供充足支撑
 
 - [x] 导出非 U 分布 COMSOL 10 层材料 CSV：`comsol/export/nonU/FG_V_Vf0.6_layers.csv`、`FG_X_Vf0.6_layers.csv`
-- [ ] 5.1 非 U 分布 COMSOL 手工验证：V/X 两组 10 层 CSV 已就绪，见 `comsol/results/manual_validation_plan.csv`
+- [x] 5.1 非 U 分布 COMSOL 验证：V/X 两组已由 COMSOL batch 跑通，15 点最大误差分别为 4.190% / 4.060%
 - [x] 补充 CFCF 边界条件：生成 U/X 两种 FG × 5 个 Vf，跑完三载荷 30 行静力结果
 - [x] 整理 CFCF 结果：`output/results_static_cfcf.csv` 与 `reports/2026-06-01-cfcf-static/`
 - [x] 导出 CFCF 代表工况材料 CSV：`comsol/export/Thermal_CFCF_X_Vf0.1-30x30-10layer_layers.csv`
-- [ ] 5.4 CFCF 的 COMSOL 手工对照：X/Vf0=0.1/elastic，需在 GUI 中设置 CFCF 边界
+- [x] 5.4 CFCF 的 COMSOL 对照：X/Vf0=0.1/elastic，mesh3/sweep10 下中心和15点最大误差均为 3.831%
 - [ ] 整理 `汇报格式-MatlabComsol仿真记录.docx` 中已有的多边界条件逐层温差数据，纳入仓库 `comsol/results/`
 - [ ] 可选：阻尼比敏感性（0%/0.5%/0.8%/1.5%），为动力部分论文图补充
 
@@ -93,7 +93,7 @@
 
 - [ ] 含孔隙分层模型的 COMSOL 建模（只需修改各层材料参数值）
 - [x] 导出含孔隙 COMSOL 代表工况材料 CSV：`comsol/export/porous/`
-- [ ] 6.3 选取 2-3 个代表工况手工对比，误差 < 5%；目标清单见 `comsol/results/manual_validation_plan.csv`
+- [ ] 6.3 含孔隙 COMSOL 验证模型复核：已跑 3 个代表工况；中心点 2/3 接近或低于 5%，但15点最大误差为 5.434%–6.594%，需复核含孔隙 COMSOL 等效模型
 
 ### 6.4 含孔隙动力代表算例
 
@@ -137,6 +137,6 @@
 | 3 COMSOL验证 | ✅ 完成 | U/Vf0.6/CFFF，误差<5% |
 | 4 动力算例 | ✅ 完成 | 模态降阶+敏感性 |
 | 4.5 汇报材料 | ✅ 完成 | LaTeX+Word+图表 |
-| 5 版本一收尾 | 🟡 进行中 | CFCF静力已完成，非U/COMSOL待验证 |
-| 6 含孔隙扩展 | 🟡 进行中 | 静力390行+10x10动力pilot已完成 |
+| 5 版本一收尾 | ✅ 基本完成 | 非U与CFCF COMSOL验证已通过 |
+| 6 含孔隙扩展 | 🟡 进行中 | 静力390行+10x10动力pilot已完成，COMSOL模型需复核 |
 | 7 论文撰写 | 🟡 进行中 | paper骨架和数据映射已建立 |

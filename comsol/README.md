@@ -48,7 +48,7 @@
 - COMSOL 使用 10 层 CSV 分域材料 + 扫掠 quad/hex 网格（mesh size 4，每个材料层 7 个扫掠单元）替代自由四面体网格。
 - `ForceArea` 与 `FollowerPressure` 在该线性小变形算例中结果一致；偏差主要来自网格/单元类型一致性。
 
-后续非 U、CFCF 和含孔隙验证均已整理为手工验证计划，见 `comsol/docs/manual-validation-workflow.md` 与 `comsol/results/manual_validation_plan.csv`。这些工况的材料 CSV 已就绪，剩余工作是在 COMSOL GUI 中替换 10 层材料参数、设置对应边界条件并记录 15 点位移对比。
+后续非 U、CFCF 和含孔隙验证已通过 `comsolbatch` 实际求解，见 `reports/2026-06-01-comsol-validation/README.md`、`comsol/results/manual_validation_plan.csv` 和 `comsol/results/validation_summary_generated.csv`。其中非 U 与 CFCF 工况通过 5% 误差标准；含孔隙代表工况已求解，但当前 3D solid 等效模型的 15 点最大误差为 5.434%--6.594%，需要继续复核含孔隙 COMSOL 建模口径。
 
 批处理运行前，COMSOL Security Preferences 需要允许方法/Java 库访问文件系统（`File system access = All files`），否则 `.class` 批处理会在 recovery 文件写入阶段失败。
 

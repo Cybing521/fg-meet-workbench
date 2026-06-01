@@ -1,6 +1,6 @@
-# Remaining COMSOL manual validation workflow
+# COMSOL validation workflow
 
-This how-to records the remaining GUI-based COMSOL checks for Phase 5.1, Phase 5.4, and Phase 6.3. The MATLAB data, layer CSV files, and reference values are already prepared; the remaining work is to assign the 10 material layers in the validated COMSOL model, solve the representative cases, and record the 15-point displacement comparison.
+This how-to records the COMSOL validation workflow for Phase 5.1, Phase 5.4, and Phase 6.3. The validation has now been run through `comsolbatch` for all listed targets; the GUI steps remain useful only when a visual recording or manual model inspection is needed.
 
 ## Scope
 
@@ -8,11 +8,11 @@ Use this workflow for:
 
 | Phase | Target | Status |
 |------|--------|--------|
-| 5.1 | Non-U CFFF validation, V/X at Vf0=0.6 | CSV ready, GUI solve pending |
-| 5.4 | CFCF boundary validation, representative X/Vf0=0.1 | CSV ready, GUI solve pending |
-| 6.3 | Porous CFFF validation, U/X porous representatives | CSV ready, GUI solve pending |
+| 5.1 | Non-U CFFF validation, V/X at Vf0=0.6 | COMSOL batch passed |
+| 5.4 | CFCF boundary validation, representative X/Vf0=0.1 | COMSOL batch passed on refined mesh |
+| 6.3 | Porous CFFF validation, U/X porous representatives | COMSOL batch run; porous model needs review |
 
-The target list and MATLAB reference center deflections are tracked in `comsol/results/manual_validation_plan.csv`.
+The target list and MATLAB reference center deflections are tracked in `comsol/results/manual_validation_plan.csv`. The generated validation tables are summarized in `reports/2026-06-01-comsol-validation/README.md`.
 
 ## Prepared CSV files
 
