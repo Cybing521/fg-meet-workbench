@@ -58,6 +58,10 @@ fg-meet-workbench/
 
 详见 [comsol/README.md](comsol/README.md)。
 
+Windows 侧继续操作时，按 [comsol/docs/windows-gradient-shell-operation.md](comsol/docs/windows-gradient-shell-operation.md) 执行。该文档包含梯度板壳示意图插入路线、COMSOL GUI 分层材料赋值步骤、取点对比方法和 <5% 误差通过标准。
+
+报告中的材料分布梯度板壳示意图位于 [paper/figures/fg_gradient_shell_schematic.png](paper/figures/fg_gradient_shell_schematic.png)，可编辑矢量版位于 [paper/figures/fg_gradient_shell_schematic.svg](paper/figures/fg_gradient_shell_schematic.svg)，生成脚本为 [tools/make_fg_shell_schematic.py](tools/make_fg_shell_schematic.py)。
+
 ---
 
 ## 快速开始

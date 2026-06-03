@@ -29,6 +29,7 @@
 - [x] 在 COMSOL 模型中导入 10 层材料 CSV（每层单独域和材料选择）
 - [x] 完成 U / Vf0.6 / CFFF / Case A 的 15 点 COMSOL 对比
 - [x] COMSOL 偏差收敛到 < 5%：中心点 3.77%，15 点最大 4.927%
+- [x] 补充 Windows 侧操作路线：`comsol/docs/windows-gradient-shell-operation.md`
 
 ## 阶段 4 — 动力代表算例 ✅
 
@@ -109,6 +110,7 @@
 - [x] 建立 `paper/` 目录结构
 - [x] 梳理论文数据清单、章节映射和初稿写作顺序：`paper/README.md`
 - [x] 建立论文主稿骨架：`paper/main.tex`
+- [x] 补充材料分布梯度板壳示意图：`paper/figures/fg_gradient_shell_schematic.png`
 - [ ] Section 1 Introduction：MEE背景 + 孔隙问题 + 全耦合温度场研究空白
 - [ ] Section 2 Theory：MEE本构 + FG分布 + 孔隙等效模型 + FOSD位移场
 - [ ] Section 3 FEM Implementation：八节点板壳 + 含孔隙材料积分适配
