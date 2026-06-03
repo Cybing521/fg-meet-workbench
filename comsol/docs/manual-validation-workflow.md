@@ -14,6 +14,8 @@ Use this workflow for:
 
 The target list and MATLAB reference center deflections are tracked in `comsol/results/manual_validation_plan.csv`. The generated validation tables are summarized in `reports/2026-06-01-comsol-validation/README.md`.
 
+For the Windows-side operating route, report-figure insertion, and GUI checklist, also see `comsol/docs/windows-gradient-shell-operation.md`.
+
 ## Prepared CSV files
 
 | Target | Layer CSV |

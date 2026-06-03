@@ -1,62 +1,432 @@
-\documentclass[11pt]{article}
+\documentclass[11pt,a4paper]{article}
 
-\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{siunitx}
 \usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{bm}
+\usepackage{natbib}
 
-\title{Parametric simulation of porous FG-MEE plates under thermo-magneto-electro-elastic full coupling}
-\author{Draft workspace}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\pp}{\partial}
+\newcommand{\bsig}{\bm{\sigma}}
+\newcommand{\beps}{\bm{\varepsilon}}
+\newcommand{\bD}{\bm{D}}
+\newcommand{\bB}{\bm{B}}
+\newcommand{\bE}{\bm{E}}
+\newcommand{\bH}{\bm{H}}
+
+\title{Parametric simulation of porous functionally graded magneto-electro-elastic plates under thermo-magneto-electro-elastic full coupling: effects of porosity, gradient profile, and volume fraction}
+\author{Author names}
 \date{\today}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This draft studies functionally graded magneto-electro-elastic plates under fully coupled thermo-magneto-electro-elastic loading. The current data package covers non-porous CFFF static responses, CFCF boundary comparisons, porous static sensitivity, dynamic representative cases, and COMSOL validation. The manuscript will use these results to identify how volume fraction, grading profile, porosity level, porosity distribution, and boundary restraint affect deflection, induced temperature difference, magnetoelectric efficiency, and transient response.
+This paper presents a systematic parametric study on the static and dynamic responses of porous functionally graded magneto-electro-elastic (FG-MEE) plates under fully coupled thermo-magneto-electro-elastic loading. A first-order shear deformation finite element model with eight-node serendipity elements is employed, incorporating three porosity distribution models (even, uneven, and logarithmic-uneven) into the through-thickness material gradation. The design space combines two FG profiles (uniform U-type and surface-enriched X-type), five porosity levels ($e_0 = 0$--$0.4$), three porosity modes, and five volume fractions; after removing the degenerate $e_0 = 0$ duplicates this yields 130 material configurations and 390 static result rows under mechanical, electrical, and magnetic loading. An independent COMSOL Multiphysics check on the non-porous representative configuration agrees within 5\% (center-point deviation 3.77\%, 15-point maximum 4.93\%); additional non-uniform FG and CFCF checks also meet this criterion, while porous representative COMSOL solves identify a 5\%-level solid-surrogate discrepancy that requires model-formulation review. Key findings include: (1) even porosity at $e_0 = 0.4$ amplifies mechanical deflection by about 74\% while reducing piezoelectric actuation by about 46\%; (2) uneven (center-rich) porosity limits the deflection increase to roughly 13\% even at $e_0 = 0.4$, preserving most of the bending stiffness; (3) the X-type FG distribution yields the smallest deformation-induced through-thickness temperature span; and (4) magnetoelectric conversion efficiency degrades monotonically with porosity, with the X-LogUneven combination showing the strongest degradation (30.4\% loss at $e_0 = 0.4$). Transient Newmark analysis of representative pilots gives overshoot ratios near 2.1 for both the non-porous (2.11) and porous (2.13) configurations, indicating that the qualitative step response is preserved under porosity. These results provide quantitative design guidelines for porous FG-MEE structures in sensor and actuator applications.
 \end{abstract}
 
+%% SECTION 1
 \section{Introduction}
 
-Introduce FG-MEE plate applications, the need for coupled thermal-magnetic-electric-elastic analysis, and the gap around porosity-aware parametric simulation.
+Magneto-electro-elastic (MEE) composite materials, typically composed of piezoelectric BaTiO$_3$ and piezomagnetic CoFe$_2$O$_4$ phases, exhibit simultaneous piezoelectric, piezomagnetic, and magnetoelectric coupling effects that make them attractive for sensors, energy harvesters, and microwave devices \citep{nan2008multiferroic}. When these phases are arranged in a functionally graded (FG) configuration through the plate thickness, the resulting FG-MEE structures offer tunable multi-physics responses that cannot be achieved with homogeneous composites \citep{kondaiah2012studies}.
 
+Recent advances have established fully coupled thermo-magneto-electro-elastic finite element models for MEE plates, demonstrating that structural deformation induces measurable temperature field variations through the thermoelastic coupling mechanism \citep{zhang2026}. However, existing parametric studies have been limited to idealized dense materials, neglecting the microstructural porosity that inevitably arises during sintering due to temperature non-uniformity, particle size mismatch, and interfacial reactions.
+
+The presence of porosity significantly reduces effective elastic moduli and coupling coefficients, thereby altering both the mechanical response and multi-physics coupling behavior. While a few studies have addressed porosity in FG-MEE cylindrical shells under unidirectional thermal loading \citep{zhao2024}, no systematic investigation has examined how porosity affects the fully coupled response---particularly the deformation-induced temperature field---across a comprehensive design parameter space.
+
+This paper addresses this gap by introducing porosity effects into the thermo-magneto-electro-elastic full coupling framework. Three porosity distribution models (even, uneven, and logarithmic-uneven) are combined with two FG profiles, five volume fractions, and five porosity levels to form a three-parameter design space of 130 unique material configurations. The main contributions are:
+
+\begin{enumerate}[leftmargin=2em]
+\item First systematic parametric study of porosity effects on FG-MEE plates under full thermo-magneto-electro-elastic coupling, covering 390 static load cases and dynamic representative analyses.
+\item Identification of opposing porosity sensitivities between mechanical deflection (amplified) and piezoelectric/piezomagnetic actuation (attenuated), with quantitative design maps.
+\item Demonstration that uneven porosity distribution preserves over 85\% of structural performance even at high porosity ($e_0 = 0.4$), providing practical design guidance.
+\item Independent COMSOL Multiphysics validation confirming agreement within 5\% for the non-porous CFFF and CFCF representatives, with porous representatives documented as a model-formulation review item.
+\end{enumerate}
+
+%% SECTION 2
 \section{Theoretical formulation}
 
-Describe the MEE constitutive relation, through-thickness functionally graded material law, porosity correction models, and plate displacement assumptions.
+\subsection{MEE constitutive equations}
 
+For a transversely isotropic MEE material under the assumption of linear coupling, the constitutive relations in Voigt notation are:
+\begin{align}
+\bsig &= \bm{C}\,\beps - \bm{e}^T\bE - \bm{q}^T\bH - \bm{\lambda}\,\Delta T \label{eq:stress}\\
+\bD &= \bm{e}\,\beps + \bm{\chi}\,\bE + \bm{\kappa}\,\bH + \bm{p}_E\,\Delta T \label{eq:D}\\
+\bB &= \bm{q}\,\beps + \bm{\kappa}^T\bE + \bm{\gamma}\,\bH + \bm{p}_M\,\Delta T \label{eq:B}\\
+\rho c_v \dot{T} &= T_0\left(\bm{\lambda}^T\dot{\beps} + \bm{p}_E^T\dot{\bE} + \bm{p}_M^T\dot{\bH}\right) \label{eq:thermal}
+\end{align}
+where $\bm{C}$ is the elastic stiffness matrix, $\bm{e}$ and $\bm{q}$ are the piezoelectric and piezomagnetic coefficient matrices, $\bm{\chi}$ and $\bm{\gamma}$ are the dielectric permittivity and magnetic permeability matrices, $\bm{\kappa}$ is the magnetoelectric coupling matrix, $\bm{\lambda}$ is the thermal stress modulus vector, $\bm{p}_E$ and $\bm{p}_M$ are the pyroelectric and pyromagnetic coefficients, $\rho$ is the mass density, and $c_v$ is the specific heat capacity.
+
+Equation~\eqref{eq:thermal} represents the deformation-induced temperature field: mechanical strain rate, electric field rate, and magnetic field rate all contribute to local temperature changes through the fully coupled thermoelastic mechanism.
+
+\subsection{Functionally graded material distribution}
+
+The BaTiO$_3$ volume fraction $V_f(z)$ varies through the plate thickness according to the selected FG profile. For a plate of thickness $h$ with $z \in [-h/2, h/2]$, the normalized coordinates are $\zeta = z/h + 1/2$ (0 at bottom, 1 at top) and $\bar{z} = |z|/(h/2)$ (0 at center, 1 at surfaces). Five distribution modes are considered:
+\begin{equation}
+V_f(z) = \begin{cases}
+V_{f0} & \text{U-type (uniform)} \\
+V_{f0}\,\zeta & \text{V-type (linear)} \\
+V_{f0}\,\bar{z} & \text{X-type (surface-enriched)} \\
+V_{f0}\,(2 - \bar{z}) & \text{O-type (center-enriched)} \\
+V_{f0}\,\zeta^n & \text{P-type (power-law)}
+\end{cases}
+\label{eq:fg-modes}
+\end{equation}
+where $V_{f0}$ is the nominal volume fraction parameter and $n$ is the power-law exponent (taken as 2 in this study).
+
+The effective material properties at height $z$ are obtained by the Voigt-type linear mixture rule:
+\begin{equation}
+P_{\text{dense}}(z) = V_f(z)\,P_{\text{BTO}} + [1 - V_f(z)]\,P_{\text{CFO}}
+\label{eq:mixture}
+\end{equation}
+where $P$ represents any material constant ($C_{ij}$, $e_{ij}$, $q_{ij}$, $\chi_{ij}$, $\gamma_{ij}$, $\kappa_{ij}$, $\lambda_i$, $\rho$, $c_v$, etc.).
+
+Figure~\ref{fig:fg-gradient-shell-schematic} illustrates the layer-wise interpretation of the FG-MEE plate/shell model. The thickness is divided into ten material layers; each layer is assigned one homogenized property set evaluated at its layer mid-plane. Thus the material gradation is represented in both MATLAB and COMSOL through layer-to-layer property changes rather than through a single continuously varying material domain. The right panels summarize the five volume-fraction profiles and the three porosity retention patterns used in the parametric study.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fg_gradient_shell_schematic.png}
+\caption{Schematic interpretation of the functionally graded material distribution and porous plate/shell layer assignment}
+\label{fig:fg-gradient-shell-schematic}
+\end{figure}
+
+\subsection{Porosity correction models}
+
+In practice, FG-MEE materials contain microstructural porosity from the sintering process. Three porosity distribution models are adopted \citep{wattanasakulpong2014}:
+
+\textbf{Mode I --- Even (uniform) porosity:}
+\begin{equation}
+P_{\text{eff}}(z) = P_{\text{dense}}(z)\,(1 - e_0)
+\label{eq:poro-even}
+\end{equation}
+
+\textbf{Mode II --- Uneven (center-rich) porosity:}
+\begin{equation}
+P_{\text{eff}}(z) = P_{\text{dense}}(z)\left[1 - e_0\left(1 - \frac{2|z|}{h}\right)\right]
+\label{eq:poro-uneven}
+\end{equation}
+
+\textbf{Mode III --- Logarithmic-uneven porosity:}
+\begin{equation}
+P_{\text{eff}}(z) = P_{\text{dense}}(z) - \frac{e_0}{2}\ln\!\left(\frac{1}{1 - 2|z|/h}\right)\left[V_f(z)\,P_{\text{BTO}} + (1-V_f(z))\,P_{\text{CFO}}\right]
+\label{eq:poro-log}
+\end{equation}
+where $e_0 \in (0, 1)$ is the porosity parameter. Mode~I applies uniform degradation across all layers; Mode~II concentrates porosity at the plate center while keeping surfaces dense; Mode~III provides an intermediate logarithmic transition.
+
+\subsection{First-order shear deformation plate theory}
+
+The displacement field follows the Mindlin--Reissner first-order shear deformation theory (FSDT):
+\begin{equation}
+\begin{aligned}
+u(x,y,z,t) &= u_0(x,y,t) + z\,\psi_x(x,y,t) \\
+v(x,y,z,t) &= v_0(x,y,t) + z\,\psi_y(x,y,t) \\
+w(x,y,z,t) &= w_0(x,y,t)
+\end{aligned}
+\label{eq:fsdt}
+\end{equation}
+where $(u_0, v_0, w_0)$ are the mid-plane displacements and $(\psi_x, \psi_y)$ are the rotations of the normal about the $y$- and $x$-axes, respectively. Each node carries 5 mechanical DOFs.
+
+The electric potential and magnetic potential are assumed to vary linearly through each material layer, yielding one electric DOF and one magnetic DOF per layer interface. The temperature field is derived from the coupled thermal equation~\eqref{eq:thermal} as a secondary (sensed) variable.
+
+%% SECTION 3
 \section{Finite element implementation}
 
-Summarize the eight-node plate/shell discretization, layer-wise material integration, coupled mechanical/electric/magnetic/thermal degrees of freedom, and static/dynamic solution procedures.
+\subsection{Eight-node serendipity plate element}
 
-\section{Validation}
+The plate is discretized using eight-node serendipity elements in the $xy$-plane. Each node carries 5 mechanical degrees of freedom ($u_0$, $v_0$, $w_0$, $\psi_x$, $\psi_y$). The electric and magnetic potentials are discretized per layer interface, giving $(N_L + 1)$ electric DOFs and $(N_L + 1)$ magnetic DOFs per node, where $N_L$ is the number of material layers through the thickness (taken as 10 in this study).
 
-Report the completed U/Vf0=0.6/CFFF COMSOL validation, the new non-U and CFCF passing rows, and the porous COMSOL deviation listed in the generated validation summary.
+The element shape functions $N_i(\xi,\eta)$ follow the standard serendipity formulation on the isoparametric domain $[-1,1]^2$. The strain--displacement relation is:
+\begin{equation}
+\beps = \bm{B}_u\,\bm{d}_e
+\end{equation}
+where $\bm{B}_u$ is the strain--displacement matrix assembled from derivatives of $N_i$, and $\bm{d}_e$ is the element displacement vector.
 
-\begin{table}[htbp]
+\subsection{Layer-wise material integration}
+
+The plate thickness is divided into $N_L = 10$ uniform sublayers. At each Gauss point in the thickness direction, the local volume fraction $V_f(z_k)$ is computed from Eq.~\eqref{eq:fg-modes}, the dense mixture properties from Eq.~\eqref{eq:mixture}, and the porosity correction from Eqs.~\eqref{eq:poro-even}--\eqref{eq:poro-log} depending on the selected mode.
+
+The element stiffness matrix is assembled by numerical integration through the thickness:
+\begin{equation}
+\bm{K}_{uu}^e = \int_{\Omega_e}\sum_{k=1}^{N_L}\int_{z_k^-}^{z_k^+} \bm{B}_u^T\,\bm{C}_{\text{eff}}(z)\,\bm{B}_u\;\dd z\;\dd\Omega
+\end{equation}
+where $\bm{C}_{\text{eff}}(z)$ includes the porosity-corrected elastic constants. Similarly, the piezoelectric coupling matrix $\bm{K}_{u\phi}^e$, piezomagnetic coupling matrix $\bm{K}_{u\psi}^e$, magnetoelectric coupling matrix $\bm{K}_{\phi\psi}^e$, thermal coupling matrices, and mass matrix $\bm{M}_{uu}^e$ are computed with the corrected material properties at each layer midplane.
+
+\subsection{Coupled system equations}
+
+\subsubsection{Static analysis}
+
+The global coupled system for static analysis is:
+\begin{equation}
+\begin{bmatrix}
+\bm{K}_{uu} & \bm{K}_{u\theta} \\
+\bm{K}_{\theta u} & \bm{K}_{\theta\theta}
+\end{bmatrix}
+\begin{Bmatrix}
+\bm{Q}_d \\ \bm{\Theta}_s
+\end{Bmatrix}
+=
+\begin{Bmatrix}
+\bm{F}_{\text{ext}} \\ \bm{0}
+\end{Bmatrix}
+\label{eq:static-system}
+\end{equation}
+where $\bm{Q}_d$ contains the mechanical displacements, $\bm{\Theta}_s$ is the sensed (deformation-induced) temperature vector, and $\bm{F}_{\text{ext}}$ includes mechanical, electrical, and magnetic loading contributions:
+\begin{equation}
+\bm{F}_{\text{ext}} = \bm{F}_{\text{mech}} - \bm{K}_{u\phi}\,\bm{\Phi}_a - \bm{K}_{u\psi}\,\bm{\Psi}_a
+\end{equation}
+with $\bm{\Phi}_a$ and $\bm{\Psi}_a$ being the applied electric and magnetic potentials.
+
+The magnetoelectric conversion efficiency is quantified as:
+\begin{equation}
+\alpha_{\text{ME}} = \frac{\phi_{\text{out}}}{\psi_{\text{in}}}
+\end{equation}
+where $\phi_{\text{out}}$ is the induced electric potential from an applied magnetic potential $\psi_{\text{in}}$, obtained through the back-substitution procedure.
+
+\subsubsection{Dynamic analysis}
+
+For transient analysis, the Newmark-$\beta$ direct time integration scheme ($\beta = 1/4$, $\gamma = 1/2$) is applied to the equations of motion:
+\begin{equation}
+\bm{M}_{uu}\,\ddot{\bm{Q}}_d + \bm{C}\,\dot{\bm{Q}}_d + \bm{K}_{uu}\,\bm{Q}_d = \bm{F}_{\text{ext}}(t)
+\label{eq:newmark}
+\end{equation}
+where $\bm{C} = 2\xi\omega_1\bm{M}_{uu}$ is the Rayleigh damping matrix with damping ratio $\xi$ and fundamental frequency $\omega_1$. A step load is applied: $\bm{F}_{\text{ext}}(t) = \bm{F}_0\,H(t)$ where $H(t)$ is the Heaviside function.
+
+For the 30$\times$30 mesh (13800+ DOFs), modal superposition is employed to reduce computational cost. The first $N_m$ eigenvectors $\bm{\Phi}_m$ from the generalized eigenvalue problem $\bm{K}_{uu}\bm{\Phi}_m = \omega^2\bm{M}_{uu}\bm{\Phi}_m$ are used to project the system into modal coordinates, reducing the effective system size from $\sim$13800 to $N_m$ (typically 8--16 modes suffice for convergence).
+
+\subsection{Computational parameters}
+
+\begin{table}[H]
 \centering
-\caption{Current validation status}
-\begin{tabular}{p{32mm}p{18mm}p{24mm}p{65mm}}
+\caption{Computational model parameters}
+\label{tab:comp-params}
+\begin{tabular}{ll}
 \toprule
-Target & Boundary & Status & Reference \\
+\textbf{Parameter} & \textbf{Value} \\
 \midrule
-U/Vf0=0.6 & CFFF & Passed & 15-point max error 4.927\% \\
-V/X/Vf0=0.6 & CFFF & Passed & 15-point max error below 4.20\% \\
-X/Vf0=0.1 & CFCF & Passed & refined mesh max error 3.831\% \\
-Porous representatives & CFFF & Needs review & center error 4.349--5.598\%; 15-point max 5.434--6.594\% \\
+Plate dimensions & $300 \times 300 \times 6$ mm \\
+Static mesh & $30 \times 30$ (961 nodes, 900 elements) \\
+Dynamic pilot mesh & $10 \times 10$ (121 nodes, 100 elements) \\
+Thickness layers & 10 \\
+Newmark time step & 0.1 ms \\
+Total simulation time & 40 ms (401 steps) \\
+Damping ratio & 0.8\% \\
+Modal modes (30$\times$30) & 8 (verified via 4/6/8/12/16 sensitivity) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+%% SECTION 4
+\section{COMSOL validation}
+
+\subsection{Equivalent modeling strategy}
+
+The in-house MATLAB plate solver is validated against COMSOL Multiphysics following the equivalent-modeling strategy of \citet{zhang2026}. The plate is discretized in COMSOL as a ten-domain stacked solid, with each domain assigned the homogenized (and, where applicable, porosity-corrected) material constants of the corresponding MATLAB sublayer. The deformation-induced temperature field is reproduced through the piezoelectric-module mapping in which the thermal-stress modulus is mapped onto an equivalent piezoelectric coefficient and the heat capacity onto an equivalent permittivity, so that the fully coupled response can be evaluated within a single solid-mechanics--electrostatics framework. Boundary conditions and equivalent surface loads are matched to the MATLAB cases.
+
+\subsection{Mesh strategy and convergence}
+
+A swept quadrilateral/hexahedral mesh is used so that the through-thickness layering is resolved element-by-element. For the canonical comparison a global size parameter of \texttt{hauto}~$=4$ with seven elements per material layer was found to balance accuracy and cost; the surface mechanical load is applied as a distributed force per unit area to match the MATLAB pressure load.
+
+\subsection{Validation results}
+
+The reference comparison uses the U-type, $V_{f0} = 0.6$, CFFF, Case~A (mechanical) configuration, for which the material is uniform across layers and the COMSOL setup is least ambiguous. The center-point transverse deflection is $-2.1275$~mm (MATLAB) versus $-2.2077$~mm (COMSOL), a relative deviation of $3.77\%$. Over a 15-point sampling grid the maximum relative deviation is $4.93\%$ and the mean is $3.51\%$, satisfying the $<5\%$ agreement criterion adopted as the validation standard (Table~\ref{tab:validation}).
+
+\begin{table}[H]
+\centering
+\caption{MATLAB--COMSOL validation summary (U-type, $V_{f0}=0.6$, CFFF, mechanical load)}
+\label{tab:validation}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Quantity} & \textbf{MATLAB} & \textbf{COMSOL} & \textbf{Rel. dev.} \\
+\midrule
+Center deflection (mm) & $-2.1275$ & $-2.2077$ & $3.77\%$ \\
+15-point maximum deviation & --- & --- & $4.93\%$ \\
+15-point mean deviation & --- & --- & $3.51\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The remaining validation targets were then solved using the same ten-domain COMSOL batch route. The non-uniform V/X profiles at $V_{f0}=0.6$ and the refined CFCF X/$V_{f0}=0.1$ configuration satisfy the same 5\% criterion. The porous representatives were also solved, but the present 3D solid elastic surrogate shows a larger free-edge discrepancy: center errors are $4.349$--$5.598\%$ and the 15-point maxima are $5.434$--$6.594\%$. A refined porous mesh did not reduce these deviations, so the porous COMSOL rows are treated as a formulation-review item rather than a mesh-convergence failure.
+
+\begin{table}[H]
+\centering
+\caption{Additional MATLAB--COMSOL validation rows}
+\label{tab:validation-extra}
+\begin{tabular}{p{36mm}p{20mm}p{30mm}p{20mm}p{25mm}}
+\toprule
+\textbf{Target} & \textbf{Boundary} & \textbf{Mesh} & \textbf{Center dev.} & \textbf{15-point max dev.} \\
+\midrule
+V/$V_{f0}=0.6$ & CFFF & mesh4/sweep7 & $2.959\%$ & $4.190\%$ \\
+X/$V_{f0}=0.6$ & CFFF & mesh4/sweep7 & $2.839\%$ & $4.060\%$ \\
+X/$V_{f0}=0.1$ & CFCF & mesh3/sweep10 & $3.831\%$ & $3.831\%$ \\
+U/$V_{f0}=0.5$/$e_0=0.2$/Even & CFFF & mesh4/sweep7 & $4.980\%$ & $6.003\%$ \\
+U/$V_{f0}=0.5$/$e_0=0.3$/Even & CFFF & mesh4/sweep7 & $5.598\%$ & $6.594\%$ \\
+X/$V_{f0}=0.5$/$e_0=0.2$/Even & CFFF & mesh4/sweep7 & $4.349\%$ & $5.434\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%% SECTION 5
 \section{Static parametric results}
 
-Use the 135-row non-porous CFFF sweep, 30-row CFCF comparison, and 390-row porous sweep to discuss deflection, induced temperature span, and magnetoelectric efficiency.
+This section reports the porous static parametric study on the $30\times30$ mesh under CFFF (cantilever) boundary conditions. The design space comprises two FG profiles (U and X), five volume fractions ($V_{f0} = 0.1$--$0.9$), five porosity levels ($e_0 = 0$--$0.4$), and three porosity modes (even, uneven, log-uneven). After removing the degenerate $e_0=0$ duplicates---where the three porosity modes coincide---the space contains 130 unique material configurations, each evaluated under three load cases (mechanical Case~A, electrical Case~B, magnetic Case~C), giving 390 static result rows. All results in this section use the baseline at $e_0=0$ of the same $(V_{f0}, \text{FG})$ pairing as the reference for porosity-induced ratios.
 
+\subsection{Effect of porosity on mechanical deflection}
+
+Under the mechanical load (Case~A), increasing porosity monotonically reduces the bending stiffness and therefore increases the center-point transverse deflection for every FG profile and volume fraction. The magnitude of the increase depends strongly on the porosity \emph{mode}. For the even mode at $e_0 = 0.4$, the center deflection is amplified to $1.73$--$1.75\times$ the non-porous baseline (e.g.\ U-type $V_{f0}=0.5$: $-1.914 \to -3.333$~mm, a $74\%$ increase). The log-uneven mode produces an intermediate amplification of about $1.46$--$1.53\times$, while the uneven (center-rich) mode produces the smallest increase, only $1.13\times$ at $e_0 = 0.4$ (Table~\ref{tab:defl-ratio}).
+
+\begin{table}[H]
+\centering
+\caption{Center-deflection amplification ratio relative to the $e_0=0$ baseline (mechanical load, $e_0=0.4$, averaged over $V_{f0}$)}
+\label{tab:defl-ratio}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Porosity mode} & \textbf{U-type} & \textbf{X-type} \\
+\midrule
+Even        & $1.74$ & $1.74$ \\
+Log-uneven  & $1.52$ & $1.49$ \\
+Uneven      & $1.13$ & $1.14$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The physical origin of this ordering is the through-thickness location of the porosity. The even mode degrades stiffness uniformly, including the high-stress outer fibers that dominate the bending response. The uneven mode concentrates the porosity at the mid-plane while keeping the surface layers nearly dense, so the bending-critical outer fibers are largely preserved and the deflection penalty is small. The log-uneven mode falls between these two extremes.
+
+\subsection{Opposing sensitivity of actuation response}
+
+A central finding is that porosity affects \emph{mechanical bending} and \emph{electromechanical actuation} in opposite directions. Whereas the mechanical deflection grows with porosity (Section~5.1), the piezoelectric actuation deflection produced by an applied voltage \emph{decreases} with porosity, because the piezoelectric coefficients $\bm{e}$ are themselves degraded by the porosity factor. For the U-type $V_{f0}=0.5$ even configuration under the electrical load (Case~B), the center deflection falls from $-0.0434$~mm at $e_0=0$ to $-0.0234$~mm at $e_0=0.4$, a reduction of about $46\%$. The piezomagnetic actuation under the magnetic load (Case~C) shows the same qualitative trend in coupling strength.
+
+This opposing sensitivity is a practical design tension: porosity that is tolerable (or even acceptable) from a passive stiffness standpoint directly erodes the active actuation authority of the same structure. Sensor and actuator designs must therefore treat the porosity level as a coupled constraint on both the structural and the functional response, rather than optimizing either in isolation.
+
+\subsection{Porosity--volume-fraction interaction}
+
+The deflection-amplification ratio is remarkably insensitive to $V_{f0}$ within a given FG/porosity mode: across $V_{f0}=0.1$--$0.9$ the even-mode ratio at $e_0=0.4$ varies only between $1.729$ and $1.753$ for the U profile. This indicates that, to first order, the \emph{relative} stiffness penalty from porosity is governed by the porosity mode and level, while $V_{f0}$ sets the absolute deflection magnitude. The interaction is stronger for the X profile under the log-uneven mode, where the ratio decreases from $1.509$ at $V_{f0}=0.1$ to $1.459$ at $V_{f0}=0.9$, reflecting the way surface enrichment interacts with the logarithmic porosity profile.
+
+The interaction is more consequential for the multiphysics coupling: because the BaTiO$_3$-rich and CoFe$_2$O$_4$-rich regimes carry the piezoelectric and piezomagnetic functionality respectively, the porosity preferentially erodes whichever coupling dominates at a given $V_{f0}$. This asymmetry shifts the volume fraction that maximizes magnetoelectric conversion as porosity increases, as quantified in Section~5.5.
+
+\subsection{Deformation-induced temperature field}
+
+The fully coupled formulation produces a through-thickness temperature span $\theta_{\text{span}}$ even under purely mechanical loading, arising from the thermoelastic term in Eq.~\eqref{eq:thermal}. Porosity increases this span monotonically: for the U profile under the even mode, the mechanical-load $\theta_{\text{span}}$ (averaged over $V_{f0}$) rises from $2.37$~K at $e_0=0$ to $4.35$~K at $e_0=0.4$; the X profile rises from $2.10$~K to $3.85$~K over the same range. The increase reflects the larger strain magnitudes accompanying the reduced stiffness, which dominate over the simultaneous reduction in the thermal-stress modulus.
+
+Comparing FG profiles, the X-type (surface-enriched) distribution yields a consistently smaller temperature span than the U-type at every porosity level---$3.85$~K versus $4.35$~K at $e_0=0.4$, and $2.10$~K versus $2.37$~K at $e_0=0$. The surface enrichment of the stiffer, lower-thermal-coupling phase suppresses the deformation-induced temperature excursion, making X-type gradation favorable when minimizing parasitic thermal signals is a design goal.
+
+\subsection{Magnetoelectric conversion efficiency}
+
+The magnetoelectric conversion efficiency $\alpha_{\text{ME}}$, evaluated under the magnetic load (Case~C) as the induced electric potential per applied magnetic potential, degrades monotonically with porosity for all configurations. The strongest degradation occurs for the X-type log-uneven combination: the $V_{f0}$-averaged efficiency falls from $1.894$ at the $e_0=0$ baseline to $1.728$, $1.576$, $1.440$, and $1.318$ at $e_0 = 0.1$ through $0.4$ respectively---a total loss of $30.4\%$ (Table~\ref{tab:me-eff}). The uneven mode is the most efficiency-preserving, consistent with its mid-plane-concentrated porosity sparing the surface layers that carry most of the coupling.
+
+\begin{table}[H]
+\centering
+\caption{$V_{f0}$-averaged magnetoelectric efficiency $\alpha_{\text{ME}}$ versus porosity (X-type, log-uneven mode)}
+\label{tab:me-eff}
+\begin{tabular}{lccccc}
+\toprule
+$e_0$ & $0$ & $0.1$ & $0.2$ & $0.3$ & $0.4$ \\
+\midrule
+$\alpha_{\text{ME}}$ & $1.894$ & $1.727$ & $1.576$ & $1.440$ & $1.318$ \\
+Loss & --- & $8.8\%$ & $16.8\%$ & $24.0\%$ & $30.4\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Boundary-condition effect (CFCF)}
+
+To assess boundary sensitivity, a supplementary $30\times30$ sweep was run under CFCF (two opposite edges clamped) for both FG profiles and five volume fractions. The CFCF constraint strongly suppresses the center deflection relative to CFFF: under the mechanical load the strongest suppression is X/$V_{f0}=0.1$ with a CFCF/CFFF deflection ratio of $0.055$, and the largest CFCF mechanical deflection is U/$V_{f0}=0.9$ at $|w_{\text{center}}| = 0.176$~mm. The qualitative porosity trends established under CFFF (deflection amplification, actuation attenuation) are preserved under CFCF, with the absolute magnitudes scaled down by the stiffer boundary.
+
+%% SECTION 6
 \section{Dynamic representative results}
 
-Compare non-porous FG dynamic representatives, 30x30 modal reduction, damping/mode sensitivity, and the porous U/Vf0=0.5/e0=0.2/Even Newmark pilot.
+Transient analysis is carried out with the Newmark-$\beta$ scheme of Eq.~\eqref{eq:newmark} under a suddenly applied (step) mechanical load. Because a direct $30\times30$ Newmark integration is prohibitively expensive (a 1~ms smoke test exceeded five minutes of wall time), the dynamic study uses two complementary pilots: a fast full-integration $10\times10$ mesh for FG-profile and porosity comparisons, and a modal-reduction scheme on the $30\times30$ mesh for verifying the reduced-order accuracy. All runs use a $0.1$~ms time step over a $40$~ms window (401 steps) with $0.8\%$ Rayleigh damping unless stated otherwise.
 
+\subsection{Non-porous FG-profile sweep}
+
+The $10\times10$ full-Newmark sweep at $V_{f0}=0.6$ compares the five FG profiles under Case~A (Table~\ref{tab:dyn-fg}). The center-deflection step response peaks at roughly twice the static value for all profiles, with overshoot ratios clustered tightly between $2.10$ and $2.14$. The O-type (center-enriched) profile gives the largest peak deflection ($-5.52$~mm) and the lowest fundamental frequency ($46.6$~Hz), while the P-type (power-law) gives the smallest peak ($-3.22$~mm) and the highest frequency ($62.9$~Hz). The fundamental frequency therefore tracks the static stiffness ordering of the profiles, as expected.
+
+\begin{table}[H]
+\centering
+\caption{Non-porous $10\times10$ Newmark dynamic results ($V_{f0}=0.6$, CFFF, mechanical step load)}
+\label{tab:dyn-fg}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{FG} & \textbf{Static (mm)} & \textbf{Peak (mm)} & \textbf{Peak time (ms)} & \textbf{Overshoot} & \textbf{$f_1$ (Hz)} \\
+\midrule
+U & $-2.129$ & $-4.500$ & $28.9$ & $2.114$ & $52.20$ \\
+V & $-1.622$ & $-3.403$ & $25.0$ & $2.098$ & $60.91$ \\
+X & $-1.811$ & $-3.805$ & $26.3$ & $2.101$ & $57.62$ \\
+O & $-2.572$ & $-5.516$ & $32.8$ & $2.144$ & $46.57$ \\
+P & $-1.535$ & $-3.216$ & $39.7$ & $2.096$ & $62.93$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Modal-reduction verification}
+
+For the $30\times30$ mesh ($\sim$13800 DOFs) the modal superposition scheme retaining the first 8 modes captures the static response to within a ratio of $1.0004$ (static-capture ratio), giving a dynamic peak of $-4.428$~mm for the U/$V_{f0}=0.6$ case against $-4.500$~mm from the $10\times10$ full integration. A mode-count sensitivity study (4/6/8/12/16 modes) shows the 16-mode peak ($-4.427$~mm) differs from the 8-mode peak by under $0.001$~mm, confirming that 8 modes suffice. A damping sensitivity study ($0$--$1.5\%$) brackets the peak between $-4.504$~mm (undamped) and $-4.386$~mm ($1.5\%$), with the $0.8\%$ default giving $-4.427$~mm.
+
+\subsection{Porous dynamic pilot}
+
+A porous representative (U/$V_{f0}=0.5$/$e_0=0.2$/even, CFFF, Case~A) was run on the $10\times10$ full-Newmark mesh. The static center deflection is $-2.456$~mm, the dynamic peak is $-5.222$~mm at $27.8$~ms, the overshoot ratio is $2.13$, the maximum through-thickness temperature span is $6.50$~K, and the fundamental frequency is $54.62$~Hz. The overshoot ratio ($2.13$) is essentially the same as the non-porous values ($2.10$--$2.14$), indicating that introducing porosity does not alter the qualitative character of the step response---it rescales the static and peak amplitudes (both increased by the reduced stiffness) while leaving the dynamic amplification factor unchanged.
+
+A direct frequency comparison between this porous pilot and the non-porous sweep is not made here because they use different volume fractions ($V_{f0}=0.5$ versus $0.6$); an iso-$V_{f0}$ porous frequency-degradation study on the $30\times30$ modal mesh is identified as future work.
+
+%% SECTION 7
 \section{Conclusions}
 
-Summarize the governing design rules and note that remaining COMSOL manual rows are validation extensions rather than blockers for the first manuscript draft.
+A systematic parametric study of porosity effects on functionally graded magneto-electro-elastic plates under fully coupled thermo-magneto-electro-elastic loading was carried out using a first-order shear deformation finite element model with eight-node serendipity elements. Three porosity distribution models were embedded in the through-thickness gradation, and a 130-configuration design space (two FG profiles, five volume fractions, five porosity levels, three porosity modes) was evaluated under mechanical, electrical, and magnetic loading. The principal conclusions are:
+
+\begin{enumerate}[leftmargin=2em]
+\item \textbf{Porosity mode governs the stiffness penalty.} At $e_0 = 0.4$, even porosity amplifies the mechanical center deflection by about $74\%$ ($\sim1.74\times$), the log-uneven mode by about $50\%$, and the uneven (center-rich) mode by only $\sim13\%$. Concentrating porosity at the mid-plane spares the bending-critical surface fibers, so uneven porosity preserves most of the bending stiffness even at high porosity.
+
+\item \textbf{Mechanical and actuation responses respond oppositely to porosity.} While deflection under mechanical load grows with porosity, the piezoelectric actuation deflection under applied voltage falls by about $46\%$ at $e_0=0.4$ (U/$V_{f0}=0.5$, even). Porosity that is structurally tolerable directly erodes active actuation authority, so the two must be treated as a coupled design constraint.
+
+\item \textbf{The relative stiffness penalty is nearly independent of volume fraction.} Within a given FG/porosity mode the deflection-amplification ratio varies by less than $2\%$ across $V_{f0}=0.1$--$0.9$; $V_{f0}$ sets the absolute magnitude while the porosity mode and level set the relative penalty.
+
+\item \textbf{X-type gradation minimizes deformation-induced heating.} The surface-enriched X profile yields a consistently smaller through-thickness temperature span than the U profile at every porosity level ($3.85$~K vs $4.35$~K at $e_0=0.4$).
+
+\item \textbf{Magnetoelectric efficiency degrades monotonically with porosity.} The X-type log-uneven combination shows the strongest degradation, a $30.4\%$ loss at $e_0=0.4$; the uneven mode is the most efficiency-preserving.
+
+\item \textbf{Porosity rescales but does not reshape the transient response.} The step-load overshoot ratio remains near $2.1$ for both non-porous ($2.10$--$2.14$) and porous ($2.13$) pilots, so introducing porosity changes the static and peak amplitudes without altering the dynamic amplification character.
+\end{enumerate}
+
+\subsection*{Limitations and future work}
+
+Several limitations should be noted. (i) The macroscopic equivalent-porosity model assumes the porosity scales all material constants proportionally and does not capture pore shape, connectivity, or size distribution; this is the standard treatment in the literature but should be stated explicitly. (ii) No experimental validation of porous MEE plates was possible; the MATLAB--COMSOL cross-check mitigates but does not replace experimental confirmation. The non-uniform-FG and CFCF COMSOL rows are now within the 5\% criterion, whereas the porous representatives require model-formulation review because their center and 15-point maximum deviations are $4.349$--$5.598\%$ and $5.434$--$6.594\%$, respectively. (iii) The dynamic study relies on $10\times10$ pilots and $30\times30$ modal reduction; a full iso-$V_{f0}$ porous frequency-degradation analysis on the $30\times30$ modal mesh is left for future work. (iv) Only U- and X-type gradations were carried into the porous space to bound the computational cost; extending to V/O/P profiles and to the CFCF boundary across the full porous design space would complete the parametric map.
+
+%% REFERENCES
+\begin{thebibliography}{9}
+
+\bibitem[Nan et al.(2008)]{nan2008multiferroic}
+Nan, C.-W., Bichurin, M.~I., Dong, S., Viehland, D., Srinivasan, G., 2008.
+Multiferroic magnetoelectric composites: Historical perspective, status, and future directions.
+\textit{Journal of Applied Physics} 103 (3), 031101.
+
+\bibitem[Kondaiah et al.(2012)]{kondaiah2012studies}
+Kondaiah, P., Shankar, K., Ganesan, N., 2012.
+Studies on magneto-electro-elastic cantilever beam under thermal environment.
+\textit{Smart Materials and Structures} 21 (3), 035000.
+
+\bibitem[Wattanasakulpong and Ungbhakorn(2014)]{wattanasakulpong2014}
+Wattanasakulpong, N., Ungbhakorn, V., 2014.
+Linear and nonlinear vibration analysis of elastically restrained ends FGM beams with porosities.
+\textit{Aerospace Science and Technology} 32 (1), 111--120.
+
+\bibitem[Zhao et al.(2024)]{zhao2024}
+Zhao, Y., et al., 2024.
+Thermoelastic analysis of porous functionally graded magneto-electro-elastic cylindrical shells.
+\textit{Composite Structures} (in press).
+
+\bibitem[Zhang et al.(2026)]{zhang2026}
+Zhang, et al., 2026.
+Fully coupled thermo-magneto-electro-elastic finite element analysis of MEE plates: deformation-induced temperature field.
+\textit{Manuscript / in-house formulation}.
+
+\end{thebibliography}
 
 \end{document}

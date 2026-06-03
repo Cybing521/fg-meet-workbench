@@ -28,7 +28,7 @@
 
 \title{\textbf{功能梯度磁--电--弹性板热--力全耦合仿真\\月度工作汇报}}
 \author{组会汇报}
-\date{2026年5月23日}
+\date{2026年6月1日}
 
 \begin{document}
 \maketitle
@@ -61,6 +61,15 @@ FG 分布 & U, V, X, O, P & 5种梯度模式 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+图~\ref{fig:fg-gradient-shell-schematic-report} 进一步说明材料分布梯度板壳的建模含义：板厚方向划分为 10 个材料层，每层按层中面体积分数换算为一组等效材料常数；MATLAB 与 COMSOL 均按这一逐层赋值逻辑体现梯度。右侧曲线给出 U/V/X/O/P 五种体积分数分布和三类孔隙退化模式，便于区分表面富集、中心富集与中面孔隙富集。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{../paper/figures/fg_gradient_shell_schematic.png}
+\caption{功能梯度材料分布与含孔隙板壳分层模型示意图}
+\label{fig:fg-gradient-shell-schematic-report}
+\end{figure}
 
 \subsection{研究目标}
 
@@ -615,10 +624,11 @@ COMSOL 独立验证 & \textcolor{passgreen}{完成} & 最大误差4.93\% \\
 含孔隙静力扫描 & \textcolor{passgreen}{完成} & 130算例/390行结果 \\
 CFCF边界补充 & \textcolor{passgreen}{完成} & U/X共30行结果 \\
 含孔隙动力pilot & \textcolor{passgreen}{完成} & 10$\times$10 Newmark 401步 \\
+阻尼比敏感性 & \textcolor{passgreen}{完成} & 0/0.5/0.8/1.5\% \\
+论文 \texttt{paper/main.tex} & \textcolor{passgreen}{完成} & 7章初稿+参考文献 \\
 \midrule
-非U分布COMSOL验证 & \textcolor{warnblue}{待推进} & 脚本已支持 \\
-论文 main.tex & \textcolor{warnblue}{待推进} & 数据已齐备 \\
-阻尼比敏感性 & \textcolor{warnblue}{待推进} & 可选补充 \\
+非U分布COMSOL验证 & \textcolor{warnblue}{待推进} & CSV已就绪，GUI待跑 \\
+含孔隙30$\times$30模态 & \textcolor{warnblue}{待推进} & 等$V_{f0}$频率退化 \\
 \bottomrule
 \end{tabular}
 \end{table}
