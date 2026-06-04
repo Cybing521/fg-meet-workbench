@@ -23,6 +23,7 @@ public class RunElasticCfffValidation {
     private static final String LOAD_MODE = env("FG_COMSOL_LOAD_MODE", "pressure").toLowerCase();
     private static final String RUN_TAG = env("FG_COMSOL_RUN_TAG", "");
     private static final boolean LAYERED_GEOMETRY = boolEnv("FG_COMSOL_LAYERED", false);
+    private static final String SOLID_MODEL = env("FG_COMSOL_SOLID_MODEL", "isotropic").toLowerCase();
     private static final String LAYER_CSV = env("FG_COMSOL_LAYER_CSV",
         "G:\\fg-meet-workbench\\comsol\\export\\Thermal_CFFF_U_Vf0.6-30x30-10layer_layers.csv");
     private static final String CASE_ID = env("FG_COMSOL_CASE_ID", "U_Vf06_elastic");
@@ -50,6 +51,13 @@ public class RunElasticCfffValidation {
 
     public static Model run() {
         double[][] layers = readLayers();
+        if (!isSupportedSolidModel()) {
+            throw new IllegalArgumentException("Unsupported FG_COMSOL_SOLID_MODEL: " + SOLID_MODEL
+                + " (use isotropic or orthotropic)");
+        }
+        if (usesOrthotropicSolid() && !LAYERED_GEOMETRY) {
+            throw new IllegalArgumentException("FG_COMSOL_SOLID_MODEL=orthotropic requires FG_COMSOL_LAYERED=true");
+        }
         Model model = ModelUtil.create("Model");
         model.modelPath("G:\\fg-meet-workbench\\output");
         model.label(modelLabel());
@@ -115,7 +123,8 @@ public class RunElasticCfffValidation {
         System.out.println("RUN_CONFIG,run_tag," + displayRunTag()
             + ",mesh_mode," + MESH_MODE + ",mesh_size," + MESH_SIZE
             + ",sweep_layers," + SWEEP_LAYERS + ",load_mode," + LOAD_MODE
-            + ",layered_geometry," + LAYERED_GEOMETRY + ",layer_csv," + LAYER_CSV
+            + ",layered_geometry," + LAYERED_GEOMETRY + ",solid_model," + SOLID_MODEL
+            + ",layer_csv," + LAYER_CSV
             + ",case_id," + CASE_ID + ",bc," + BC);
 
         if (LAYERED_GEOMETRY) {
@@ -129,6 +138,10 @@ public class RunElasticCfffValidation {
         }
 
         model.component("comp1").physics().create("solid", "SolidMechanics", "geom1");
+        if (usesOrthotropicSolid()) {
+            model.component("comp1").physics("solid").feature("lemm1").set("SolidModel", "Orthotropic");
+            model.component("comp1").physics("solid").feature("lemm1").set("OrthotropicOption", "OrthotropicStd");
+        }
         model.component("comp1").physics("solid").create("fix1", "Fixed", 2);
         model.component("comp1").physics("solid").feature("fix1").selection().named("sel_fixed_x0");
         if ("CFCF".equals(BC)) {
@@ -316,12 +329,38 @@ public class RunElasticCfffValidation {
             model.component("comp1").material().create(matTag, "Common");
             model.component("comp1").material(matTag).label("Layer " + layerId + " from CSV");
             model.component("comp1").material(matTag).selection().named(selectionTag);
+            assignLayerMaterial(model, matTag, layer);
+        }
+    }
+
+    private static void assignLayerMaterial(Model model, String matTag, double[] layer) {
+        model.component("comp1").material(matTag).propertyGroup("def")
+            .set("density", Double.toString(layerDensity(layer)) + "[kg/m^3]");
+        if (usesOrthotropicSolid()) {
+            model.component("comp1").material(matTag).propertyGroup().create("Orthotropic", "Orthotropic");
+            model.component("comp1").material(matTag).propertyGroup("Orthotropic")
+                .set("Evector", new String[] {
+                    Double.toString(layerE1(layer)) + "[Pa]",
+                    Double.toString(layerE2(layer)) + "[Pa]",
+                    Double.toString(layerE2(layer)) + "[Pa]"
+                });
+            model.component("comp1").material(matTag).propertyGroup("Orthotropic")
+                .set("nuvector", new String[] {
+                    Double.toString(layerNu12(layer)),
+                    Double.toString(layerNu12(layer)),
+                    Double.toString(layerNu23(layer))
+                });
+            model.component("comp1").material(matTag).propertyGroup("Orthotropic")
+                .set("Gvector", new String[] {
+                    Double.toString(layerG12(layer)) + "[Pa]",
+                    Double.toString(layerG13(layer)) + "[Pa]",
+                    Double.toString(layerG23(layer)) + "[Pa]"
+                });
+        } else {
             model.component("comp1").material(matTag).propertyGroup("def")
                 .set("youngsmodulus", Double.toString(layerE1(layer)) + "[Pa]");
             model.component("comp1").material(matTag).propertyGroup("def")
                 .set("poissonsratio", Double.toString(layerNu12(layer)));
-            model.component("comp1").material(matTag).propertyGroup("def")
-                .set("density", Double.toString(layerDensity(layer)) + "[kg/m^3]");
         }
     }
 
@@ -329,7 +368,7 @@ public class RunElasticCfffValidation {
         if (!LAYERED_GEOMETRY) {
             return new double[0][0];
         }
-        double[][] layers = new double[NLAYER][6];
+        double[][] layers = new double[NLAYER][11];
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(LAYER_CSV));
@@ -345,10 +384,15 @@ public class RunElasticCfffValidation {
                 }
                 layers[index][0] = Double.parseDouble(parts[0].trim());
                 layers[index][1] = Double.parseDouble(parts[1].trim());
-                layers[index][2] = Double.parseDouble(parts[3].trim());
-                layers[index][3] = Double.parseDouble(parts[23].trim());
-                layers[index][4] = Double.parseDouble(parts[24].trim());
-                layers[index][5] = Double.parseDouble(parts[25].trim());
+                layers[index][2] = Double.parseDouble(parts[2].trim());
+                layers[index][3] = Double.parseDouble(parts[3].trim());
+                layers[index][4] = Double.parseDouble(parts[4].trim());
+                layers[index][5] = Double.parseDouble(parts[5].trim());
+                layers[index][6] = Double.parseDouble(parts[6].trim());
+                layers[index][7] = Double.parseDouble(parts[7].trim());
+                layers[index][8] = Double.parseDouble(parts[23].trim());
+                layers[index][9] = Double.parseDouble(parts[24].trim());
+                layers[index][10] = Double.parseDouble(parts[25].trim());
                 index++;
             }
             if (index != NLAYER) {
@@ -376,20 +420,48 @@ public class RunElasticCfffValidation {
         return layer[1];
     }
 
-    private static double layerNu12(double[] layer) {
+    private static double layerE2(double[] layer) {
         return layer[2];
     }
 
-    private static double layerDensity(double[] layer) {
+    private static double layerNu12(double[] layer) {
         return layer[3];
     }
 
-    private static double layerZ1(double[] layer) {
+    private static double layerNu23(double[] layer) {
         return layer[4];
     }
 
-    private static double layerZ2(double[] layer) {
+    private static double layerG12(double[] layer) {
         return layer[5];
+    }
+
+    private static double layerG13(double[] layer) {
+        return layer[6];
+    }
+
+    private static double layerG23(double[] layer) {
+        return layer[7];
+    }
+
+    private static double layerDensity(double[] layer) {
+        return layer[8];
+    }
+
+    private static double layerZ1(double[] layer) {
+        return layer[9];
+    }
+
+    private static double layerZ2(double[] layer) {
+        return layer[10];
+    }
+
+    private static boolean usesOrthotropicSolid() {
+        return "orthotropic".equals(SOLID_MODEL);
+    }
+
+    private static boolean isSupportedSolidModel() {
+        return "isotropic".equals(SOLID_MODEL) || "orthotropic".equals(SOLID_MODEL);
     }
 
     public static void main(String[] args) {

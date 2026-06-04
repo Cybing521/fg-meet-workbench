@@ -29,6 +29,7 @@ POROUS_CASES = [
         "layer_csv": ROOT / "comsol" / "export" / "porous" / "Porous_U_Vf0.5_e20_Even_layers.csv",
         "best_points": ROOT / "comsol" / "results" / "validation_points_porous_U_Vf05_e20_Even_elastic_layered_csv_sweep7_mesh4.csv",
         "refined_points": ROOT / "comsol" / "results" / "validation_points_porous_U_Vf05_e20_Even_elastic_layered_csv_sweep10_mesh3.csv",
+        "orthotropic_points": ROOT / "comsol" / "results" / "validation_points_porous_U_Vf05_e20_Even_elastic_orthotropic_sweep7_mesh4.csv",
     },
     {
         "case": "U_Vf50_e30_Even_elastic",
@@ -37,6 +38,7 @@ POROUS_CASES = [
         "layer_csv": ROOT / "comsol" / "export" / "porous" / "Porous_U_Vf0.5_e30_Even_layers.csv",
         "best_points": ROOT / "comsol" / "results" / "validation_points_porous_U_Vf05_e30_Even_elastic_layered_csv_sweep7_mesh4.csv",
         "refined_points": ROOT / "comsol" / "results" / "validation_points_porous_U_Vf05_e30_Even_elastic_layered_csv_sweep10_mesh3.csv",
+        "orthotropic_points": ROOT / "comsol" / "results" / "validation_points_porous_U_Vf05_e30_Even_elastic_orthotropic_sweep7_mesh4.csv",
     },
     {
         "case": "X_Vf50_e20_Even_elastic",
@@ -45,6 +47,7 @@ POROUS_CASES = [
         "layer_csv": ROOT / "comsol" / "export" / "porous" / "Porous_X_Vf0.5_e20_Even_layers.csv",
         "best_points": ROOT / "comsol" / "results" / "validation_points_porous_X_Vf05_e20_Even_elastic_layered_csv_sweep7_mesh4.csv",
         "refined_points": ROOT / "comsol" / "results" / "validation_points_porous_X_Vf05_e20_Even_elastic_layered_csv_sweep10_mesh3.csv",
+        "orthotropic_points": ROOT / "comsol" / "results" / "validation_points_porous_X_Vf05_e20_Even_elastic_orthotropic_sweep7_mesh4.csv",
     },
 ]
 
@@ -147,22 +150,36 @@ def material_parity(case_file: Path, layer_csv: Path) -> dict[str, object]:
 
 def java_material_usage() -> dict[str, object]:
     src = JAVA_DRIVER.read_text(encoding="utf-8", errors="replace")
-    used = []
+    isotropic_used = []
     if "layerE1(layer)" in src:
-        used.append("E1")
+        isotropic_used.append("E1")
     if "layerNu12(layer)" in src:
-        used.append("v12")
+        isotropic_used.append("v12")
     if "layerDensity(layer)" in src:
-        used.append("Density")
+        isotropic_used.append("Density")
+    orthotropic_used = [
+        col for col, token in [
+            ("E1", "layerE1(layer)"),
+            ("E2", "layerE2(layer)"),
+            ("v12", "layerNu12(layer)"),
+            ("v23", "layerNu23(layer)"),
+            ("G12", "layerG12(layer)"),
+            ("G13", "layerG13(layer)"),
+            ("G23", "layerG23(layer)"),
+            ("Density", "layerDensity(layer)"),
+        ]
+        if token in src
+    ]
     ignored = [
-        "E2", "v23", "G12", "G13", "G23", "d31", "d32", "q31", "q32",
-        "g33", "k33", "r33", "A1", "A2", "PyroE", "PyroM", "Cv", "HC",
+        "d31", "d32", "q31", "q32", "g33", "k33", "r33",
+        "A1", "A2", "PyroE", "PyroM", "Cv", "HC",
     ]
     return {
         "java_driver": str(JAVA_DRIVER.relative_to(ROOT)),
-        "material_model": "COMSOL Common material, isotropic Young's modulus / Poisson's ratio / density",
-        "csv_columns_consumed": ";".join(used),
-        "csv_columns_not_consumed_by_solid_surrogate": ";".join(ignored),
+        "material_model": "COMSOL Common material, isotropic default plus orthotropic SolidModel experiment",
+        "isotropic_csv_columns_consumed": ";".join(isotropic_used),
+        "orthotropic_csv_columns_consumed": ";".join(orthotropic_used),
+        "csv_columns_not_consumed_by_elastic_solid_validation": ";".join(ignored),
     }
 
 
@@ -185,12 +202,16 @@ def fmt_num(value: float) -> str:
 def make_report(point_rows: list[dict[str, object]], material_rows: list[dict[str, object]], usage: dict[str, object]) -> str:
     best = [r for r in point_rows if r["family"] == "porous-best"]
     refined = [r for r in point_rows if r["family"] == "porous-refined"]
+    orthotropic = [r for r in point_rows if r["family"] == "porous-orthotropic"]
     nonporous = [r for r in point_rows if r["family"] == "nonporous-reference"]
     best_max = max(float(r["max_err_pct"]) for r in best)
     refined_max = max(float(r["max_err_pct"]) for r in refined)
+    orthotropic_max = max(float(r["max_err_pct"]) for r in orthotropic)
     nonporous_max = max(float(r["max_err_pct"]) for r in nonporous)
     best_ratio_min = min(float(r["mean_ratio_comsol_over_matlab"]) for r in best)
     best_ratio_max = max(float(r["mean_ratio_comsol_over_matlab"]) for r in best)
+    orthotropic_center_min = min(float(r["center_err_pct"]) for r in orthotropic)
+    orthotropic_center_max = max(float(r["center_err_pct"]) for r in orthotropic)
     parity_max = max(float(r["max_rel_diff_pct_case_vs_csv"]) for r in material_rows)
 
     lines = [
@@ -198,13 +219,14 @@ def make_report(point_rows: list[dict[str, object]], material_rows: list[dict[st
         "",
         "## Direct answer",
         "",
-        "The porous discrepancy is not best treated as a load-method problem. The current batch model already uses the validated Case A force-area route: top surface load `FperArea = [0, 0, -15000] N/m^2`. The evidence points instead to the porous COMSOL solid surrogate being too simple for the porous MATLAB plate model.",
+        "The porous discrepancy is not best treated as a load-method problem. The current batch model already uses the validated Case A force-area route: top surface load `FperArea = [0, 0, -15000] N/m^2`. The new orthotropic rerun also keeps that physical load unchanged, and it still misses the 5% target.",
         "",
-        "The specific modeling gap is that `tools/comsol/RunElasticCfffValidation.java` reads the 10-layer CSV but assigns only `E1`, `v12`, and `Density` to a COMSOL isotropic elastic material. The MATLAB input and layer CSV contain the fuller plate material row (`E1/E2/G12/G13/G23`, coupling and thermal terms). The simplification still passes for non-porous/non-U checks, but after porosity softening it produces a systematic extra-flexible response.",
+        "The driver now has an explicit `FG_COMSOL_SOLID_MODEL=orthotropic` path that sets COMSOL Solid Mechanics to `SolidModel=Orthotropic` and assigns `E1/E2/v12/v23/G12/G13/G23/Density` from each porous layer CSV. That experiment makes COMSOL slightly more flexible, so the remaining mismatch is deeper than the old isotropic material shortcut.",
         "",
         "## Review result",
         "",
         f"- Best porous 15-point maximum error: `{fmt_pct(best_max)}`.",
+        f"- Orthotropic porous 15-point maximum error: `{fmt_pct(orthotropic_max)}`; center errors span `{fmt_pct(orthotropic_center_min)}`--`{fmt_pct(orthotropic_center_max)}`.",
         f"- Refined porous mesh maximum error: `{fmt_pct(refined_max)}`; refinement increases the discrepancy, so this is not a mesh-density fix.",
         f"- Non-porous/non-U reference maximum error remains within criterion: `{fmt_pct(nonporous_max)}`.",
         f"- Porous COMSOL/MATLAB mean displacement ratio is `{fmt_num(best_ratio_min)}`--`{fmt_num(best_ratio_max)}`; COMSOL is consistently more flexible.",
@@ -215,7 +237,7 @@ def make_report(point_rows: list[dict[str, object]], material_rows: list[dict[st
         "| Case | Run | Center error | Max error | Mean ratio C/M | Max-error point |",
         "|------|-----|--------------|-----------|----------------|-----------------|",
     ]
-    for row in best + refined:
+    for row in best + orthotropic + refined:
         lines.append(
             "| {case_label} | {run_label} | {center} | {maxerr} | {ratio} | {point} ({x:.2f},{y:.2f}) |".format(
                 case_label=row["case_label"],
@@ -250,19 +272,20 @@ def make_report(point_rows: list[dict[str, object]], material_rows: list[dict[st
         "| Boundary condition | OK | CFFF/CFCF selection logic is explicit in Java driver; CFCF refined row passes. |",
         "| Load method | OK for Case A | Uses force-area load with MATLAB pressure magnitude. |",
         "| Mesh density | Not root cause | Refined porous mesh increases error. |",
-        "| Solid material formulation | Needs change | Current COMSOL driver consumes only `E1`, `v12`, `Density` and treats each layer as isotropic. |",
+        "| Orthotropic material formulation | Implemented, not sufficient | `FG_COMSOL_SOLID_MODEL=orthotropic` consumes `E1/E2/v12/v23/G12/G13/G23/Density`, but the three porous rows still exceed 5%. |",
         "",
         "## Next implementation path",
         "",
-        "The next real fix is to add an orthotropic/anisotropic material mode to the COMSOL Java driver and rerun the three porous validation rows. That mode should assign at least `E1`, `E2`, `G12`, `G13`, `G23`, `v12`, `v23`, and `Density` per layer. If the target is full thermo-magneto-electro-elastic validation rather than elastic deflection validation, the mapped coupling/thermal constants must also be moved out of the CSV-only documentation path and into the COMSOL physics definition.",
+        "The next real fix is a formulation review rather than a load calibration. The highest-value checks are: confirm the COMSOL orthotropic axis convention and Poisson reciprocity, compare the MATLAB plate stiffness terms against the 3D solid constitutive matrix COMSOL is solving, and decide whether this validation should use a layered shell/plate representation instead of stacked 3D solid domains. A full anisotropic `D` matrix mode is only useful after deriving the correct 6x6 elastic matrix from the MATLAB effective layer constants.",
         "",
-        "Until that orthotropic COMSOL rerun is complete, the paper/report wording should remain: non-U and CFCF are validated within 5%; porous rows are solved but require COMSOL model-formulation review.",
+        "The paper/report wording should therefore remain conservative: non-U and CFCF are validated within 5%; porous rows are solved in COMSOL, including an orthotropic rerun, but they remain a model-formulation review item.",
         "",
         "## Generated files",
         "",
         "- `data/point_bias_summary.csv`",
         "- `data/material_parity_summary.csv`",
         "- `data/comsol_material_usage.csv`",
+        "- `comsol/results/validation_summary_porous_orthotropic_experiment.csv`",
     ])
     return "\n".join(lines) + "\n"
 
@@ -274,6 +297,7 @@ def main() -> None:
     for case in POROUS_CASES:
         for family, run_label, key in [
             ("porous-best", "mesh4/sweep7", "best_points"),
+            ("porous-orthotropic", "orthotropic mesh4/sweep7", "orthotropic_points"),
             ("porous-refined", "mesh3/sweep10", "refined_points"),
         ]:
             stats = point_stats(case[key])

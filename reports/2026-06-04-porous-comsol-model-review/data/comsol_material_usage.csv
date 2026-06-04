@@ -1,2 +1,2 @@
-java_driver,material_model,csv_columns_consumed,csv_columns_not_consumed_by_solid_surrogate
-tools\comsol\RunElasticCfffValidation.java,"COMSOL Common material, isotropic Young's modulus / Poisson's ratio / density",E1;v12;Density,E2;v23;G12;G13;G23;d31;d32;q31;q32;g33;k33;r33;A1;A2;PyroE;PyroM;Cv;HC
+java_driver,material_model,isotropic_csv_columns_consumed,orthotropic_csv_columns_consumed,csv_columns_not_consumed_by_elastic_solid_validation
+tools\comsol\RunElasticCfffValidation.java,"COMSOL Common material, isotropic default plus orthotropic SolidModel experiment",E1;v12;Density,E1;E2;v12;v23;G12;G13;G23;Density,d31;d32;q31;q32;g33;k33;r33;A1;A2;PyroE;PyroM;Cv;HC
