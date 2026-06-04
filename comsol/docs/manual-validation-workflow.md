@@ -12,7 +12,7 @@ Use this workflow for:
 | 5.4 | CFCF boundary validation, representative X/Vf0=0.1 | COMSOL batch passed on refined mesh |
 | 6.3 | Porous CFFF validation, U/X porous representatives | COMSOL batch run; porous model needs review |
 
-The target list and MATLAB reference center deflections are tracked in `comsol/results/manual_validation_plan.csv`. The generated validation tables are summarized in `reports/2026-06-01-comsol-validation/README.md`.
+The target list and MATLAB reference center deflections are tracked in `comsol/results/manual_validation_plan.csv`. The generated validation tables are summarized in `reports/2026-06-01-comsol-validation/README.md`. The porous model-construction review is recorded in `reports/2026-06-04-porous-comsol-model-review/README.md`.
 
 For the Windows-side operating route, report-figure insertion, and GUI checklist, also see `comsol/docs/windows-gradient-shell-operation.md`.
 
@@ -46,6 +46,16 @@ For the Windows-side operating route, report-figure insertion, and GUI checklist
 - Center-point relative error is below 5%.
 - 15-point maximum relative error is below 5%, or any outlier is explained by mesh interpolation near constrained edges.
 - Record the COMSOL mesh mode, mesh size, swept layers, material CSV path, and boundary condition in the validation log.
+
+## Porous model-construction review
+
+Use this review when the porous rows remain outside the 15-point criterion after a real COMSOL solve:
+
+1. Confirm the load method first. The batch route should use `BoundaryLoad` with `LoadType = ForceArea` and `FperArea = [0, 0, -15000[N/m^2]]`, matching MATLAB Case A.
+2. Compare the 15-point bias pattern. The current porous rows show COMSOL/MATLAB mean displacement ratios of about 1.043--1.055, so COMSOL is consistently more flexible rather than showing a sign or point-selection error.
+3. Check mesh direction. The refined mesh3/sweep10 reruns increase the porous discrepancy, so another blind mesh refinement is not the next step.
+4. Check material parity. The exported porous layer CSVs match the MATLAB case-file MATERIAL blocks within printed precision.
+5. Check COMSOL material consumption. The current Java driver consumes only `E1`, `v12`, and `Density` and assigns an isotropic solid material. The next implementation step is an orthotropic/anisotropic material mode using at least `E1`, `E2`, `G12`, `G13`, `G23`, `v12`, `v23`, and `Density` per layer.
 
 ## Notes
 

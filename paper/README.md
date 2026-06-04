@@ -13,7 +13,7 @@ This directory starts Phase 7. The data layer is now sufficient for a complete f
 | Porous static sweep | 390 rows, 130 cases x 3 load cases | `output/results_static_porous.csv` |
 | Non-porous dynamic representatives | U/V/X/O/P, 10x10 full Newmark; U/Vf0=0.6 30x30 modal reduction | `reports/2026-05-27-dynamic-fg-sweep/`, `reports/2026-05-22-modal30x30/` |
 | Porous dynamic pilot | U/Vf0=0.5/e0=0.2/Even, 10x10 full Newmark | `output/dynamic_porous_U_Vf50_e20_Even_10x10_summary.csv` |
-| COMSOL validation | U/Vf0=0.6/CFFF baseline passed; V/X and CFCF passed; porous representatives need COMSOL model review | `comsol/results/manual_validation_plan.csv`, `comsol/results/validation_summary_generated.csv` |
+| COMSOL validation | U/Vf0=0.6/CFFF baseline passed; V/X and CFCF passed; porous representatives solved but need orthotropic/anisotropic COMSOL material review | `comsol/results/manual_validation_plan.csv`, `comsol/results/validation_summary_generated.csv`, `reports/2026-06-04-porous-comsol-model-review/README.md` |
 
 ## Manuscript map
 
@@ -32,5 +32,5 @@ This directory starts Phase 7. The data layer is now sufficient for a complete f
 1. Write Methods first: Sections 2 and 3 are mostly stable and do not depend on further COMSOL model review.
 2. Draft Section 5 from the completed static reports.
 3. Draft Section 6 from dynamic reports, using the porous 10x10 run as a pilot result.
-4. Fill Section 4 with the existing U/Vf0=0.6 baseline plus the new V/X and CFCF passing rows; describe the porous COMSOL deviation as a validation-model limitation to be resolved.
+4. Fill Section 4 with the existing U/Vf0=0.6 baseline plus the new V/X and CFCF passing rows; describe the porous COMSOL deviation as a validation-model limitation tied to the current isotropic solid surrogate (`E1`, `v12`, `Density` only).
 5. Write Introduction and Conclusions last, once the result narrative is fixed.

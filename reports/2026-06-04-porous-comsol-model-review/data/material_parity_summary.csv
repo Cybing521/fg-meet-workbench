@@ -1,0 +1,4 @@
+case_id,case_label,case_file,layer_csv,layers_in_case,layers_in_csv,max_rel_diff_pct_case_vs_csv,max_diff_layer,max_diff_column
+U_Vf50_e20_Even_elastic,U/Vf0=0.5/e0=0.2/Even,cases\porous\Porous_CFFF_U_Vf0.5_e20_Even-30x30-10layer.txt,comsol\export\porous\Porous_U_Vf0.5_e20_Even_layers.csv,10,10,0.020064205457458933,1,PyroE
+U_Vf50_e30_Even_elastic,U/Vf0=0.5/e0=0.3/Even,cases\porous\Porous_CFFF_U_Vf0.5_e30_Even-30x30-10layer.txt,comsol\export\porous\Porous_U_Vf0.5_e30_Even_layers.csv,10,10,0.024414062499979218,1,k33
+X_Vf50_e20_Even_elastic,X/Vf0=0.5/e0=0.2/Even,cases\porous\Porous_CFFF_X_Vf0.5_e20_Even-30x30-10layer.txt,comsol\export\porous\Porous_X_Vf0.5_e20_Even_layers.csv,10,10,0.03496503496503497,1,E1
