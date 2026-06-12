@@ -1,0 +1,335 @@
+from part import *
+from material import *
+from section import *
+from assembly import *
+from step import *
+from interaction import *
+from load import *
+from mesh import *
+from optimization import *
+from job import *
+from sketch import *
+from visualization import *
+from connectorBehavior import *
+mdb.jobs['Job-1'].submit(consistencyChecking=OFF)
+mdb.jobs['Job-1']._Message(STARTED, {'phase': BATCHPRE_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ABORTED, {'phase': BATCHPRE_PHASE, 
+    'message': 'Analysis phase failed due to errors', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ERROR, {
+    'message': 'Analysis Input File Processor exited with an error.', 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(JOB_ABORTED, {
+    'message': 'Analysis Input File Processor exited with an error.', 
+    'jobName': 'Job-1'})
+mdb.models['Model-1'].rootAssembly.Instance(dependent=ON, name='Part-1-2', 
+    part=mdb.models['Model-1'].parts['Part-1'])
+del mdb.models['Model-1'].loads['A-1']
+del mdb.models['Model-1'].loads['A-2']
+del mdb.models['Model-1'].loads['B-1']
+del mdb.models['Model-1'].loads['B-2']
+del mdb.models['Model-1'].loads['L-1']
+del mdb.models['Model-1'].loads['L-2']
+del mdb.models['Model-1'].loads['R-1']
+del mdb.models['Model-1'].loads['R-2']
+mdb.models['Model-1'].Moment(cm1=3322.0, createStepName='Step-1', 
+    distributionType=UNIFORM, field='', localCsys=None, name='A-1', region=
+    mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].sets['A-1'])
+mdb.models['Model-1'].Moment(cm1=6644.0, createStepName='Step-1', 
+    distributionType=UNIFORM, field='', localCsys=None, name='A-2', region=
+    mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].sets['A-2'])
+mdb.models['Model-1'].Moment(cm1=-3322.0, createStepName='Step-1', 
+    distributionType=UNIFORM, field='', localCsys=None, name='B-1', region=
+    mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].sets['B-1'])
+mdb.models['Model-1'].Moment(cm1=-6644.0, createStepName='Step-1', 
+    distributionType=UNIFORM, field='', localCsys=None, name='B-2', region=
+    mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].sets['B-2'])
+mdb.models['Model-1'].Moment(cm2=3322.0, createStepName='Step-1', 
+    distributionType=UNIFORM, field='', localCsys=None, name='L-1', region=
+    mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].sets['L-1'])
+mdb.models['Model-1'].Moment(cm2=6644.0, createStepName='Step-1', 
+    distributionType=UNIFORM, field='', localCsys=None, name='L-2', region=
+    mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].sets['L-2'])
+mdb.models['Model-1'].Moment(cm2=-3322.0, createStepName='Step-1', 
+    distributionType=UNIFORM, field='', localCsys=None, name='R-1', region=
+    mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].sets['R-1'])
+mdb.models['Model-1'].Moment(cm2=-6644.0, createStepName='Step-1', 
+    distributionType=UNIFORM, field='', localCsys=None, name='R-2', region=
+    mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].sets['R-2'])
+mdb.jobs['Job-1'].submit(consistencyChecking=OFF)
+mdb.jobs['Job-1']._Message(STARTED, {'phase': BATCHPRE_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ABORTED, {'phase': BATCHPRE_PHASE, 
+    'message': 'Analysis phase failed due to errors', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ERROR, {'phase': BATCHPRE_PHASE, 
+    'message': 'An error occurred during a write access to <rank=0,arg_name=outdir>Job-1.mdl file. Check the disk space on your system.', 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ABORTED, {'phase': BATCHPRE_PHASE, 
+    'message': 'Analysis phase failed due to errors', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ERROR, {
+    'message': 'Analysis Input File Processor exited with an error.', 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(JOB_ABORTED, {
+    'message': 'Analysis Input File Processor exited with an error.', 
+    'jobName': 'Job-1'})
+del mdb.models['Model-1'].rootAssembly.features['Part-1-2']
+mdb.jobs['Job-1'].submit(consistencyChecking=OFF)
+mdb.jobs['Job-1']._Message(STARTED, {'phase': BATCHPRE_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ABORTED, {'phase': BATCHPRE_PHASE, 
+    'message': 'Analysis phase failed due to errors', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ERROR, {
+    'message': 'Analysis Input File Processor exited with an error.', 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(JOB_ABORTED, {
+    'message': 'Analysis Input File Processor exited with an error.', 
+    'jobName': 'Job-1'})
+mdb.models['Model-1'].loads['A-1'].setValues(distributionType=UNIFORM, field=''
+    , region=
+    mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].sets['A-1'])
+del mdb.models['Model-1'].boundaryConditions['SS-1']
+mdb.models['Model-1'].boundaryConditions['SS-2'].deactivate('Step-1')
+mdb.models['Model-1'].DisplacementBC(amplitude=UNSET, createStepName='Initial', 
+    distributionType=UNIFORM, fieldName='', localCsys=None, name='SS-1', 
+    region=Region(
+    edges=mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].edges.getSequenceFromMask(
+    mask=('[#a ]', ), )), u1=UNSET, u2=SET, u3=SET, ur1=SET, ur2=UNSET, ur3=
+    SET)
+del mdb.models['Model-1'].boundaryConditions['SS-2']
+del mdb.models['Model-1'].boundaryConditions['SS-1']
+mdb.models['Model-1'].DisplacementBC(amplitude=UNSET, createStepName='Initial', 
+    distributionType=UNIFORM, fieldName='', localCsys=None, name='BC-1', 
+    region=Region(
+    edges=mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].edges.getSequenceFromMask(
+    mask=('[#a ]', ), )), u1=UNSET, u2=SET, u3=SET, ur1=SET, ur2=UNSET, ur3=
+    SET)
+mdb.models['Model-1'].DisplacementBC(amplitude=UNSET, createStepName='Initial', 
+    distributionType=UNIFORM, fieldName='', localCsys=None, name='BC-2', 
+    region=Region(
+    edges=mdb.models['Model-1'].rootAssembly.instances['Part-1-1'].edges.getSequenceFromMask(
+    mask=('[#5 ]', ), )), u1=SET, u2=UNSET, u3=SET, ur1=UNSET, ur2=SET, ur3=
+    SET)
+mdb.jobs['Job-1'].submit(consistencyChecking=OFF)
+mdb.jobs['Job-1']._Message(STARTED, {'phase': BATCHPRE_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ABORTED, {'phase': BATCHPRE_PHASE, 
+    'message': 'Analysis phase failed due to errors', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ERROR, {
+    'message': 'Analysis Input File Processor exited with an error.', 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(JOB_ABORTED, {
+    'message': 'Analysis Input File Processor exited with an error.', 
+    'jobName': 'Job-1'})
+# Save by DD on 2022_04_23-15.53.47; build 2019 2018_09_25-02.41.51 157541
+# Save by DD on 2022_04_23-15.53.48; build 2019 2018_09_25-02.41.51 157541
+# Save by DD on 2022_04_23-15.53.48; build 2019 2018_09_25-02.41.51 157541
+from part import *
+from material import *
+from section import *
+from assembly import *
+from step import *
+from interaction import *
+from load import *
+from mesh import *
+from optimization import *
+from job import *
+from sketch import *
+from visualization import *
+from connectorBehavior import *
+mdb.jobs['Job-1'].submit(consistencyChecking=OFF)
+mdb.jobs['Job-1']._Message(STARTED, {'phase': BATCHPRE_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FILE, {'phase': BATCHPRE_PHASE, 
+    'file': 'E:\\temp\\Job-1.odb', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(COMPLETED, {'phase': BATCHPRE_PHASE, 
+    'message': 'Analysis phase complete', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STARTED, {'phase': STANDARD_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 24216, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STEP, {'phase': STANDARD_PHASE, 'stepId': 1, 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FRAME, {'phase': STANDARD_PHASE, 'step': 0, 
+    'frame': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(MEMORY_ESTIMATE, {'phase': STANDARD_PHASE, 
+    'jobName': 'Job-1', 'memory': 27.0})
+mdb.jobs['Job-1']._Message(PHYSICAL_MEMORY, {'phase': STANDARD_PHASE, 
+    'physical_memory': 8105.0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(MINIMUM_MEMORY, {'minimum_memory': 17.0, 
+    'phase': STANDARD_PHASE, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FRAME, {'phase': STANDARD_PHASE, 'step': 0, 
+    'frame': 1, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STATUS, {'totalTime': 1.0, 'attempts': 1, 
+    'timeIncrement': 1.0, 'increment': 1, 'stepTime': 1.0, 'step': 1, 
+    'jobName': 'Job-1', 'severe': 0, 'iterations': 1, 'phase': STANDARD_PHASE, 
+    'equilibrium': 1})
+mdb.jobs['Job-1']._Message(END_STEP, {'phase': STANDARD_PHASE, 'stepId': 1, 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(COMPLETED, {'phase': STANDARD_PHASE, 
+    'message': 'Analysis phase complete', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(JOB_COMPLETED, {'time': 'Sat Apr 23 16:17:23 2022', 
+    'jobName': 'Job-1'})
+mdb.models['Model-1'].materials['Material-1'].elastic.setValues(table=((
+    151000.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-2'].elastic.setValues(table=((
+    151000.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-3'].elastic.setValues(table=((
+    151000.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-4'].elastic.setValues(table=((
+    151000.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-5'].elastic.setValues(table=((
+    151000.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-6'].elastic.setValues(table=((
+    151000.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-7'].elastic.setValues(table=((
+    151000.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-8'].elastic.setValues(table=((
+    151000.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-9'].elastic.setValues(table=((
+    151000.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-10'].elastic.setValues(table=((
+    151000.0, 0.3), ))
+mdb.jobs['Job-1'].submit(consistencyChecking=OFF)
+mdb.jobs['Job-1']._Message(STARTED, {'phase': BATCHPRE_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FILE, {'phase': BATCHPRE_PHASE, 
+    'file': 'E:\\temp\\Job-1.odb', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(COMPLETED, {'phase': BATCHPRE_PHASE, 
+    'message': 'Analysis phase complete', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STARTED, {'phase': STANDARD_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 25548, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STEP, {'phase': STANDARD_PHASE, 'stepId': 1, 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FRAME, {'phase': STANDARD_PHASE, 'step': 0, 
+    'frame': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(MEMORY_ESTIMATE, {'phase': STANDARD_PHASE, 
+    'jobName': 'Job-1', 'memory': 27.0})
+mdb.jobs['Job-1']._Message(PHYSICAL_MEMORY, {'phase': STANDARD_PHASE, 
+    'physical_memory': 8105.0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(MINIMUM_MEMORY, {'minimum_memory': 17.0, 
+    'phase': STANDARD_PHASE, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FRAME, {'phase': STANDARD_PHASE, 'step': 0, 
+    'frame': 1, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STATUS, {'totalTime': 1.0, 'attempts': 1, 
+    'timeIncrement': 1.0, 'increment': 1, 'stepTime': 1.0, 'step': 1, 
+    'jobName': 'Job-1', 'severe': 0, 'iterations': 1, 'phase': STANDARD_PHASE, 
+    'equilibrium': 1})
+mdb.jobs['Job-1']._Message(END_STEP, {'phase': STANDARD_PHASE, 'stepId': 1, 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(COMPLETED, {'phase': STANDARD_PHASE, 
+    'message': 'Analysis phase complete', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(JOB_COMPLETED, {'time': 'Sat Apr 23 16:21:11 2022', 
+    'jobName': 'Job-1'})
+mdb.models['Model-1'].steps['Step-1'].setValues(nlgeom=ON)
+mdb.jobs['Job-1'].submit(consistencyChecking=OFF)
+# Save by DD on 2022_04_23-16.32.37; build 2019 2018_09_25-02.41.51 157541
+from part import *
+from material import *
+from section import *
+from assembly import *
+from step import *
+from interaction import *
+from load import *
+from mesh import *
+from optimization import *
+from job import *
+from sketch import *
+from visualization import *
+from connectorBehavior import *
+mdb.jobs['Job-1']._Message(STARTED, {'phase': BATCHPRE_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FILE, {'phase': BATCHPRE_PHASE, 
+    'file': 'E:\\temp\\Job-1.odb', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(COMPLETED, {'phase': BATCHPRE_PHASE, 
+    'message': 'Analysis phase complete', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STARTED, {'phase': STANDARD_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 20772, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STEP, {'phase': STANDARD_PHASE, 'stepId': 1, 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FRAME, {'phase': STANDARD_PHASE, 'step': 0, 
+    'frame': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(MEMORY_ESTIMATE, {'phase': STANDARD_PHASE, 
+    'jobName': 'Job-1', 'memory': 27.0})
+mdb.jobs['Job-1']._Message(PHYSICAL_MEMORY, {'phase': STANDARD_PHASE, 
+    'physical_memory': 8105.0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(MINIMUM_MEMORY, {'minimum_memory': 17.0, 
+    'phase': STANDARD_PHASE, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FRAME, {'phase': STANDARD_PHASE, 'step': 0, 
+    'frame': 1, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STATUS, {'totalTime': 1.0, 'attempts': 1, 
+    'timeIncrement': 1.0, 'increment': 1, 'stepTime': 1.0, 'step': 1, 
+    'jobName': 'Job-1', 'severe': 0, 'iterations': 2, 'phase': STANDARD_PHASE, 
+    'equilibrium': 2})
+mdb.jobs['Job-1']._Message(END_STEP, {'phase': STANDARD_PHASE, 'stepId': 1, 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(COMPLETED, {'phase': STANDARD_PHASE, 
+    'message': 'Analysis phase complete', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(JOB_COMPLETED, {'time': 'Sat Apr 23 16:33:05 2022', 
+    'jobName': 'Job-1'})
+mdb.models['Model-1'].materials['Material-1'].elastic.setValues(table=((
+    126100.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-2'].elastic.setValues(table=((
+    126400.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-3'].elastic.setValues(table=((
+    126700.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-4'].elastic.setValues(table=((
+    127000.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-5'].elastic.setValues(table=((
+    127300.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-6'].elastic.setValues(table=((
+    127600.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-7'].elastic.setValues(table=((
+    127800.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-8'].elastic.setValues(table=((
+    128100.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-9'].elastic.setValues(table=((
+    128400.0, 0.3), ))
+mdb.models['Model-1'].materials['Material-10'].elastic.setValues(table=((
+    128700.0, 0.3), ))
+mdb.models['Model-1'].loads['A-1'].setValues(cm1=20992.99581, distributionType=
+    UNIFORM, field='')
+mdb.models['Model-1'].loads['B-1'].setValues(cm1=-20992.99581, 
+    distributionType=UNIFORM, field='')
+mdb.models['Model-1'].loads['L-1'].setValues(cm2=20992.99581, distributionType=
+    UNIFORM, field='')
+mdb.models['Model-1'].loads['R-1'].setValues(cm2=-20992.99581, 
+    distributionType=UNIFORM, field='')
+mdb.models['Model-1'].loads['A-2'].setValues(cm1=41985.99163, distributionType=
+    UNIFORM, field='')
+mdb.models['Model-1'].loads['B-2'].setValues(cm1=-41985.99163, 
+    distributionType=UNIFORM, field='')
+mdb.models['Model-1'].loads['L-2'].setValues(cm2=41985.99163, distributionType=
+    UNIFORM, field='')
+mdb.models['Model-1'].loads['R-2'].setValues(cm2=-41985.99163, 
+    distributionType=UNIFORM, field='')
+mdb.jobs['Job-1'].submit(consistencyChecking=OFF)
+mdb.jobs['Job-1']._Message(STARTED, {'phase': BATCHPRE_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FILE, {'phase': BATCHPRE_PHASE, 
+    'file': 'E:\\temp\\Job-1.odb', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(COMPLETED, {'phase': BATCHPRE_PHASE, 
+    'message': 'Analysis phase complete', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STARTED, {'phase': STANDARD_PHASE, 
+    'clientHost': 'ZHAOYAFEI', 'handle': 9568, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STEP, {'phase': STANDARD_PHASE, 'stepId': 1, 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FRAME, {'phase': STANDARD_PHASE, 'step': 0, 
+    'frame': 0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(MEMORY_ESTIMATE, {'phase': STANDARD_PHASE, 
+    'jobName': 'Job-1', 'memory': 27.0})
+mdb.jobs['Job-1']._Message(PHYSICAL_MEMORY, {'phase': STANDARD_PHASE, 
+    'physical_memory': 8105.0, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(MINIMUM_MEMORY, {'minimum_memory': 17.0, 
+    'phase': STANDARD_PHASE, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(ODB_FRAME, {'phase': STANDARD_PHASE, 'step': 0, 
+    'frame': 1, 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(STATUS, {'totalTime': 1.0, 'attempts': 1, 
+    'timeIncrement': 1.0, 'increment': 1, 'stepTime': 1.0, 'step': 1, 
+    'jobName': 'Job-1', 'severe': 0, 'iterations': 3, 'phase': STANDARD_PHASE, 
+    'equilibrium': 3})
+mdb.jobs['Job-1']._Message(END_STEP, {'phase': STANDARD_PHASE, 'stepId': 1, 
+    'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(COMPLETED, {'phase': STANDARD_PHASE, 
+    'message': 'Analysis phase complete', 'jobName': 'Job-1'})
+mdb.jobs['Job-1']._Message(JOB_COMPLETED, {'time': 'Sat Apr 23 20:50:22 2022', 
+    'jobName': 'Job-1'})
+# Save by DD on 2022_04_23-20.51.35; build 2019 2018_09_25-02.41.51 157541
+# Save by DD on 2022_04_23-23.25.03; build 2019 2018_09_25-02.41.51 157541

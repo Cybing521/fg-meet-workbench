@@ -19,12 +19,19 @@ fg-meet-workbench/
 ├── tools/                       # Python/MATLAB 输入生成与 COMSOL 导出
 ├── cases/                       # 生成的 MEET 输入文件（试点 + 可扩展全组合）
 ├── templates/                   # 30×30×10 方板 CFFF 网格模板
-├── reference/                   # 历史 FG-MEEP 输入样例（格式对照）
+├── reference/                   # 历史 FG-MEEP 输入样例、前人代码和参考材料
 ├── output/                      # 运行结果（gitignore）
 ├── setup_paths.m
 ├── run_phase1_static_elastic.m  # 阶段 1 冒烟测试
 └── TODO.md
 ```
+
+前人代码已复制到 [reference/predecessor-code](reference/predecessor-code)，包含：
+
+- `zhao-yafei/`：赵亚飞论文及相关代码；
+- `qian-shenyun/`：钱沈云论文及相关代码。
+
+该目录保留原始 MATLAB `.m`、输入文件、`.mat`、`.fig`、`.xlsx` 和论文 PDF 等材料，便于 Windows 设备拉取后直接对照验证。
 
 ---
 
