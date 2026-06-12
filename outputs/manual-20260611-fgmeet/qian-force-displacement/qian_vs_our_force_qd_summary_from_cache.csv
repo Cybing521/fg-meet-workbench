@@ -1,0 +1,2 @@
+comparison,num_reduced_dof,loadmax,max_abs_diff_all_dof_m,max_rel_diff_all_dof_pct,mean_abs_diff_all_dof_m,max_abs_diff_15points_mm,max_rel_diff_15points_pct,qian_source,our_source
+qian_code_qd_vs_our_static_elastic_U_Vf60,13800,-15000,0,0,0,0,0,G:\fg-meet-workbench\outputs\manual-20260611-fgmeet\electro-magneto-validation\qian_point3_cfff_plate_direct.mat,G:\fg-meet-workbench\output\static_elastic_U_Vf60_elastic.mat

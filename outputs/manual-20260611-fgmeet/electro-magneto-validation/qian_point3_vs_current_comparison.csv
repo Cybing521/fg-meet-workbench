@@ -1,0 +1,5 @@
+metric,qian_value,our_current_value,abs_diff,rel_diff_pct,notes
+electric_thermal_response_layer_span_scaled_to_2mm,658.585489735107,658.585489735105,1.13686837721616e-12,1.72622749048636e-13,"same layer-average reporting convention as current internal 2mm table"
+magnetic_thermal_response_layer_span_scaled_to_2mm,0.681570500460291,0.68157050046029,1.33226762955019e-15,1.95470260031862e-13,"same layer-average reporting convention as current internal 2mm table"
+electric_zero_delta_full_span_scaled_to_2mm,982.425092612064,NaN,NaN,NaN,"pure Qian RWR zero external temperature field, full SensM_E span, not the current table convention"
+magnetic_zero_delta_full_span_scaled_to_2mm,0.759433824648604,NaN,NaN,NaN,"pure Qian RWR zero external temperature field, full SensM_M span, not the current table convention"

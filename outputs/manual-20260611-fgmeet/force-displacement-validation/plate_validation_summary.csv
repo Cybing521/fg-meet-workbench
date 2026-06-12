@@ -1,0 +1,2 @@
+run_tag,case_id,comsol_csv,matlab_w_p8_mm,comsol_w_p8_mm,center_rel_err_pct,max_abs_diff_mm,max_rel_err_pct,mean_rel_err_pct,comsol_mesh,notes,date
+plate_U_Vf06_CFFF_mesh3,U_Vf06_elastic,output\\comsol_elastic_plate_validation_plate_U_Vf06_CFFF_mesh3_points.csv,-2.12751986193692,-2.29581206236645,7.91025284606824,0.369884311769186,9.04412695155931,8.29769602861791,"COMSOL Plate 2D, auto mesh size 3, thickness 0.006 m, face load -15000 Pa",plate interface first run,2026-06-11

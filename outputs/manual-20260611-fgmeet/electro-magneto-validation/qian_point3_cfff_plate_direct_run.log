@@ -1,0 +1,13 @@
+QIAN_POINT3_DIRECT_START
+qian_dir=G:\fg-meet-workbench\reference\predecessor-code\qian-shenyun\双向耦合程序-new\双向耦合程序-new\MEET-elastic-thermal\.
+input_file=./InputFile/Thermal_CFFFplate_0.6Vf-30x30-10layer.txt
+assembling_predecessor_matrices...
+assembled_predecessor_matrices log=G:\fg-meet-workbench\outputs\manual-20260611-fgmeet\electro-magneto-validation\qian_point3_cfff_plate_main_fosdlin.log cache=G:\fg-meet-workbench\outputs\manual-20260611-fgmeet\electro-magneto-validation\qian_point3_cfff_plate_matrices.mat
+final_dof_m=13800 final_dof_mee=9000
+free_end_mid_mm=-5.99822273187996
+center_mx_mm=-2.24406106840784 center_my_mm=-2.12751986193692
+electric_span_at_load=1045.06444869869 electric_span_2mm=931.404642601963
+magnetic_span_at_load=0.807855272883312 magnetic_span_2mm=0.719994018216702
+wrote_summary=G:\fg-meet-workbench\outputs\manual-20260611-fgmeet\electro-magneto-validation\qian_point3_cfff_plate_summary.csv
+wrote_comparison=G:\fg-meet-workbench\outputs\manual-20260611-fgmeet\electro-magneto-validation\qian_point3_vs_current_comparison.csv
+QIAN_POINT3_DIRECT_DONE

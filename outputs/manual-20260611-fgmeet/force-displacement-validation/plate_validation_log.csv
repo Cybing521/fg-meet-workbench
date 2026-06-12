@@ -1,0 +1,2 @@
+case_id,fg_mode,vf0,load_case,bc,matlab_w_mm,comsol_w_mm,rel_err_w_pct,matlab_theta_K,comsol_theta_K,rel_err_theta_pct,matlab_mesh,comsol_mesh,notes,date
+U_Vf06_elastic,U,0.6,elastic,CFFF,-2.12751986193692,-2.29581206236645,7.91025284606824,,,,30x30 MEET,"COMSOL Plate 2D, auto mesh size 3, thickness 0.006 m, face load -15000 Pa",15-point comparison; max_abs_diff_mm=0.369884; max_rel_err_pct=9.04413; mean_rel_err_pct=8.2977; plate interface first run,2026-06-11

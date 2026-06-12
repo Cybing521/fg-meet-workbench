@@ -1,0 +1,7 @@
+﻿comparison,point,x_m,y_m,z_m,node_id,our_matlab_w_mm,qian_reference_w_mm,rel_err_pct,source,notes
+our_vs_qian_present,free_end_midpoint,0.3,0.15,0.0,2791,-5.998222731879956,-5.9976,0.010383017873076753,Qian 2026 Table 3,Both are CFFF square plate 300mm x 300mm x 6mm under 15000 Pa; compare free-end midpoint only
+our_vs_qian_comsol,free_end_midpoint,0.3,0.15,0.0,2791,-5.998222731879956,-5.9525,0.7681265330526038,Qian 2026 Table 2,Compare our present-model point with Qian COMSOL convergence value; not a 15-point COMSOL check
+our_point_extract,fixed_edge_midpoint,0.0,0.15,0.0,31,0.0,,,case NODE START + output/static_elastic_U_Vf60_elastic.mat Qd,direct restored w from case node table
+our_point_extract,center,0.15,0.15,0.0,1411,-2.1275198619369178,,,case NODE START + output/static_elastic_U_Vf60_elastic.mat Qd,direct restored w from case node table
+our_point_extract,x025_y015,0.25,0.15,0.0,2331,-4.659011517423632,,,case NODE START + output/static_elastic_U_Vf60_elastic.mat Qd,direct restored w from case node table
+our_point_extract,free_end_midpoint,0.3,0.15,0.0,2791,-5.998222731879956,,,case NODE START + output/static_elastic_U_Vf60_elastic.mat Qd,direct restored w from case node table

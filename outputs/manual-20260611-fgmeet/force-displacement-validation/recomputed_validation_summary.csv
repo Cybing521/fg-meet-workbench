@@ -1,0 +1,2 @@
+run_tag,case_id,comsol_csv,matlab_w_p8_mm,comsol_w_p8_mm,center_rel_err_pct,max_abs_diff_mm,max_rel_err_pct,mean_rel_err_pct,comsol_mesh,notes,date
+recomputed_U_Vf06_layered_csv_sweep7_mesh4,U_Vf06_elastic,output\\comsol_elastic_cfff_U_Vf06_layered_csv_sweep7_mesh4_points.csv,-2.12751986193692,-2.20773924098383,3.7705584085067,0.226637361223919,4.92675796739782,3.51281176599227,"3D solid 10-domain CSV materials, swept quad/hex mesh, hauto size 4, 7 elements per material layer, force area",recomputed for force-displacement validation,2026-06-11

@@ -1,0 +1,3 @@
+check_id,old_driver_value,old_driver_unit,current_scaled_driver_for_abs_2mm,old_over_current_ratio,old_w_center_mm,current_probe_w_center_mm,conclusion
+E_to_w,90075.3298702999,V,11481.694511476,7.84512510590395,-1.99999999976528,-0.0522570949262148,stale_after_w_center_refresh
+M_to_w,17974.2624645234,A,2291.13777305258,7.84512510593177,2.00000000001515,0.174585747179692,stale_after_w_center_refresh

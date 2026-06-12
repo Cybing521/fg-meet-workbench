@@ -30,6 +30,7 @@ public class RunElasticCfffValidation {
     private static final String FG_MODE = env("FG_COMSOL_FG_MODE", "U");
     private static final String VF0 = env("FG_COMSOL_VF0", "0.6");
     private static final String BC = env("FG_COMSOL_BC", "CFFF").toUpperCase();
+    private static final double STIFFNESS_SCALE = doubleEnv("FG_COMSOL_STIFFNESS_SCALE", 1.0);
 
     private static final double[][] POINTS = new double[][] {
         {0.050, 0.050, 0.0},
@@ -124,6 +125,7 @@ public class RunElasticCfffValidation {
             + ",mesh_mode," + MESH_MODE + ",mesh_size," + MESH_SIZE
             + ",sweep_layers," + SWEEP_LAYERS + ",load_mode," + LOAD_MODE
             + ",layered_geometry," + LAYERED_GEOMETRY + ",solid_model," + SOLID_MODEL
+            + ",stiffness_scale," + STIFFNESS_SCALE
             + ",layer_csv," + LAYER_CSV
             + ",case_id," + CASE_ID + ",bc," + BC);
 
@@ -132,7 +134,8 @@ public class RunElasticCfffValidation {
         } else {
             model.component("comp1").material().create("mat1", "Common");
             model.component("comp1").material("mat1").label("U Vf0.6 equivalent homogeneous solid");
-            model.component("comp1").material("mat1").propertyGroup("def").set("youngsmodulus", Double.toString(E) + "[Pa]");
+            model.component("comp1").material("mat1").propertyGroup("def")
+                .set("youngsmodulus", Double.toString(scaleStiffness(E)) + "[Pa]");
             model.component("comp1").material("mat1").propertyGroup("def").set("poissonsratio", Double.toString(NU));
             model.component("comp1").material("mat1").propertyGroup("def").set("density", Double.toString(RHO) + "[kg/m^3]");
         }
@@ -257,6 +260,14 @@ public class RunElasticCfffValidation {
         return Integer.parseInt(value);
     }
 
+    private static double doubleEnv(String name, double defaultValue) {
+        String value = env(name, "");
+        if (value.length() == 0) {
+            return defaultValue;
+        }
+        return Double.parseDouble(value);
+    }
+
     private static boolean boolEnv(String name, boolean defaultValue) {
         String value = env(name, "");
         if (value.length() == 0) {
@@ -340,9 +351,9 @@ public class RunElasticCfffValidation {
             model.component("comp1").material(matTag).propertyGroup().create("Orthotropic", "Orthotropic");
             model.component("comp1").material(matTag).propertyGroup("Orthotropic")
                 .set("Evector", new String[] {
-                    Double.toString(layerE1(layer)) + "[Pa]",
-                    Double.toString(layerE2(layer)) + "[Pa]",
-                    Double.toString(layerE2(layer)) + "[Pa]"
+                    Double.toString(scaleStiffness(layerE1(layer))) + "[Pa]",
+                    Double.toString(scaleStiffness(layerE2(layer))) + "[Pa]",
+                    Double.toString(scaleStiffness(layerE2(layer))) + "[Pa]"
                 });
             model.component("comp1").material(matTag).propertyGroup("Orthotropic")
                 .set("nuvector", new String[] {
@@ -352,13 +363,13 @@ public class RunElasticCfffValidation {
                 });
             model.component("comp1").material(matTag).propertyGroup("Orthotropic")
                 .set("Gvector", new String[] {
-                    Double.toString(layerG12(layer)) + "[Pa]",
-                    Double.toString(layerG13(layer)) + "[Pa]",
-                    Double.toString(layerG23(layer)) + "[Pa]"
+                    Double.toString(scaleStiffness(layerG12(layer))) + "[Pa]",
+                    Double.toString(scaleStiffness(layerG13(layer))) + "[Pa]",
+                    Double.toString(scaleStiffness(layerG23(layer))) + "[Pa]"
                 });
         } else {
             model.component("comp1").material(matTag).propertyGroup("def")
-                .set("youngsmodulus", Double.toString(layerE1(layer)) + "[Pa]");
+                .set("youngsmodulus", Double.toString(scaleStiffness(layerE1(layer))) + "[Pa]");
             model.component("comp1").material(matTag).propertyGroup("def")
                 .set("poissonsratio", Double.toString(layerNu12(layer)));
         }
@@ -446,6 +457,10 @@ public class RunElasticCfffValidation {
 
     private static double layerDensity(double[] layer) {
         return layer[8];
+    }
+
+    private static double scaleStiffness(double value) {
+        return value * STIFFNESS_SCALE;
     }
 
     private static double layerZ1(double[] layer) {

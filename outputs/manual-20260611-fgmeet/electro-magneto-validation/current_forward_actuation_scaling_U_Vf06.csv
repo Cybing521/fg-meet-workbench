@@ -1,0 +1,4 @@
+case_id,load_case,driver_kind,probe_driver_value,driver_unit,probe_w_center_mm,unit_response_mm_per_driver,target_abs_w_mm,scaled_driver_for_abs_2mm,source_results_static_mtime,note
+U_Vf60_elastic,elastic,mechanical_load,-15000,load_scale,-2.12751986193692,0.000141834657462461,2,-14100.9259357455,1779449411.763117,mechanical reference from current results_static-based linear scaling
+U_Vf60_electro,electro,electric_potential,300,V,-0.0522570949262148,-0.000174190316420716,2,11481.694511476,1779449411.763117,current results_static-based linear scaling; MATLAB rerun blocked by MathWorks service error 5001
+U_Vf60_magneto,magneto,magnetic_potential,200,A,0.174585747179692,0.00087292873589846,2,2291.13777305258,1779449411.763117,current results_static-based linear scaling; MATLAB rerun blocked by MathWorks service error 5001

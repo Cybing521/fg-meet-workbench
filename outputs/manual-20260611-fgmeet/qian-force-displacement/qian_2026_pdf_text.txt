@@ -1,0 +1,1160 @@
+Int J Mech Mater Des        (2026) 22:17
+https://doi.org/10.1007/s10999-025-09834-9
+
+
+
+
+Fully coupled modeling for static and dynamic analysis
+of thermo‑magneto‑electro‑elastic plates
+Shun‑Qi Zhang · Shen‑Yun Qian · Shen Liu ·
+Chun‑Yan Ling · Song‑Yun Ma
+
+
+
+
+Received: 8 July 2025 / Accepted: 5 November 2025
+© The Author(s), under exclusive licence to Springer Nature B.V. 2025
+
+
+Abstract Magneto-electro-elastic (MEE) materi-                     Serendipity plate/shell elements for MEE structures
+als with integrated sensory and actuation functions                incorporate five displacement DOFs per node, and
+have promising application potentials in the space-                one electric, one magnetic and one temperature DOF
+craft and automotive engineering. The deformation of               per element. The present FE model is first analyzed
+MEE structures in temperature varying environments                 for mesh convergence. Subsequently, the static and
+leads to a thermo-magneto-electro-elastic coupled                  dynamic responses of MEE plates under mechani-
+problem. However, most studies considered tempera-                 cal, electric, and magnetic loads are investigated. The
+ture changes as a thermal load. This unidirectional                numerical results, including displacements and tem-
+coupling misses thermal changes due to structural                  perature fields, are compared with COMSOL simula-
+deformations. This study establishes a thermo-mag-                 tions. The comparative results indicate that the model
+neto-electro-elastic fully coupled finite element (FE)             has good accuracy in predicting the impact of struc-
+model for MEE plates based on the first-order shear                tural deformations on the temperature field.
+deformation (FOSD) theory. The proposed eight-node
+                                                                   Keywords MEE plates · First-order shear
+                                                                   deformation theory · Multi-physics coupling · Finite
+S.-Q. Zhang · S.-Y. Qian · S. Liu · C.-Y. Ling (*)
+                                                                   element analysis
+School of Mechatronic Engineering and Automation,
+Shanghai University, Shanghai, China
+e-mail: lingchunyan@shu.edu.cn
+S.-Q. Zhang                                                        1 Introduction
+e-mail: zhangsq@shu.edu.cn
+S.-Y. Qian                                                         Thin-walled structures are essential in aeronautical
+e-mail: syqian@shu.edu.cn                                          and astronautical engineering for lightweight design,
+S. Liu                                                             but traditional single-function materials cannot meet
+e-mail: efz8631@shu.edu.cn                                         the demanding requirements of modern structural
+                                                                   applications. Magneto-electro-elastic (MEE) com-
+S.-Q. Zhang
+                                                                   posite materials with their multi-functional proper-
+SHU General Intelligent Robotics Research Institute,
+Baoshan District , Shanghai, China                                 ties have emerged as one of the innovative research
+                                                                   topics in the mechanical engineering. Suchtelen
+S.-Y. Ma                                                           (1972) first developed MEE materials by using
+Institute of General Mechanics, RWTH Aachen University,
+                                                                   ferroelectric phases (BaTiO3 ) and ferromagnetic
+Aachen, Germany
+e-mail: ma@iam.rwth-aachen.de                                      phases (CoFe2 O4 ). This kind of composite materials
+
+                                                                                                            Vol.: (0123456789)
+   17         Page 2 of 21                                                                           S.-Q. Zhang et al.
+
+
+ integrate the properties of ferroelectric and ferro-        multiphysics coupling problems. Nguyen-Thanh et al.
+ magnetic materials, demonstrating dual functionality        (2021) proposed a Parametric Deep Energy Method
+ through electric field induced polarization and mag-        (P-DEM) based on physics-informed neural networks
+ netic field induced magnetization. Their unique cou-        (PINNs) to solve strain gradient elasticity problems.
+ pling effects - piezoelectric, piezomagnetic and mag-       Eshaghi et al. (2025) proposed the Variational Phys-
+ netoelectric - enable diverse applications in sensors       ics-Informed Neural Operator (VINO), which embeds
+ and actuators, energy harvesters, sonar applications,       the variational energy form of partial differential
+ magnetic field probes, and microwave resonators             equations (PDEs) into the neural operator framework.
+ (Pouresmaeeli et al. 2013; Liu and Lyu 2020; Shish-         PDEs are solved by minimizing the energy form of
+ esaz et al. (2018); Semenov et al. (2006)). To fully        PDEs, and VINO exhibits outstanding performance
+ harness these coupling effects, it is crucial to investi-   in scenarios with scarce data and high resolution.
+ gate the structural behavior of MEE structures under        Although recent variational and machine learning
+ multi-physics conditions.                                   approaches offer efficient alternatives, the FE method
+    Existing studies on the mechanical behavior of           remains a well-established technique with recognized
+ MEE structures have employed various computational          accuracy in multiphysics problems and the advantage
+ approaches, with the primary methodologies being            of systematic validation through commercial software
+ semi-analytical solution, finite element (FE) analysis      packages.
+ and analytical method. Huang et al. (2007) derived              MEE materials are often used in complex envi-
+ closed-form solutions for key mechanical quantities         ronments, the static and dynamic behaviors of MEE
+ including axial force and displacement fields in MEE        structures under different loadings have been widely
+ beams to investigate plane stress behavior. Zhang           investigated. Researchers have examined MEE struc-
+ et al. (2022) constructed a multi-physics coupled FE        tures under mechanical, electric, magnetic, ther-
+ model and performed static and dynamic analysis on          mal, and hygrothermal fields, focusing primarily on
+ FG-MEE structures, and the proposed FE model is of          how external loadings influence deformation, vibra-
+ great significance in the accurate design of FG-MEE         tion, and stability. For instance, investigations have
+ structures. Zhou et al. (2022) utilized the enriched        addressed bending and transient responses under
+ finite element method to evaluate the vibrational per-      combined electric, magnetic and mechanical fields
+ formance of MEE structures, effectively smoothing           (Zhao et al. 2022); vibrations under explosive, ther-
+ stress discontinuities between elements. Zhang et al.       mal, electric, and magnetic conditions (Dat et al.
+ (2019, 2020a) proposed a semi-analytical approach           2022); static and dynamic characteristics under vari-
+ combining the scaled boundary finite element method         ous thermal loadings (Zhao et al. 2024); mechanical
+ and the accurate integration technique to analyze the       responses in hygrothermal environments (Vinyas and
+ static deflection and natural vibration properties of       Kattimani 2017a, 2018a); and transient behaviors
+ MEE plates.                                                 under moving heat flux (Tarkashvand et al. 2025).
+    In addressing the governing equations of mechani-        While these works provide valuable insights, most
+ cal problems, several researchers have proposed             emphasize external excitations, whereas studies on
+ feasible and efficient solution methodologies. The          fully coupled multiphysics effects remain limited.
+ high-order nonlocal operator method, the nonlocal               The unique capability of MEE materials to facili-
+ strong formulations for various physical models, and        tate coupling interactions between mechanical, elec-
+ the variational method proposed by Ren et al. (2020,        tric, and magnetic fields (Priya et al. 2007), resulting
+ 2023, 2025) demonstrate remarkable computational            in field induced electric and magnetic potentials, has
+ efficiency and accuracy, providing useful insights for      attracted some research attention. Sladek et al. (2013)
+ extension to MEE structures. Rabczuk et al. (2019)          calculated the potential changes of MEE thick plates
+ proposed a novel nonlocal operator theory for solv-         under intensity loading. Zhang et al. (2022) examined
+ ing governing equations, which completely avoids            FG-MEE structures subjected to coupled mechanical,
+ the use of shape functions and greatly simplifies the       magnetic and electric loads, quantifying the induced
+ solution process. Samaniego et al. (2020) presented         potentials. Vinyas and Kattimani (2017b, 2018b) inves-
+ a deep energy method (DEM), incorporating deep              tigated multilayered METE beams and plates under
+ neural networks, for solving various mechanical and         varying thermal conditions, analyzing their effects
+
+Vol:. (1234567890)
+Fully coupled modeling for static and dynamic analysis of thermo‑magneto‑electro‑elastic…                          Page 3 of 21        17
+
+
+on displacements, potentials and magnetic flux den-                B = q𝜺 + 𝜿E + 𝜸H + 𝝉 T 𝜽,                                              (3)
+sity. Zhou and Qu (2023) conducted a comprehensive
+analysis of MEE structures subjected to thermal and
+mechanical loads, characterizing both static defor-
+                                                                   S = 𝝀𝜺 + pE + 𝝉H + c𝜽,                                                 (4)
+mation and transient response while determining the
+resulting displacement and potential fields.                       𝝀T = C𝜶,                                                               (5)
+    Previous research has primarily concentrated on out-
+put electric and magnetic potentials. However, due to              𝜽 = T − T0 .                                                           (6)
+the thermal expansion coefficients of MEE materials,
+externally applied physical fields can induce structural           Here, 𝝈, 𝜺, D and E denote the stress, strain, electric
+deformation, which in turn leads to changes in the tem-            displacement and electric field vectors, respectively;
+perature field of the structure, resulting in temperature          B, H , S and 𝜽 denote the magnetic induction, mag-
+differences. Cui et al. (2019) proposed a novel thermo-            netic field, entropy and temperature difference vec-
+mechanical coupling approach using thermal deforma-                tors , respectively. Furthermore, C, 𝝌 and 𝜸 denote the
+tion and material viscosity-induced deformation heat-              elastic, dielectric, magnetostrictive constant matri-
+ing to describe the interconversion of internal energy             ces, respectively; e, q and 𝜿 denote the piezoelectric,
+and mechanical work. However, their study primarily                piezomagnetic and magnetoelectric coupling coeffi-
+focused on energy variations caused by deformation                 cient matrices, respectively; 𝝀, 𝜶, p, 𝝉 and c denote the
+heating, without detailed analysis of the temperature              thermal stress moduli, thermal expansion, pyroelec-
+field variations. Furthermore, there are almost no stud-           tric coefficient, pyromagnetic coefficient and thermal
+ies on the effect of structural deformation on the tem-            capacity matrices, respectively.
+perature field. With regard to this, this study seeks to               Assuming that the plate and shell thickness is
+establish a fully coupled model of magneto-electro-                small relative to the in-plane dimensions, the nor-
+thermo-elastic for MEE plates within the first-order               mal stresses 𝜎33 are negligible compared to the planar
+shear deformation (FOSD) theory to fill the research               stresses. Accordingly, the comprehensive matrix rep-
+gap. Based on the principle of virtual work and Ham-               resentation corresponding to Eqs. 1–4 is relegated to
+ilton’s principle, the governing equations are system-             Appendix A, with the main text focusing on the core
+atically derived and subsequently solved through a self-           derivation steps.
+coded FE program to numerically investigate both static                Under the assumption that all applied
+and transient responses of MEE plates. Beyond analyz-              fields (electric, magnetic and thermal) are
+ing deformation effects under multiphysics fields, this            thickness-directional              only,       which         leads       to
+work explicitly explores the resulting temperature field           𝜒11 = 𝜒22 = 0, 𝜅11 = 𝜅22 = 0, 𝛾11 = 𝛾22 = 0, p1 = p2 = 0, 𝜏1 = 𝜏2 = 0 . In
+
+variations. The theoretical framework and computa-                 accordance with Maxwell’s equations, the electric
+tional findings presented in this article are projected to         and magnetic fields are derived from their respective
+provide a crucial reference for the design optimization            potentials through gradient operations, specifically
+of MEE structures under various physical fields.                                                  {
+                                                                                                       𝜕𝜙        𝜕𝜙      𝜕𝜙
+                                                                                                                              }
+                                                                   E = −▽𝝓 = B𝝓 𝝓 = − 𝜕Θ11 , − 𝜕Θ22 , − 𝜕Θ33 ,                             (7)
+2 Theoretical formulations
+                                                                                   {                        }
+                                                                                      𝜕𝜓       𝜕𝜓       𝜕𝜓
+                                                                   H = −▽𝝍 = B𝝍 𝝍 = − 𝜕Θ11 , − 𝜕Θ22 , − 𝜕Θ33 ,                            (8)
+2.1 Constitutive relations
+                                                                   where ▽ is the gradient operator, 𝝓 and 𝝍 represent
+Given the assumption of small strains in plates and
+                                                                   the electric and magnetic potential vectors, respec-
+shells, the linear constitutive relations for MEE mate-
+                                                                   tively; B𝝓 and B𝝍 denote the electric and magnetic
+rials are given by (Tassi et al. 2022)
+                                                                   field matrix, respectively.
+𝝈 = C𝜺 − eT E − qT H − 𝝀T 𝜽,                             (1)          Since the electric and magnetic fields act in the
+                                                                   thickness direction, the in-plane components can be
+                                                                   neglected. The electric and magnetic potentials are
+D = e𝜺 + 𝝌E + 𝜿H + pT 𝜽,                                 (2)
+
+                                                                                                                           Vol.: (0123456789)
+   17         Page 4 of 21                                                                           S.-Q. Zhang et al.
+
+
+ postulated to exhibit linear variation along the thick-    Fig. 1. Eqs. 12 and 13 can be written in the following
+ ness direction. Eqs. 7 and 8 can be simplified to          matrix form
+             𝜙3                                                                         ⎧ v0 ⎫
+ E3 = −         ,                                    (9)                                ⎪ 01 ⎪
+             hE
+                                                                ⎧ v ⎫ ⎡ 1 0 0 Θ3 0 ⎤⎪ v2 ⎪
+                                                                ⎪ 1⎪                    ⎪0 ⎪
+             𝜓3                                             u = ⎨ v2 ⎬ = ⎢ 0 1 0 0 Θ3 ⎥⎨ v3 ⎬ = Zu v.             (14)
+ H3 = −         ,                                   (10)        ⎪ v3 ⎪ ⎣ 0 0 1 0 0 ⎦⎪ 1 ⎪
+                                                                         ⎢            ⎥
+             hH                                                 ⎩ ⎭                     ⎪ v1 ⎪
+                                                                                        ⎪1 ⎪
+ where hE and hH are the distances between electrodes                                   ⎩ v2 ⎭
+ and magnetic poles of the current layer. Moreover, 𝜙3
+                                                            Here, v denotes the generalized displacement vector.
+ and 𝜓3 represent the imposed electric magnetic poten-
+                                                               Disregarding the compression of the struc-
+ tials along the thickness direction, respectively.
+                                                            ture along the thickness direction, the strain ten-
+    Due to the continuous variation of temperature dif-
+                                                            sors including only the in-plane strains 𝜀𝛼𝛽 and
+ ference along the thickness direction, the structure
+                                                            transverse shear strains 𝜀𝛼3 , which are obtained as
+ is discretized into N layers for calculation. The dis-
+                                                            (Zhang et al. 2020b)
+ tribution of the temperature field within the structure
+ is represented by the temperature difference in each                0           1           2
+                                                            𝜀𝛼𝛽 = 𝜀𝛼𝛽 + Θ3 𝜀𝛼𝛽 + (Θ3 )2 𝜀𝛼𝛽 ,                     (15)
+ layer, as expressed below:
+
+            ⎡1 0 ⋯ 0⎤⎧ 𝜃1 ⎫                                          0           1
+            ⎢0 1 ⋯ 0⎥⎪ 𝜃2 ⎪                                 𝜀𝛼3 = 𝜀𝛼3 + Θ3 𝜀𝛼3 ,                                  (16)
+ 𝜽 = BT 𝜽 = ⎢       ⎥⎨ ⎬,                           (11)
+            ⎢⋮ ⋮ ⋱ ⋮⎥⎪ ⋮ ⎪
+                                                                         0   0
+                                                            where 𝜀11, 𝜀22 are the in-plane longitudinal strains,
+            ⎣0 0 ⋯ 1⎦⎩𝜃N ⎭                                  0   0                                         0   0
+                                                            𝜀12, 𝜀21 denote the in-plane shear strains, 𝜀13, 𝜀23 rep-
+ where BT is the temperature distribution matrix and                                             1    1
+                                                            resent the transverse shear strains, 𝜀11, 𝜀22 denote the
+ 𝜃i denotes the temperature difference in the i-th layer.                            1   1
+                                                            bending strains, 𝜀12, 𝜀21 are the torsional strains, and
+                                                            2    1
+ 2.2 Strain–displacement field                             𝜀𝛼𝛽 , 𝜀𝛼3 represent corrections for the in-plane and
+                                                            shear strains, respectively.
+ This paper adopts the FOSD theory, which states               Each strain component in Eqs. 15 and 16 can be
+ that straight lines perpendicular to the mid-plane of      expressed as
+ the structure stay straight after deformation, but may
+ no longer be perpendicular to the mid-plane, and the
+ structural thickness remains unchanged. Under this
+ theory, the displacement field of any point within
+ plate/shell structures can be characterized by five
+ independent kinematic parameters, expressed as
+ (Zhang et al. 2015)
+         0           1
+ v𝛼 = v𝛼 + Θ3 v𝛼 ,                                  (12)
+
+         0
+ v3 = v3 ,                                          (13)
+                                 0   0
+ where 𝛼 takes 1 and 2, v𝛼 and v3 represent the transla-
+                             1
+ tional displacements, v𝛼 are the generalized rotational
+ displacements. These five parameters can be seen as
+ degrees of freedom (u, v, w, 𝜑1 , 𝜑2 ) as presented in     Fig. 1  Degrees of freedom
+
+
+
+Vol:. (1234567890)
+Fully coupled modeling for static and dynamic analysis of thermo‑magneto‑electro‑elastic…                       Page 5 of 21        17
+
+
+ 0         0           0
+2𝜀𝛼𝛽 = 𝜑𝛼𝛽 + 𝜑𝛽𝛼 ,                                             (17)
+
+ 1         0                   0       1           0
+2𝜀𝛼𝛽 = 𝜑𝛼𝛽 − b𝜆𝛽 𝜑𝜆𝛼 + 𝜑𝛽𝛼 − b𝛿𝛼 𝜑𝛿𝛽 ,                         (18)
+
+ 2             1                   1
+2𝜀𝛼𝛽 = −b𝜆𝛽 𝜑𝜆𝛼 − b𝛿𝛼 𝜑𝛿𝛽 ,                                    (19)
+                                                                      Fig. 2  Schematic of eight-node element
+
+ 0         1       0
+2𝜀𝛼3 = v𝛼 + 𝜑3𝛼 ,                                              (20)
+                                                                      transformation as illustrated in Fig. 2 is created to
+ 1         1                   1                                      transform them into regularly shaped elements in
+2𝜀𝛼3 = 𝜑3𝛼 − b𝛿𝛼 v𝛿 .                                          (21)   the natural coordinate system (𝜉, 𝜂).
+           n           n               n   n           n   n             The displacement vector v and strain vector 𝜺 are
+Here, 𝜑𝜆𝛼 = v𝜆,𝛼 − b𝜆𝛼 v3, 𝜑3𝛼 = v3,𝛼 + b𝛿𝛼 v𝛿 , where
+                                                                      formulated in terms of the nodal degrees of freedom
+ , 𝛼 denotes the partial derivatives of the coordinate
+′ ′
+                                                                      vector q and the interpolation functions
+axes, ′ n′ takes 0 or 1, representing translational and
+rotational parameters, respectively. Furthermore, b𝜆𝛼                 v = Nq.                                                          (27)
+and b𝛿𝛼 denote the covariant and mixed-variant com-
+ponents of curvature tensors. For plate structures,                   𝜺 = Lv = LNq = Bu q.                                             (28)
+b𝜆𝛼 = b𝛿𝛼 = 0. Thus, The strain–displacement rela-
+tionships for the MEE plates can be expressed as                      Here, Bu is the strain field matrix, L denotes the dif-
+       0                   1
+                                                                      ferential operator. N is the shape function, which is
+𝜀11 = v1,1 + Θ3 v1,1 ,                                         (22)   also the interpolation function defined by the natural
+                                                                      coordinates, expressed at each node of an element as
+       0                   1
+𝜀22 = v2,2 + Θ3 v2,2 ,                                         (23)   ⎧ Ni = 1 (1 + 𝜉i 𝜉)(1 + 𝜂i 𝜂)(𝜉i 𝜉 + 𝜂i 𝜂 − 1) for i = 1, 2, 3, 4
+                                                                             4
+                                                                      ⎪      1       2
+                                                                      ⎨ Ni = 2 (1 − 𝜉 )(1 + 𝜂i 𝜂)                    for i = 5, 7       .
+           0       0                   1       1                      ⎪ N = 1 (1 − 𝜂 2 )(1 + 𝜉 𝜉)                    for i = 6, 8
+2𝜀12 = v1,2 + v2,1 + Θ3 (v1,2 + v2,1 ),                        (24)   ⎩ i 2                   i
+
+                                                                                                                                       (29)
+           1   0                                                      The partial derivative of the interpolation functions
+2𝜀23 = v2 + v3,2 ,                                             (25)   Ni with respect to 𝜉, 𝜂 can be represented in matrix
+                                                                      form as
+           1   0
+2𝜀13 = v1 + v3,1 .                                             (26)   { 𝜕N } [ 𝜕Θ1 𝜕Θ2 ]{ 𝜕N }
+                                                                            i                              i
+                                                                                                            { 𝜕N }
+                                                                                                                             i
+                                                                         𝜕𝜉              𝜕𝜉  𝜕𝜉         𝜕Θ1               𝜕Θ1
+                                                                         𝜕Ni      =     𝜕Θ1 𝜕Θ2         𝜕Ni      =J       𝜕Ni      .
+                                                                         𝜕𝜂              𝜕𝜂  𝜕𝜂         𝜕Θ2               𝜕Θ2
+                                                                                                                                       (30)
+                                                                      Here, J is the Jacobian matrix. The transformation
+3 Finite element formulations
+                                                                      relationship between the curvilinear coordinate sys-
+                                                                      tem (Θ1 , Θ2 ) and the natural coordinate system (𝜉, 𝜂)
+The MEE plate is discretized using an 8-node
+                                                                      can be expressed as
+isoparametric element, with each node possess-
+ing 5 displacement DOFs (u, v, w, 𝜑1 , 𝜑2 ). Each                     { 𝜕N }
+                                                                            i
+                                                                                           { 𝜕N }
+                                                                                               i
+                                                                                                         [ 𝜕Θ2
+                                                                                                                − 𝜕Θ
+                                                                                                                     2 ]{ 𝜕N }
+                                                                                                                             i
+                                                                                                       1
+MEE layer in an element has one electric potential                       𝜕Θ1
+                                                                         𝜕Ni     =J   −1     𝜕𝜉
+                                                                                             𝜕Ni    =       𝜕𝜂
+                                                                                                            𝜕Θ1 𝜕Θ1
+                                                                                                                   𝜕𝜉     𝜕𝜉
+                                                                                                                          𝜕Ni  .
+                                                                                                      |J| −
+difference DOF 𝜙 , one magnetic potential differ-                        𝜕Θ2                 𝜕𝜂              𝜕𝜂  𝜕𝜉       𝜕𝜂
+
+ence DOF 𝜓 and one temperature difference DOF                                                                                          (31)
+𝜃 . Since the elements in the curvilinear coordinate                  Derive the finite element dynamics equations using
+system (Θ1 , Θ2 ) are irregularly shaped, a coordinate                the Hamilton’s principle as
+
+
+                                                                                                                        Vol.: (0123456789)
+   17           Page 6 of 21                                                                                                    S.-Q. Zhang et al.
+
+       t2 (
+
+ ∫t1                                                                                                    ∫V
+                                                                                    KuT = K TTu = −          BTu 𝝀T BT dV,                   (39)
+                                )
+              𝛿T − 𝛿Wint + 𝛿Wext dt = 0.                               (32)
+
+ Here 𝛿 denotes the variational operator, T, Wint and
+                                                                                                ∫V
+ Wext represent the kinetic energy, internal work and                               K𝝓𝝓 = −          BT𝝓 𝝌B𝝓 dV,                             (40)
+ external work, respectively.
+    The expression for 𝛿T is given by
+
+                                                                                                          ∫V
+                                                                                    K𝝓𝝍 = K T𝝍𝝓 = −            BT𝝓 𝜿B𝝍 dV,                   (41)
+                ∫V
+                         T                 T
+ 𝛿T = −              𝜌𝛿u udV
+                         ̈   = −𝛿q Muu q,
+                                       ̈                               (33)
+
+
+                                                                                                         ∫V
+ with                                                                               K𝝓T = K TT𝝓 = −            BT𝝓 pT BT dV,                 (42)
+
+               ∫V
+ Muu =              𝜌NT ZTu Zu NdV.                                    (34)
+
+                                                                                                ∫V
+                                                                                    K𝝍𝝍 = −          BT𝝍 𝜸B𝝍 dV,                             (43)
+ Here, 𝜌 is the material density, Muu is the mass
+ matrix, q̈ is the second derivative of nodal DOFs with
+ respect to time.
+                                                                                                         ∫V
+    From Eqs. 1–4, the expression for 𝛿Wint can be writ-                            K𝝍T = K TT𝝍 = −            BT𝝍 𝝉 T BT dV,                (44)
+ ten as
+
+
+                ∫V
+                    𝛿𝜺T 𝝈 − 𝛿ET D − 𝛿HT B − 𝛿𝜽T S dV
+                     (                           )
+ 𝛿Wint =
+                                                                                                                                             (35)
+                = 𝛿qT Kuu q + Ku𝝓 𝝓 + Ku𝝍 𝝍 + KuT 𝜽 + 𝛿𝝓T K𝝓u q + K𝝓𝝓 𝝓 + K𝝓𝝍 𝝍 + K𝝓T 𝜽
+                      (                            )     (                              )
+
+                + 𝛿𝝍 T K𝝍u q + K𝝍𝝓 𝝓 + K𝝍𝝍 𝝍 + K𝝍T 𝜽 + 𝛿𝜽T KTu q + KT𝝓 𝝓 + KT𝝍 𝝍 + KTT 𝜽 ,
+                      (                              )     (                              )
+
+
+ with
+                                                                                                ∫V
+                                                                                    KTT = −          BTT cBT dV.                             (45)
+
+              ∫V
+ Kuu =              BTu CBu dV,                                        (36)
+                                                                                    Here, Kuu, Ku𝝓, Ku𝝍 , KuT, K𝝓𝝓, K𝝓𝝍 , K𝝓T, K𝝍𝝍 , K𝝍T
+                                                                                    and KTT represent the elastic stiffness matrix, coupled
+                                                                                    electro-elastic stiffness matrix, coupled magneto-
+                             ∫V
+ Ku𝝓 = K T𝝓u = −                  BTu eT B𝝓 dV,                        (37)         elastic stiffness matrix, coupled thermo-elastic stiff-
+                                                                                    ness matrix, electric stiffness matrix, coupled electro-
+                                                                                    magnetic stiffness matrix, coupled thermo-electric
+                             ∫V
+ Ku𝝍 = K T𝝍u = −                  BTu qT B𝝍 dV,                        (38)         stiffness matrix, magnetic stiffness matrix, coupled
+                                                                                    thermo-magnetic stiffness matrix, and thermal stiff-
+                                                                                    ness matrix, respectively.
+                                                                                        The external work can be written as
+
+
+                                                   ∫V                 ∫Ω
+                                       𝛿Wext =          𝛿uT fb dV +        𝛿uT fs dΩ + 𝛿uT fc
+
+
+                                                   ∫Ω                            ∫Ω                             ∫Ω
+                                                                                                                        −
+                                               −        𝛿𝝓T 𝝑dΩ − 𝛿𝝓T Qc −            𝛿𝝍 T 𝜾dΩ − 𝛿𝝍 T Ic −           𝛿𝜽T QdΩ                 (46)
+
+                                               = 𝛿qT Fue + 𝛿𝝓T F𝝓e + 𝛿𝝍 T F𝝍e + 𝛿𝜽T FTe ,
+
+
+                                                                                    with
+
+Vol:. (1234567890)
+Fully coupled modeling for static and dynamic analysis of thermo‑magneto‑electro‑elastic…                     Page 7 of 21       17
+
+
+                                                                           COMSOL results, and analyzing the impact of the
+         ∫V                     ∫Ω
+Fue =         NT ZTu f b dV +        NT ZTu f s dΩ + NT ZTu f c ,          boundary conditions on the output.
+                                                                    (47)      In COMSOL, the solid mechanics and heat trans-
+                                                                           fer modules treat thermal loads merely as inputs to
+          ∫Ω
+F𝝓e = −            𝝑dΩ − Qc ,                                       (48)   compute thermal expansion, which does not allow
+                                                                           the establishment of the fully coupled model pro-
+                                                                           posed in this study or the realization of temperature
+                                                                           field variations within the structure. Therefore, the
+              ∫Ω                                                    (49)
+F𝝍e = −            𝜾dΩ − Ic ,
+                                                                           built-in piezoelectric module was employed instead.
+                                                                           In this module, applying mechanical loads yields both
+                                                                           the displacement field and the electric field distribu-
+          ∫Ω
+                   −
+FTe = −            QdΩ.                                             (50)   tion of the structure. By equivalently treating thermal
+                                                                           stress parameters as piezoelectric coefficients and
+Here, fb, fs and fc are the body force, surface traction                   heat capacity as dielectric constants within the mate-
+and concentrated point force vectors, respectively.                        rial properties of COMSOL, the resulting electric
+Moreover, 𝝑 and Qc are the vectors representing the                        field can then be interpreted as the structural tempera-
+homogeneous and concentrated charges, 𝜾 and Ic are                         ture field variation.
+the homogeneous and concentrated current vectors,                             During the model validation with COMSOL,
+                                                                           the applied voltage and magnetic potential require
+     −
+and Q is the homogeneous heat flow vector. Further-
+more, Fue, F𝝓e, F𝝍e and FTe represent the applied                          conversion into equivalent stress, whereas the pre-
+mechanical load, electric load, magnetic load, and                         sent model allows direct application without such
+thermal load vectors, respectively.                                        conversion.
+   Substituting Eqs. 33, 35 and 46 into 32 yields the
+dynamic FE equations as                                                    4.1 Mesh convergence analysis
+
+Muu q̈ + Kuu q + Ku𝝓 𝝓a + Ku𝝍 𝝍a + KuT 𝜽a = Fue , (51)                     A cantilevered square plate is considered, whose geo-
+                                                                           metric configuration is depicted in Fig. 3 and material
+K𝝓u q + K𝝓𝝓 𝝓s + K𝝓𝝍 𝝍s + K𝝓T 𝜽s = F𝝓e ,                            (52)   parameters are summarized in Table 1. The material
+                                                                           properties of the MEE composite are obtained using
+                                                                           the rule of mixtures homogenization scheme, which
+K𝝍u q + K𝝍𝝓 𝝓s + K𝝍𝝍 𝝍s + K𝝍T 𝜽s = F𝝍e ,                            (53)   combines the properties of the ferroelectric phase
+                                                                           (BaTiO3 ) and ferromagnetic (CoFe2 O4 ) phase accord-
+KTu q + KT𝝓 𝝓s + KT𝝍 𝝍s + KTT 𝜽s = FTe .                            (54)   ing to their respective volume fractions. Specifically,
+
+In the equations, 𝜽s physically represents the tempera-
+ture field variation induced by structural deformation
+under external loads, which is the primary focus of
+this study.
+   By removing the dynamic part, i.e., eliminating
+the terms containing q̈ , the static FE equations are
+obtained.
+
+
+
+4 Numerical analysis
+
+This section presents the numerical validation of the
+fully coupled FE model, comparing the influence of
+the multiphysical fields on the temperature field with
+                                                                           Fig. 3  MEE square plate
+
+                                                                                                                     Vol.: (0123456789)
+   17         Page 8 of 21                                                                                 S.-Q. Zhang et al.
+
+
+ Table 1  Material parameters of the MEE plate (Kondaiah et al. 2012; Kim 2011)
+ Properties                              MEE                    CoFe2 O4                   BaTiO3                0.5Vf
+                                                                                                                 (Sladek
+                                                                                                                 et al. 2013)
+
+ C11 = C22 (GPa)                         200                    286                        166                   213
+ C12 (GPa)                               110                    173                        77                    113
+ C13 = C23 (GPa)                         110                    170                        78                    0
+ C33 (GPa)                               190                    269.5                      162                   207
+ C44 = C55 (GPa)                         45                     45.3                       43                    49.9
+ C66 (GPa)                               45                     56.5                       44.5                  50
+                                         − 3.5                  0                          − 4.4                 − 2.71
+          (       )
+ e31 = e32 C∕m2
+                                         11.0                   0                          18.6                  8.86
+     (      )
+ e33 C∕m2
+                                         0                      0                          11.6                  0.15
+          (       )
+ e24 = e15 C∕m2
+                                         0.9                    0.08                       11.2                  0.24
+            ( −9 2        )
+ 𝜒11 = 𝜒22 10 C ∕Nm2
+                                         7.5                    0.093                      12.6                  6.37
+     (               )
+ 𝜒33 10−9 C2 ∕Nm2
+ q31 = q32 (N∕Am)                        200                    580                        0                     222
+ q33 (N∕Am)                              260                    700                        0                     292
+ q24 = q15 (N∕Am)                        180                    560                        0                     185
+                                         6.0                    0                          0                     − 5.23
+           (             )
+ 𝜅11 = 𝜅22 10−12 Ns∕VC
+                                         2500                   0                          0                     2750
+     ( −12          )
+ 𝜅33 10 Ns∕VC
+                                         − 1.5                  − 5.9                      0.05                  2.01
+          (             )
+ 𝛾11 = 𝛾22 10−4 Ns2 ∕C2
+                                         0.75                   1.57                       0.1                   0.839
+     (            )
+ 𝛾33 10−4 Ns2 ∕C2
+                                         12.9                   10                         15.7                  –
+         ( −6        )
+ 𝛼1 = 𝛼2 10 1∕K
+                                         7.8                    10                         6.4                   –
+    ( −6      )
+ 𝛼3 10 1∕K
+                                         −9                     0                          0                     –
+   (            )
+ p 10−7 C∕m2 K
+                                         − 18                   0                          0                     –
+  ( −5          )
+ 𝜏 10 C∕m2 K
+                                         327                    165                        422                   –
+  (        )
+ c J∕m3 K
+ 𝜌/ kg∕m3                                5600                   5300                       5800                  5550
+   (       )
+
+
+
+
+ for a generic material property P, the effective value               Pf and Pm are the corresponding material parameters
+ is calculated as:                                                    of each phase.
+                                                                         The present FE model utilizes shell elements,
+ P = vf Pf + vm Pm ,                                    (55)          while COMSOL employs 3D solid elements. The
+ where vf and vm are the volume fractions of the fer-                 frequencies and the midpoint displacement at the
+ roelectric and ferromagnetic phases, respectively, and               free end under a uniform surface load of 15,000 Pa
+
+
+
+ Table 2  The first-order frequency and displacements vs. mesh density (COMSOL model)
+ Mesh                         5×5×10     10×10×10       20×20×10         30×30×10       40×40×10    45×45×10      50×50×10
+
+ DOFs                         6789       24144          90804            200064         351924      443829        546384
+ Frequency(Hz)                56.398     55.152         54.637           54.493         54.428      54.407        54.391
+ Diff.(%)                                − 2.21         − 0.93           − 0.26         − 0.12      − 0.04        − 0.03
+ Displacements(mm)            − 5.5634   − 5.7984       − 5.9036         − 5.9342       − 5.9484    − 5.9525      − 5.9564
+ Diff.(%)                                4.22           1.81             0.52           0.24        0.08          0.06
+
+
+Vol:. (1234567890)
+Fully coupled modeling for static and dynamic analysis of thermo‑magneto‑electro‑elastic…                 Page 9 of 21        17
+
+
+Table 3  The first-order frequency and displacements vs. mesh density (present model)
+Mesh                   5×5          6×6          8×8         10×10      12×12       14×14      16×16      18×18          20×20
+
+DOFs                   675          960          1680        2600       3720        5040       6560       8280           10200
+Frequency(Hz)          52.252       52.228       52.209      52.202     52.199      52.198     52.197     52.197         52.196
+Diff.(%)                            − 0.05       − 0.04      − 0.01     − 0.01      0.00       0.00       0.00           0.00
+Displacements(mm)      − 5.9941     − 5.9976     − 5.9993    − 5.9994   − 5.9992    − 5.9989   − 5.9987   − 5.9985       − 5.9984
+Diff.(%)                            0.06         0.03        0.00       0.00        − 0.01     0.00       0.00           0.00
+
+
+
+                                                                     the midpoint displacements of COMSOL model and
+                                                                     the present model gradually converge to a constant
+                                                                     value as the number of meshes increases. The pre-
+                                                                     sent model achieves convergence at a first-order fre-
+                                                                     quency of 52.228 Hz and a displacement of −5.9976
+                                                                     mm with the required mesh of 6×6 elements (960
+                                                                     DOFs), while the COMSOL model converges at
+                                                                     54.407 Hz and −5.9525 mm with the required mesh
+                                                                     of 45×45×10 elements (443829 DOFs). That is, the
+                                                                     present model only needs 0.22% DOFs of COMSOL
+                                                                     for convergence, with the deviations in the first-order
+                                                                     frequency and displacement are merely 4.00% and
+                                                                     0.76%, respectively.
+
+                                                                     4.2 Model validation
+Fig. 4  Variation of the central deflection with the load inten-
+sity for the clamped plate                                           The simulation case considers a square MEE plate
+                                                                     with all four edges clamped , based on the model
+                                                                     reported by Sladek et al. (2013). The plate has a
+of COMSOL model and the present model, using                         length and width of a = b = 254 mm , a thickness of
+different mesh methods, are separately investigated                  h = 12 mm , and the material properties correspond-
+and the results are presented in Tables 2 and 3. The                 ing to 0.5 volume fraction of BaTiO3 ∕CoFe2 O4 com-
+outcomes show that the first-order frequencies and                   posite, as listed in Table 1. A normalized uniform
+
+
+
+
+Fig. 5  Vertical displacements of the center-line under mechanical loads a CFFF and CFFC, b CFCF and CCFC
+
+                                                                                                                  Vol.: (0123456789)
+   17         Page 10 of 21    S.-Q. Zhang et al.
+
+
+ Fig. 6  map under CFFF
+ condition and mechanical
+ loads a present, b COM-
+ SOL
+
+
+
+
+ Fig. 7  Temperature con-
+ tour map under CFCF con-
+ dition and mechanical loads
+ a present, b COMSOL
+
+
+
+
+ Fig. 8  Temperature con-
+ tour map under CFFC con-
+ dition and mechanical loads
+ a present, b COMSOL
+
+
+
+
+ Fig. 9  Temperature con-
+ tour map under CCFC con-
+ dition and mechanical loads
+ a present, b COMSOL
+
+
+
+
+Vol:. (1234567890)
+Fully coupled modeling for static and dynamic analysis of thermo‑magneto‑electro‑elastic…                Page 11 of 21         17
+
+
+load q̃ = qa4 ∕C11 h4 is applied on the upper surface of              4.3.1 Elasto‑thermal bidirectional coupling
+the plate. Figure 4 shows the variation of the dimen-
+sionless central deflection with respect to the load                  Applying a uniform pressure of 1.5×104 Pa on the
+intensity. The comparison indicates that the present                  top surface of the plate, the vertical displacements
+model exhibits good agreement with the reference                      of the center-line along the Θ1-direction of the plate
+results, thereby establishing a solid theoretical basis               are calculated and shown in Fig. 5. The temperature
+for subsequent investigations of temperature field var-               difference distribution cloud diagrams under differ-
+iations induced by structural deformation.                            ent boundary conditions are illustrated in Figs. 6, 7, 8
+                                                                      and 9. There is a high degree of consistency between
+4.3 Static studies of MEE plate                                      the present model’s outcomes and COMSOL simula-
+                                                                      tions. Taking the CFFF condition as an example, the
+The static response of a square MEE plate is inves-                   present model only has 22800 DOFs, accounting for
+tigated. Four points are considered for evaluation,                   approximately 4.17% of COMSOL model’s DOF,
+namely A(0.055m, 0.155m), B(0.205m, 0.205m),                          which illustrates high accuracy and efficiency of the
+C(0.155m, 0.235m), D(0.255m, 0.085m). The dimen-                      current model. Furthermore, the boundary condi-
+sions of the plate and the positions of these points                  tions exert a substantial effect on the plate response:
+are shown in Fig. 3. The corresponding material                       weaker constraints lead to larger deformations, with
+parameters are summarized in Table 1. Four types of                   the CFFF case exhibiting the greatest displacement
+boundary conditions are considered: CFFF, CFCF,                       amplitude ( Fig. 5). Larger deformations also amplify
+CFFC, and CCFC, in which C and F denote "Clamp"                       the thermo-mechanical coupling at the clamped edge.
+and "Free". The sequence of C and F corresponds to                    As illustrated in Figs. 6, 7, 8 and 9, under the CFFF
+the boundary conditions on the left, bottom, right,                   condition, the temperature difference at the clamped
+and top edges of the plate, respectively. The present                 edge reaches its maximum. This arises because
+model and COMSOL are used to calculate the output                     the constrained region must resist the deformation,
+temperature difference 𝜃 along the thickness corre-                   thereby developing the highest stresses and most pro-
+sponding to these points under the impact of differ-                  nounced coupling effects.
+ent physical fields, respectively. The meshing of the
+present model is 30×30, while COMSOL uses solid                       4.3.2 Electro‑thermal bidirectional coupling
+elements with 50×50×10 elements.
+                                                                      Simultaneously applying voltages of 300V and -300V
+                                                                      on the top and the bottom surfaces of the plate, the
+                                                                      vertical displacements of the center-line in the Θ1
+
+Table 4  Vertical displacements of the center-line in the Θ1-direction under electric loads (mm)
+
+Θ1 ∕a     CFFF                            CFCF                           CFFC                         CCFC
+          present         COMSOL          present        COMSOL          present         COMSOL       present          COMSOL
+
+0.00      0.00E+00        0.00E+00        0.00E+00       0.00E+00        0.00E+00        0.00E+00     0.00E+00         0.00E+00
+0.10      − 1.65E-03      − 1.61E-03      7.29E-04       7.05E-04        3.29E-05        3.46E-05     1.87E-04         1.81E-04
+0.20      − 7.27E-03      − 7.19E-03      2.13E-03       2.10E-03        − 4.80E-04      − 4.62E-04   6.24E-04         6.12E-04
+0.30      − 1.75E-02      − 1.74E-02      3.45E-03       3.41E-03        − 2.07E-03      − 2.03E-03   1.17E-03         1.15E-03
+0.40      − 3.25E-02      − 3.24E-02      4.31E-03       4.28E-03        − 5.01E-03      − 4.94E-03   1.68E-03         1.67E-03
+0.50      − 5.23E-02      − 5.23E-02      4.61E-03       4.58E-03        − 9.46E-03      − 9.34E-03   1.95E-03         1.93E-03
+0.60      − 7.67E-02      − 7.70E-02      4.31E-03       4.28E-03        − 1.56E-02      − 1.55E-02   1.60E-03         1.60E-03
+0.70      − 1.06E-01      − 1.05E-01      3.45E-03       3.41E-03        − 2.39E-02      − 2.37E-02   7.30E-05         9.41E-05
+0.80      − 1.39E-01      − 1.39E-01      2.13E-03       2.10E-03        − 3.48E-02      − 3.45E-02   − 3.54E-03       − 3.48E-03
+0.90      − 1.77E-01      − 1.77E-01      7.29E-04       7.05E-04        − 4.90E-02      − 4.87E-02   − 1.04E-02       − 1.03E-02
+1.00      − 2.19E-01      − 2.18E-01      0.00E+00       0.00E+00        − 6.74E-02      − 6.70E-02   − 2.21E-02       − 2.20E-02
+
+
+                                                                                                                   Vol.: (0123456789)
+   17         Page 12 of 21                                                                                            S.-Q. Zhang et al.
+
+
+
+
+ Fig. 10  Output temperature difference 𝜃 in thickness direction under electric loads a at point A, b at point B, c at point C, d at point
+ D
+
+
+ -direction of the plate are calculated, with the results               The displacement under electric loads differs from
+ shown in Table 4. The output temperature differ-                       that under mechanical loads because, in terms of
+ ences in the Θ3-direction at points A-D under vari-                    equivalent stress, the electric loads induces equiva-
+ ous boundary conditions are illustrated in Fig. 10.                    lent stresses in the Θ1 and Θ2-directions, whereas the
+ The results confirm that the center-line displace-                     mechanical loads induces equivalent stress only in the
+ ments and temperature differences determined by the                    Θ3-direction. As evidenced in Fig. 10, the temperature
+ present model exhibit strong consistency with the                      differences in the Θ3-direction at different points are
+ COMSOL simulations. From Table 4, it can be seen                       related to both the boundary conditions and the point
+ that under the electric field, the effects of CFFF and                 locations. This can be attributed to the variations in
+ CFFC conditions on the center-line displacements                       deformation at different positions of the plate under
+ remain unchanged, while under CFCF condition, the                      different boundary conditions, which in turn lead to
+ center-line displacement is positive, and under CCFC                   differences in temperature.
+ condition, the center-line displacement changes
+ from positive to negative along the Θ1-direction.
+
+Vol:. (1234567890)
+Fully coupled modeling for static and dynamic analysis of thermo‑magneto‑electro‑elastic…               Page 13 of 21       17
+
+
+Table 5  Vertical displacements of the center-line in the Θ1-direction under magnetic loads (mm)
+
+Θ1 ∕a     CFFF                         CFCF                            CFFC                        CCFC
+          present         COMSOL       present         COMSOL          present         COMSOL      present        COMSOL
+
+0.00      0.00E+00        0.00E+00     0.00E+00        0.00E+00        0.00E+00       0.00E+00     0.00E+00       0.00E+00
+0.10      5.50E−03        5.32E−03     −2.43E−03       −2.37E−03       −2.91E−04      −1.16E−04    −6.26E−04      −6.05E−04
+0.20      2.43E−02        2.39E−02     −7.12E−03       −7.01E−03       1.11E−03       1.54E−03     −2.08E−03      −2.05E−03
+0.30      5.84E−02        5.78E−02     −1.15E−02       −1.14E−02       6.26E−03       6.79E−03     −3.91E−03      −3.86E−03
+0.40      1.09E−01        1.08E−01     −1.44E−02       −1.43E−02       1.62E−02       1.65E−02     −5.62E−03      −5.57E−03
+0.50      1.75E−01        1.73E−01     −1.54E−02       −1.53E−02       3.15E−02       3.12E−02     −6.50E−03      −6.46E−03
+0.60      2.56E−01        2.55E−01     −1.44E−02       −1.43E−02       5.32E−02       5.17E−02     −5.36E−03      −5.36E−03
+0.70      3.53E−01        3.51E−01     −1.15E−02       −1.14E−02       8.26E−02       7.92E−02     −2.44E−04      −3.15E−04
+0.80      4.65E−01        4.63E−01     −7.12E−03       −7.01E−03       1.22E−01       1.15E−01     1.18E−02       1.16E−02
+0.90      5.91E−01        5.89E−01     −2.43E−03       −2.36E−03       1.73E−01       1.63E−01     3.49E−02       3.46E−02
+1.00      7.32E−01        7.29E−01     0.00E+00        0.00E+00        2.40E−01       2.24E−01     7.40E−02       7.35E−02
+
+
+
+4.3.3 Magneto‑thermal bidirectional coupling                        with equal thickness for calculation. The layers are
+                                                                     numbered sequentially from 1 to 10, with the num-
+Magnetic potential loads of 200A and -200A are                       bering beginning at the bottom and ending at the
+applied to the top and the bottom surfaces of the plate,             top. The point E (0.155m, 0.155m) is arbitrarily
+respectively. The vertical displacements of the center-              selected in the Θ1-Θ2 plane, as shown in Fig. 3, and
+line along the Θ1-direction are calculated and shown                 the temperature differences at each layer along the
+in Table 5. The output temperature differences in the                thickness direction at this point can be expressed as
+Θ3-direction at points A-D under different boundary                                                                      }T
+                                                                     𝜽 = 𝜃1 , 𝜃2 , 𝜃3 , 𝜃4 , 𝜃5 , 𝜃6 , 𝜃7 , 𝜃8 , 𝜃9 , 𝜃10 .
+                                                                          {
+conditions are illustrated in Fig. 11. According to
+Tables 4 and 5 and Figs. 10 and 11, the data reveal
+that compared to the electric field effect, the center-              4.4.1 Elasto‑thermal bidirectional coupling
+line displacements under magnetic field show oppo-
+site trends and larger amplitudes, which leads to the                Applying a uniform load of 1.5×104 Pa on the upper
+temperature differences exhibiting the same variation                surface of the plate. Under CFFF condition, the total
+trend. This is because the piezomagnetic coefficients                time is set to 4 × 10−2 s, with time increments of
+q31 and q32 are negative and have larger absolute val-               1 × 10−4 s; under CFCF condition, the total time is
+ues compared to the piezoelectric coefficients.                      set to 6 × 10−3 s, with time increments of 1.5 × 10−5
+                                                                     s. The vibrations of the center point and the dynamic
+4.4 Dynamic analysis of MEE plate                                   output temperature differences in the thickness direc-
+                                                                     tion at point E under two different boundary condi-
+The dynamic analysis of a square MEE plate is                        tions are presented in Figs. 12 and 13.
+studied, the dimensions and materials are consist-                      The excellent agreement between the present
+ent with those in Section 4.3. Two different bound-                  model and COMSOL simulations, as evidenced in
+ary conditions are considered: CFFF and CFCF.                        Figs. 12 and 13, validates the model’s accuracy in
+The meshing methods of the present model and                         predicting the dynamic response of MEE plates.
+COMSOL are the same as in Section 4.3. The plate                     Additionally, boundary conditions have a consider-
+is exposed to independent mechanical, electric, and                  able impact on the transient response of MEE plates.
+magnetic field forces, the vibrations of the center                  Compared with CFFF condition, the dynamic dis-
+point under various boundary conditions are inves-                   placements at the center point show smaller ampli-
+tigated. Furthermore, to analyze the variation of                    tudes under CFCF condition. The magnitude of the
+dynamic temperature difference 𝜃 along the thick-
+ness direction, the plate is discretized into 10 layers
+
+                                                                                                                Vol.: (0123456789)
+   17         Page 14 of 21                                                                                       S.-Q. Zhang et al.
+
+
+
+
+ Fig. 11  Output temperature difference 𝜃 in thickness direction under magnetic loads a at point A, b at point B, c at point C, d at
+ point D
+
+
+ dynamic temperature differences at point E is simi-                 output temperature differences 𝜃1 − 𝜃10 at point E
+ larly reduced.                                                      under two different boundary conditions are shown
+                                                                     in Figs. 14 and 15. The figures show that under the
+ 4.4.2 Electro‑thermal bidirectional coupling                       electric field, the displacement variations at the center
+                                                                     point and the temperature differences at point E
+ Simultaneously applying voltages of 300V and                        exhibit more complex trends. Similarly, under CFCF
+ -300V on the plate’s top and bottom surfaces. To                    condition, the dynamic displacements at the center
+ more clearly present the comparison of temperature                  point show smaller amplitudes compared to them
+ difference results between the present model and                    under CFFF condition. The magnitude of dynamic
+ COMSOL, under CFFF condition, the total time is                     temperature differences at point E are also reduced
+ set to 7 × 10−4 s, with time increments of 1.4 × 10−5               accordingly.
+ s; under CFCF condition, the total time is set to
+ 6.45 × 10−4 s, with time increments of 1.5 × 10−5 s.
+ The vibrations of the center point and the dynamic
+
+Vol:. (1234567890)
+Fully coupled modeling for static and dynamic analysis of thermo‑magneto‑electro‑elastic…            Page 15 of 21       17
+
+
+
+
+Fig. 12  Dynamic response under CFFF boundary condition and mechanical loads a dynamic displacements of the center point, b
+dynamic output temperature difference 𝜃 in the thickness direction at point E
+
+
+
+
+Fig. 13  Dynamic response under CFCF boundary condition and mechanical loads a dynamic displacements of the center point, b
+dynamic output temperature difference 𝜃 in the thickness direction at point E
+
+
+4.4.3 Magneto‑thermal bidirectional coupling                      differences in the thickness direction at point E under
+                                                                   two different boundary conditions are shown in
+Magnetic potential loads of 200A and -200A are                     Figs. 16 and 17. By comparing the results presented
+applied to the plate’s upper and bottom surfaces,                  in Figs. 14 and 15, it is obvious that the dynamic dis-
+respectively. When comparing dynamic temperature                   placements and temperature differences at the same
+differences, the total time is set to 6.6 × 10−4 s, with           location show opposite trends and larger amplitudes,
+time increments of 3 × 10−6 s. The vibrations of the               which is consistent with the static response and is
+center point and the dynamic output temperature                    also due to the effect of piezomagnetic coefficients.
+
+
+
+                                                                                                             Vol.: (0123456789)
+   17         Page 16 of 21                                                                              S.-Q. Zhang et al.
+
+
+
+
+ Fig. 14  Dynamic response under CFFF boundary condition and electric loads a dynamic displacements of the center point, b
+ dynamic output temperature difference 𝜃 in the thickness direction at point E
+
+
+
+
+ Fig. 15  Dynamic response under CFCF boundary condition and electric loads a dynamic displacements of the center point, b
+ dynamic output temperature difference 𝜃 in the thickness direction at point E
+
+
+ 5 Conclusions                                                 on the temperature changes induced by structural
+                                                                deformation.
+ Unlike most previous studies that treat temperature               Based on the FOSD hypothesis, the present work
+ changes as a thermal load causing structural defor-            develops a fully coupled finite element model of
+ mation, the innovation of this paper lies in focusing          MEE plates and codes a corresponding computational
+
+
+
+
+Vol:. (1234567890)
+Fully coupled modeling for static and dynamic analysis of thermo‑magneto‑electro‑elastic…              Page 17 of 21       17
+
+
+
+
+Fig. 16  Dynamic response under CFFF boundary condition and magnetic loads a dynamic displacements of the center point, b
+dynamic output temperature difference 𝜃 in the thickness direction at point E
+
+
+
+
+Fig. 17  Dynamic response under CFCF boundary condition and magnetic loads a dynamic displacements of the center point, b
+dynamic output temperature difference 𝜃 in the thickness direction at point E
+
+program. The model analyzes the static bending and                 precision with significantly fewer DOFs, manifesting
+free vibration under multi-physics fields, explicitly              its superior computational efficiency.
+accounting for displacement-induced temperature                        From the present results, it is evident that structural
+difference. After mesh convergence and validation,                 deformation does indeed lead to variations in the temper-
+results are compared with COMSOL, showing strong                   ature field, an aspect overlooked in previous studies. The
+agreement and confirming the model’s accuracy.                     boundary conditions have a significant impact on the dis-
+Moreover, the present model achieves comparable                    placement and through-thickness temperature difference:
+                                                                   the fewer fixed boundaries, the larger the deformation
+
+                                                                                                               Vol.: (0123456789)
+   17         Page 18 of 21                                                                                       S.-Q. Zhang et al.
+
+
+ of the plate, and the greater the amplitudes of the tem-           Declarations
+ perature difference. Secondly, the dynamic response and
+                                                                    Conflict of interest   The authors declare no Conflict of inter-
+ temperature field variations under electric and magnetic           est.
+ fields are more complex than under mechanical field.
+ This is because the equivalent stresses induced by elec-
+ tric and magnetic fields act simultaneously in the Θ1 and          Appendix A: Lengthy constitutive equations
+ Θ2-directions, whereas the mechanical load acts only in            and detailed mathematical formulations
+ the Θ3-direction. Moreover, the displacement and tem-
+ perature difference variations under magnetic field show           Constitutive equations for magneto-electro-elastic
+ opposite trends and larger amplitudes compared to those            materials are as follows
+ under electric field, which is due to the opposite sign and
+ larger magnitude of piezomagnetic coefficients com-                ⎧𝜎11 ⎫ ⎡C11 C12 0 0 0 ⎤⎧ 𝜀11 ⎫ ⎡ 0 0 e31 ⎤
+ pared to piezoelectric coefficients. Finally, most previous        ⎪𝜎 ⎪ ⎢C C
+                                                                    ⎪ 22 ⎪ ⎢ 12 22
+                                                                                    0 0 0 ⎥⎪ 𝜀22 ⎪ ⎢ 0 0 e32 ⎥⎧E1 ⎫
+ studies have focused only on the influence of physical
+                                                                                            ⎥⎪    ⎪ ⎢         ⎥⎪ ⎪
+                                                                    ⎨𝜎12 ⎬ = ⎢ 0 0 C66 0 0 ⎥⎨2𝜀12 ⎬ − ⎢ 0 0 0 ⎥⎨E2 ⎬
+                                                                    ⎪𝜎23 ⎪ ⎢ 0 0 0 C44 0 ⎥⎪2𝜀23 ⎪ ⎢ 0 e24 0 ⎥⎪E3 ⎪
+ fields on the displacement field of MEE plates. The pre-           ⎪𝜎 ⎪ ⎢ 0 0 0 0 C ⎥⎪2𝜀 ⎪ ⎢e 0 0 ⎥⎩ ⎭
+ sent model further investigates the impact of displace-            ⎩ 13 ⎭ ⎣             55 ⎦⎩ 13 ⎭   ⎣ 15    ⎦
+
+ ment field on the temperature field, which has theoretical                 ⎡ 0 0 q31 ⎤      ⎧𝜆1 ⎫
+                                                                            ⎢ 0 0 q ⎥⎧H ⎫ ⎪𝜆 ⎪
+ significance for the practical applications of MEE plates                  ⎢       32    1
+                                                                                       ⎥⎪ ⎪ ⎪ 2 ⎪
+                                                                          − ⎢ 0 0 0 ⎥⎨H2 ⎬ − ⎨ 0 ⎬𝜃,
+ in real environments.                                                      ⎢ 0 q24 0 ⎥⎪H3 ⎪ ⎪ 0 ⎪
+     In this work, all parameters were treated as deter-                    ⎣ 15 0 0 ⎦
+                                                                            ⎢q         ⎥⎩ ⎭ ⎪ 0 ⎪
+ ministic to focus on validating the fully coupled finite
+                                                                                             ⎩ ⎭
+                                                                                                                              (A1)
+ element model. For practical applications, however,
+ uncertainties in material properties and external loading                                 ⎧ 𝜀11 ⎫
+ may significantly affect the response. Future work will
+                                                                    ⎧D ⎫ ⎡ 0 0 0 0 e ⎤⎪ 𝜀 ⎪ ⎡𝜒
+                                                                    ⎪ 1⎪ ⎢              15 ⎪ 22 ⎪      11 0  0 ⎤⎧E1 ⎫
+                                                                                                                 ⎪ ⎪
+ consider incorporating variance-based uncertainty quan-            ⎨D2 ⎬ = ⎢ 0 0 0 e24 0 ⎥⎨2𝜀12 ⎬ + ⎢ 0 𝜒22 0 ⎥⎥⎨E2 ⎬
+                                                                                          ⎥          ⎢
+                                                                    ⎪D3 ⎪ ⎣e31 e32 0 0 0 ⎦⎪2𝜀23 ⎪ ⎣ 0 0 𝜒33 ⎦⎪E3 ⎪
+ tification and explore advanced machine learning frame-            ⎩ ⎭                    ⎪2𝜀 ⎪                 ⎩ ⎭
+ works such as the Deep Energy Method, systematically                                      ⎩ 13 ⎭
+ assess the influence of uncertain inputs on displacement                   ⎡𝜅11 0 0 ⎤⎧H1 ⎫ ⎧p1 ⎫
+ and field distributions. While such advanced frameworks
+                                                                                       ⎪ ⎪ ⎪ ⎪
+                                                                          + ⎢ 0 𝜅22 0 ⎥⎨H2 ⎬ + ⎨p2 ⎬𝜃,
+ are beyond the scope of the current work, the present                      ⎣ 0 0 𝜅33 ⎦⎩H3 ⎭ ⎩p3 ⎭
+                                                                            ⎢         ⎥⎪ ⎪ ⎪ ⎪
+
+ FEM-based formulation provides a solid foundation                                                                            (A2)
+ upon which uncertainty analyses can be systematically
+ developed.                                                                                 ⎧ 𝜀11 ⎫
+                                                                    ⎧B ⎫ ⎡ 0 0 0 0 q ⎤⎪ 𝜀 ⎪ ⎡𝜅
+                                                                    ⎪ 1⎪ ⎢              15 ⎪ 22 ⎪      11 0  0 ⎤⎧E1 ⎫
+                                                                                                                 ⎪ ⎪
+ Author contributions S.Z. designed the study, developed            ⎨B2 ⎬ = ⎢ 0 0 0 q24 0 ⎥⎨2𝜀12 ⎬ + ⎢ 0 𝜅22 0 ⎥⎥⎨E2 ⎬
+                                                                                          ⎥          ⎢
+ the methodology, and provided resources. S.Q. implemented          ⎪B3 ⎪ ⎣q31 q32 0 0 0 ⎦⎪2𝜀23 ⎪ ⎣ 0 0 𝜅33 ⎦⎪E3 ⎪
+ the software, performed validation, and wrote the initial draft.
+                                                                    ⎩ ⎭                     ⎪2𝜀 ⎪                ⎩ ⎭
+                                                                                            ⎩ 13 ⎭
+ S.L. conducted investigations and visualized the results. C.L.
+ supervised the research. S.Z. and S.M. contributed to manu-               ⎡𝛾11 0 0 ⎤⎧H1 ⎫ ⎧𝜏1 ⎫
+ script review and editing.
+                                                                                      ⎪ ⎪ ⎪ ⎪
+                                                                          + 0 𝛾22 0 ⎥⎨H2 ⎬ + ⎨𝜏2 ⎬𝜃,
+                                                                           ⎢
+                                                                           ⎣ 0 0 𝛾33 ⎦⎩H3 ⎭ ⎩𝜏3 ⎭
+                                                                           ⎢         ⎥⎪ ⎪ ⎪ ⎪
+ Data availability Data is provided within the manuscript or
+ supplementary information files.                                                                                             (A3)
+
+
+                 ⎧ 𝜀11 ⎫
+                �⎪ 𝜀22 ⎪ �         �⎪E1 ⎪ �         �⎪H1 ⎪
+                 ⎪     ⎪            ⎧ ⎫              ⎧ ⎫
+                                                                                                                              (A4)
+    �
+ S = 𝜆1 𝜆2 0 0 0 ⎨2𝜀12 ⎬ + p1 p2 p3 ⎨E2 ⎬ + 𝜏1 𝜏2 𝜏3 ⎨H2 ⎬ + c𝜃.
+                 ⎪2𝜀23 ⎪            ⎪E3 ⎪            ⎪H3 ⎪
+                 ⎪2𝜀 ⎪              ⎩ ⎭              ⎩ ⎭
+                 ⎩ 13 ⎭
+
+
+Vol:. (1234567890)
+Fully coupled modeling for static and dynamic analysis of thermo‑magneto‑electro‑elastic…                                     Page 19 of 21         17
+
+
+The detailed derivation process for 𝛿T , 𝛿Wint and
+𝛿Wext is as follows
+
+
+           ∫V                      ∫V                                  ∫V
+𝛿T = −          𝜌𝛿uT udV
+                     ̈   =−              𝜌𝛿(Zu v)T (Zu v̈ )dV = −           𝜌𝛿vT ZTu Zu v̈ dV
+
+                                                                                                                                                    (A5)
+           ∫V                                              ∫V
+   =−           𝜌𝛿(N q)T ZTu Zu (Nq)dV
+                                  ̈    = −𝛿qT                    𝜌NT ZTu Zu NdV q̈
+
+   = −𝛿qT Muu q,
+              ̈
+
+
+
+
+           ∫V
+                    𝛿𝜺T 𝝈 − 𝛿ET D − 𝛿HT B − 𝛿𝜽T S dV
+                (                                )
+𝛿Wint =
+
+
+           ∫V
+      =         (𝛿(Bu q)T (C𝜺 − eT E − qT H − 𝝀T 𝜽) − 𝛿(B𝝓 𝝓)T (e𝜺 + 𝝌E + 𝜿H + pT 𝜽)
+
+      − 𝛿(B𝝍 𝝍)T (q𝜺 + 𝜿E + 𝜸H + 𝝉 T 𝜽) − 𝛿(BT 𝜽)T (𝝀𝜺 + pE + 𝝉H + c𝜽))dV
+
+           ∫V
+      =         (𝛿(Bu q)T (CBu q − eT B𝝓 𝝓 − qT B𝝍 𝝍 − 𝝀T BT 𝜽)
+                                                                                                                                                    (A6)
+      − 𝛿(B𝝓 𝝓)T (eBu q + 𝝌B𝝓 𝝓 + 𝜿B𝝍 𝝍 + pT BT 𝜽)
+      − 𝛿(B𝝍 𝝍)T (qBu q + 𝜿B𝝓 𝝓 + 𝜸B𝝍 𝝍 + 𝝉 T BT 𝜽)
+      − 𝛿(BT 𝜽)T (𝝀Bu q + pB𝝓 𝝓 + 𝝉B𝝍 𝝍 + cBT 𝜽))dV
+      = 𝛿qT Kuu q + Ku𝝓 𝝓 + Ku𝝍 𝝍 + KuT 𝜽 + 𝛿𝝓T K𝝓u q + K𝝓𝝓 𝝓 + K𝝓𝝍 𝝍 + K𝝓T 𝜽
+            (                            )        (                           )
+
+      + 𝛿𝝍 T K𝝍u q + K𝝍𝝓 𝝓 + K𝝍𝝍 𝝍 + K𝝍T 𝜽 + 𝛿𝜽T KTu q + KT𝝓 𝝓 + KT𝝍 𝝍 + KTT 𝜽 ,
+            (                               )       (                           )
+
+
+
+
+           ∫V                     ∫Ω
+𝛿Wext =         𝛿uT fb dV +            𝛿uT fs dΩ + 𝛿uT fc
+
+
+           ∫Ω                                   ∫Ω                             ∫Ω
+                                                                                         −
+      −         𝛿𝝓T 𝝑dΩ − 𝛿𝝓T Qc −                   𝛿𝝍 T 𝜾dΩ − 𝛿𝝍 T Ic −           𝛿𝜽T QdΩ
+
+                                                                                                                                                    (A7)
+           ∫V                            ∫Ω
+       =        𝛿(Zu Nq)T fb dV +             𝛿(Zu Nq)T fs dΩ + 𝛿(Zu Nq)T fc
+
+
+           ∫Ω                                   ∫Ω                             ∫Ω
+                                                                                         −
+      −         𝛿𝝓T 𝝑dΩ − 𝛿𝝓T Qc −                   𝛿𝝍 T 𝜾dΩ − 𝛿𝝍 T Ic −           𝛿𝜽T QdΩ
+
+
+                    ∫V                     ∫Ω
+       = 𝛿qT (           NT ZTu f b dV +        NT ZTu f s dΩ + NT ZTu f c )
+
+
+                      ∫Ω                                ∫Ω                             ∫Ω
+                                                                                             −
+      + 𝛿𝝓T (−             𝝑dΩ − Qc ) + 𝛿𝝍 T (−              𝜾dΩ − Ic ) + 𝛿𝜽T (−             QdΩ)
+                T             T               T              T
+       = 𝛿q Fue + 𝛿𝝓 F𝝓e + 𝛿𝝍 F𝝍e + 𝛿𝜽 FTe .
+
+References                                                                          Dat, N.D., Quan, T.Q., Duc, N.D.: Vibration analysis of auxetic
+                                                                                         laminated plate with magneto-electro-elastic face sheets
+Cui, Y., Yu, Z., Lan, P.: A novel method of thermo-mechanical                            subjected to blast loading. Compos. Struct. 280, 114925
+     coupled analysis based on the unified description. Mech.                            (2022). https://​doi.​org/​10.​1016/j.​comps​truct.​2021.​114925
+     Mach. Theory 134, 376–392 (2019). https://​doi.​org/​10.​                      Eshaghi, M.S., Anitescu, C., Thombre, M., et al.: Variational
+     1016/j.​mechm​achth​eory.​2019.​01.​001                                             physics-informed neural operator (vino) for solving
+                                                                                         partial differential equations. Comput. Methods Appl.
+
+                                                                                                                                        Vol.: (0123456789)
+   17         Page 20 of 21                                                                                                  S.-Q. Zhang et al.
+
+
+      Mech. Eng. 437, 117785 (2025). https://​doi.​org/​10.​              Shishesaz, M., Shirbani, M.M., Sedighi, H.M., et al.: Design
+      1016/j.​cma.​2025.​117785                                                 and analytical modeling of magneto-electro-mechanical
+ Huang, D., Ding, H., Chen, W.: Analytical solution for func-                   characteristics of a novel magneto-electro-elastic vibra-
+      tionally graded magneto-electro-elastic plane beams.                      tion-based energy harvesting system. J. Sound Vib. 425,
+      Int. J. Eng. Sci. 45(2), 467–485 (2007). https://​doi.​org/​              149–169 (2018). https://​doi.​org/​10.​1016/j.​jsv.​2018.​03.​030
+      10.​1016/j.​ijeng​sci.​2007.​03.​005                                Sladek, J., Sladek, V., Krahulec, S., et al.: The MLPG analyses
+ Kim, J.Y.: Micromechanical analysis of effective properties                    of large deflections of magnetoelectroelastic plates. Eng.
+      of magneto-electro-thermo-elastic multilayer compos-                      Anal. Bound. Elem. 37(4), 673–682 (2013). https://​doi.​
+      ites. Int. J. Eng. Sci. 49(9), 1001–1018 (2011). https://​                org/​10.​1016/j.​engan​abound.​2013.​02.​001
+      doi.​org/​10.​1016/j.​ijeng​sci.​2011.​05.​012                      Suchtelen, J.V.: Product properties: a new application of com-
+ Kondaiah, P., Shankar, K., Ganesan, N.: Studies on magneto-                    posite materials. Philips Res. Rep. 27(1), 28–37 (1972)
+      electro-elastic cantilever beam under thermal environ-              Tarkashvand, A., Zafari, H., Aliakbari, F.: Novel multi-physics
+      ment. Coupled Syst. Mech. 1, 205–217 (2012). https://​                    simulation of transient dynamics in functionally graded
+      doi.​org/​10.​12989/​csm.​2012.1.​2.​205                                  porous multiferroic cylindrical shells under moving heat
+ Liu, H., Lyu, Z.: Modeling of novel nanoscale mass sensor                      flux: a magneto-electro-thermoelastic analysis. Eng.
+      made of smart FG magneto-electro-elastic nanofilm                         Struct. 322, 119116 (2025). https://​doi.​org/​10.​1016/j.​engst​
+      integrated with graphene layers. Thin-Walled Struct.                      ruct.​2024.​119116
+      151, 106749 (2020). https://​doi.​org/​10.​1016/j.​tws.​2020.​      Tassi, N., Bakkali, A., Fakri, N., et al.: Mathematical mod-
+      106749                                                                    eling of fully coupled reinforced magneto-electro-thermo-
+ Nguyen-Thanh, V.M., Anitescu, C., Alajlan, N., et al.: Para-                   mechanical effective properties based on conditioned
+      metric deep energy approach for elasticity accounting for                 micromechanics. Compos. Struct. 280, 114896 (2022).
+      strain gradient effects. Comput. Methods Appl. Mech.                      https://​doi.​org/​10.​1016/j.​comps​truct.​2021.​114896
+      Eng. 386, 114096 (2021). https://​doi.​org/​10.​1016/j.​cma.​       Vinyas, M., Kattimani, S.C.: Hygrothermal analysis of mag-
+      2021.​114096                                                             neto-electro-elastic plate using 3D finite element analysis.
+ Pouresmaeeli, S., Ghavanloo, E., Fazelzadeh, S.: Vibration                    Compos. Struct. 180, 617–637 (2017). https://​doi.​org/​10.​
+      analysis of viscoelastic orthotropic nanoplates resting                  1016/j.​comps​truct.​2017.​08.​015
+      on viscoelastic medium. Compos. Struct. 96(405), 410                Vinyas, M., Kattimani, S.C.: Static studies of stepped func-
+      (2013). https://​doi.​org/​10.​1016/j.​comps​truct.​2012.​08.​051        tionally graded magneto-electro-elastic beam subjected
+ Priya, S., Islam, R., Dong, S., et al.: Recent advancements in                to different thermal loads. Compos. Struct. 163, 216–237
+      magnetoelectric particulate and laminate composites. J.                  (2017). https://​doi.​org/​10.​1016/j.​comps​truct.​2016.​12.​040
+      Electroceram. 19(1), 149–166 (2007). https://​doi.​org/​10.​        Vinyas, M., Kattimani, S.C.: Finite element evaluation of free
+      1007/​s10832-​007-​9042-5                                                vibration characteristics of magneto-electro-elastic rectan-
+ Rabczuk, T., Ren, H., Zhuang, X.: A nonlocal operator method                  gular plates in hygrothermal environment using higher-
+      for partial differential equations with application to elec-             order shear deformation theory. Compos. Struct. 202,
+      tromagnetic waveguide problem. Comput. Mater. Contin.                    1339–1352 (2018). https://​doi.​org/​10.​1016/j.​comps​truct.​
+      59(1), 31–55 (2019). https://​doi.​org/​10.​32604/​cmc.​2019.​           2018.​06.​069
+      04567                                                               Vinyas, M., Kattimani, S.C.: Investigation of the effect of
+ Ren, H., Zhuang, X., Rabczuk, T.: A higher order nonlocal                     ­BaTiO3/CoFe2O4 particle arrangement on the static
+      operator method for solving partial differential equations.              response of magneto-electro-thermo-elastic plates. Com-
+      Comput. Methods Appl. Mech. Eng. 367, 113132 (2020).                     pos. Struct. 185, 51–64 (2018). https://​doi.​org/​10.​1016/j.​
+      https://​doi.​org/​10.​1016/j.​cma.​2020.​113132                         comps​truct.​2017.​10.​073
+ Ren, H., Zhuang, X., Oterkus, E., et al.: Nonlocal strong forms          Zhang, P., Qi, C., Fang, H., et al.: Semi-analytical analysis of
+      of thin plate, gradient elasticity, magneto-electro-elastic-             static and dynamic responses for laminated magneto-elec-
+      ity and phase-field fracture by nonlocal operator method.                tro-elastic plates. Compos. Struct. 222, 110933 (2019).
+      Eng. Comput. 39(1), 23–44 (2023). https://​doi.​org/​10.​                https://​doi.​org/​10.​1016/j.​comps​truct.​2019.​110933
+      1007/​s00366-​021-​01502-8                                          Zhang, P., Qi, C., Fang, H., et al.: A semi-analytical approach
+ Ren, H., Rabczuk, T., Zhuang, X.: Variational damage                          for the flexural analysis of in-plane functionally graded
+      model: a new paradigm for fractures. Front. Struct.                      magneto-electro-elastic plates. Compos. Struct. 250,
+      Civil Eng. 19(1), 1–21 (2025). https://​doi.​org/​10.​1007/​             112590 (2020). https://​doi.​org/​10.​1016/j.​comps​truct.​2020.​
+      s11709-​025-​1144-0                                                      112590
+ Samaniego, E., Anitescu, C., Goswami, S., et al.: An energy              Zhang, S.Q., Li, Y.X., Schmidt, R.: Modeling and simulation
+      approach to the solution of partial differential equations in            of macro-fiber composite layered smart structures. Com-
+      computational mechanics via machine learning: concepts,                  pos. Struct. 126, 89–100 (2015). https://​doi.​org/​10.​1016/j.​
+      implementation and applications. Comput. Methods Appl.                   comps​truct.​2015.​02.​051
+      Mech. Eng. 362, 112790 (2020). https://​doi.​org/​10.​1016/j.​      Zhang, S.Q., Gao, Y.S., Zhao, G.Z., et al.: Geometrically non-
+      cma.​2019.​112790                                                        linear analysis of CNT-reinforced functionally graded
+ Semenov, A.A., Karmanenko, S.F., Kalinikos, B.A., et al.:                     composite plates integrated with piezoelectric layers.
+      Dual-tunable hybrid wave ferrite-ferroelectric microwave
+      resonator. Electron. Lett. 42(11), 641–642 (2006). https://​
+      doi.​org/​10.​1049/​el:​20060​164
+
+
+Vol:. (1234567890)
+Fully coupled modeling for static and dynamic analysis of thermo‑magneto‑electro‑elastic…                    Page 21 of 21        17
+
+
+    Compos. Struct. 234, 111694 (2020). https://​doi.​org/​10.​        loading. Compos. Struct. 315, 116984 (2023). https://​doi.​
+    1016/j.​comps​truct.​2019.​111694                                  org/​10.​1016/j.​comps​truct.​2023.​116984
+Zhang, S.Q., Zhao, Y.F., Wang, X., et al.: Static and dynamic      Zhou, L., Wang, J., Liu, M., et al.: Evaluation of the transient
+    analysis of functionally graded magneto-electro-elastic            performance of magneto-electro-elastic based structures
+    plates and shells. Compos. Struct. 281, 114950 (2022).             with the enriched finite element method. Compos. Struct.
+    https://​doi.​org/​10.​1016/j.​comps​truct.​2021.​114950           280, 114888 (2022). https://​doi.​org/​10.​1016/j.​comps​truct.​
+Zhao, Y.F., Zhang, S.Q., Wang, X., et al.: Nonlinear analysis          2021.​114888
+    of carbon nanotube reinforced functionally graded plates
+    with magneto-electro-elastic multiphase matrix. Compos.        Publisher’s Note Springer Nature remains neutral with regard
+    Struct. 297, 115969 (2022). https://​doi.​org/​10.​1016/j.​    to jurisdictional claims in published maps and institutional
+    comps​truct.​2022.​115969                                      affiliations.
+Zhao, Y.F., Gao, Y.S., Wang, X., et al.: Finite element analy-
+    sis of functionally graded magneto-electro-elastic porous
+                                                                   Springer Nature or its licensor (e.g. a society or other partner)
+    cylindrical shells subjected to thermal loads. Mech. Adv.
+                                                                   holds exclusive rights to this article under a publishing
+    Mater. Struct. 31(17), 4003–4018 (2024). https://​doi.​org/​
+                                                                   agreement with the author(s) or other rightsholder(s); author
+    10.​1080/​15376​494.​2023.​21883​26
+                                                                   self-archiving of the accepted manuscript version of this article
+Zhou, L., Qu, F.: The magneto-electro-elastic coupling isogeo-
+                                                                   is solely governed by the terms of such publishing agreement
+    metric analysis method for the static and dynamic analy-
+                                                                   and applicable law.
+    sis of magneto-electro-elastic structures under thermal
+
+
+
+
+                                                                                                                      Vol.: (0123456789)
+

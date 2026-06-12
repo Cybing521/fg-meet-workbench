@@ -1,0 +1,8 @@
+metric,value,notes
+min_comsol_to_matlab_ratio,0.993742378638347,smallest raw COMSOL/MATLAB displacement ratio across the 15 points
+max_comsol_to_matlab_ratio,1.04926757967398,largest raw COMSOL/MATLAB displacement ratio across the 15 points
+optimal_uniform_stiffness_scale,1.02150497915616,minimax uniform stiffness scale derived from (min_ratio + max_ratio) / 2
+raw_max_rel_err_pct,4.92675796739782,original COMSOL 3D solid versus MATLAB/present 15-point max error
+raw_mean_rel_err_pct,3.51281176599227,original COMSOL 3D solid versus MATLAB/present 15-point mean error
+scaled_max_rel_err_pct,2.71781352850081,best possible 15-point max error using one global stiffness scale
+scaled_mean_rel_err_pct,1.9386874380902,mean error using the optimal global stiffness scale

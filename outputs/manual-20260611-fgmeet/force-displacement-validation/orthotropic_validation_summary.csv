@@ -1,0 +1,2 @@
+run_tag,case_id,comsol_csv,matlab_w_p8_mm,comsol_w_p8_mm,center_rel_err_pct,max_abs_diff_mm,max_rel_err_pct,mean_rel_err_pct,comsol_mesh,notes,date
+U_Vf06_orthotropic_sweep7_mesh4,U_Vf06_elastic,output\\comsol_elastic_validation_U_Vf06_orthotropic_sweep7_mesh4_points.csv,-2.12751986193692,-2.26310155281457,6.37275793769656,0.323250738563268,7.02698859130437,6.38241646190171,"3D solid orthotropic 10-domain CSV materials, swept mesh size 4, 7 elements per layer, force area",orthotropic material-row parity check,2026-06-11

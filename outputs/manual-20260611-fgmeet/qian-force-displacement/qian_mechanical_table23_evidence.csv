@@ -1,0 +1,4 @@
+"source","table_or_text","case","model","mesh","dof","frequency_hz","free_end_midpoint_w_mm","paper_deviation","use_for_validation"
+"Qian 2026 PDF","Table 2 + text","CFFF square plate, 300 mm x 300 mm x 6 mm, uniform pressure 15000 Pa","COMSOL 3D solid","45x45x10","443829","54.407","-5.9525","","External COMSOL reference for force-to-displacement, but only free-end midpoint"
+"Qian 2026 PDF","Table 3 + text","CFFF square plate, 300 mm x 300 mm x 6 mm, uniform pressure 15000 Pa","present shell model","6x6","960","52.228","-5.9976","","External present-model reference for force-to-displacement, but only free-end midpoint"
+"Qian 2026 PDF","Section 4.2 text","same as above","present vs COMSOL convergence comparison","present 6x6 vs COMSOL 45x45x10","","","","frequency deviation 4.00%; displacement deviation 0.76%","Supports that force-to-displacement literature error can be below 1% at the reported point"
