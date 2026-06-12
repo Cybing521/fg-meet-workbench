@@ -4,6 +4,18 @@
 
 ---
 
+## 当前交付入口与清理状态
+
+- 中文 DOCX 报告：[paper/main_zh.docx](paper/main_zh.docx)
+- 中文 PDF 报告：[paper/main_zh.pdf](paper/main_zh.pdf)
+- 论文源文件：[paper/main_zh.tex](paper/main_zh.tex)
+- Windows COMSOL 操作路线：[comsol/docs/windows-gradient-shell-operation.md](comsol/docs/windows-gradient-shell-operation.md)
+- 前人代码和参考材料：[reference/predecessor-code](reference/predecessor-code)
+- 最新五点验证和对比材料：[outputs/manual-20260611-fgmeet](outputs/manual-20260611-fgmeet)
+
+本次整合已删除本地交付压缩包、LaTeX 编译中间文件、Word 渲染预览页、PPT 预览截图和本地运行检查包。正式报告、论文源码、复现脚本、结果 CSV、COMSOL 验证说明和前人代码保留。
+
+
 ## 仓库结构
 
 ```
