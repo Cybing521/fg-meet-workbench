@@ -1,0 +1,13 @@
+{
+  "date": "2026-07-15",
+  "matlab": "R2026a 26.1; base MATLAB and Simulink; PDE Toolbox absent",
+  "comsol": "COMSOL Multiphysics 6.0.0.318 Java API/comsolbatch",
+  "plotting_python": "Python 3.10.20; Matplotlib 3.10.9; pandas 2.3.3; NumPy 2.2.6",
+  "latex_engine": "Tectonic 0.16.9",
+  "matlab_solid": "H20 serendipity; 3x3x3 full integration",
+  "comsol_solid": "quadratic serendipity solid",
+  "manifest_entries": 127,
+  "verified_entries": 127,
+  "missing_entries": [],
+  "status": "pass"
+}

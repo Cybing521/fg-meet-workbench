@@ -1,0 +1,20 @@
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+ISOMORPHIC_MATLAB_START,mesh,10
+ISOMORPHIC_MATLAB_DONE,mesh,10,w_electric_mm,-0.0568420385856,w_magnetic_mm,0.189972682667
+ISOMORPHIC_MATLAB_START,mesh,15
+ISOMORPHIC_MATLAB_DONE,mesh,15,w_electric_mm,-0.0569719914602,w_magnetic_mm,0.190407000239
+ISOMORPHIC_MATLAB_START,mesh,20
+ISOMORPHIC_MATLAB_DONE,mesh,20,w_electric_mm,-0.0570732010745,w_magnetic_mm,0.190745254503
+             load_case              bottom_stress_Pa    top_stress_Pa    nx    ny    nz_total    thickness_elements_per_physical_layer    element_count    node_count    dof_count    w_center_mm    w_free_mid_mm    relative_equilibrium_residual      status       elapsed_s    w_change_from_previous_pct
+    ____________________________    ________________    _____________    __    __    ________    _____________________________________    _____________    __________    _________    ___________    _____________    _____________________________    ___________    _________    __________________________
+
+    "electric_equivalent_stress"        4.934e+06        -4.934e+06      10    10       10                         1                          1000            4961         14883       -0.056842       -0.24229                5.7406e-09              "completed"     0.97811                  NaN          
+    "magnetic_external_stress"         -1.649e+07         1.649e+07      10    10       10                         1                          1000            4961         14883         0.18997        0.80975                5.6487e-09              "completed"     0.97811                  NaN          
+    "electric_equivalent_stress"        4.934e+06        -4.934e+06      15    15       10                         1                          2250           10656         31968       -0.056972       -0.24248                5.1615e-09              "completed"      2.4097               0.2281          
+    "magnetic_external_stress"         -1.649e+07         1.649e+07      15    15       10                         1                          2250           10656         31968         0.19041        0.81039                4.5744e-09              "completed"      2.4097               0.2281          
+    "electric_equivalent_stress"        4.934e+06        -4.934e+06      20    20       10                         1                          4000           18501         55503       -0.057073       -0.24265                4.4184e-09              "completed"      7.2057              0.17733          
+    "magnetic_external_stress"         -1.649e+07         1.649e+07      20    20       10                         1                          4000           18501         55503         0.19075        0.81096                4.4878e-09              "completed"      7.2057              0.17733          
+
+ISOMORPHIC_MATLAB_COMPLETED,G:\fg-meet-workbench\outputs\paper-20260715-fgmee\experiments\isomorphic_solid\matlab_isomorphic_solid_results.csv

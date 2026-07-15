@@ -1,0 +1,3 @@
+coupling,constitutive_coefficient_per_K,assembled_coefficient_per_K,assembled_to_constitutive_ratio,expected_layer_multiplier,diagnosis
+pyroelectric,18.285262412283025,182.85262412283038,10.000000000000007,10,full PE diagonal repeated once per physical layer
+pyromagnetic,0.042716210783763704,0.42716210783763703,10.0,10,full PM diagonal repeated once per physical layer

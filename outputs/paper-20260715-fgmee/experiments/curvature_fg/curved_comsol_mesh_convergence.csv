@@ -1,0 +1,4 @@
+model,mode,radius_m,axial_divisions,circumferential_divisions,thickness_divisions,element_count,w_center_radial_mm,change_from_previous_pct,mesh_gate_1pct,source_file
+COMSOL_3D_curved_solid,U,0.4,10,10,10,1000,-1.9866667304992203,,,G:\fg-meet-workbench\outputs\paper-20260715-fgmee\experiments\curvature_fg\comsol\comsol_curved_U_R0p4_10x10x10_meshcheck_summary.csv
+COMSOL_3D_curved_solid,U,0.4,15,15,10,2250,-2.098474427100787,5.6279040105267795,fail,G:\fg-meet-workbench\outputs\paper-20260715-fgmee\experiments\curvature_fg\comsol\comsol_curved_U_R0p4_15x15x10_meshcheck_summary.csv
+COMSOL_3D_curved_solid,U,0.4,20,20,10,4000,-2.118727531431109,0.9651346744455362,pass,G:\fg-meet-workbench\outputs\paper-20260715-fgmee\experiments\curvature_fg\comsol\comsol_curved_U_R0p4_20x20x10_final_summary.csv

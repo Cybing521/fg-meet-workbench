@@ -15,6 +15,7 @@ function result = run_meet_static(caseFile, loadCase, varargin)
     addParameter(p, 'Magnetic', 200, @isnumeric);
     addParameter(p, 'OutTag', '', @(x) ischar(x) || isstring(x));
     addParameter(p, 'SolveSensors', true, @(x) islogical(x) || isnumeric(x));
+    addParameter(p, 'CorrectPyroAssembly', true, @(x) islogical(x) || isnumeric(x));
     addParameter(p, 'UseCache', true, @(x) islogical(x) || isnumeric(x));
     addParameter(p, 'Quiet', true, @(x) islogical(x) || isnumeric(x));
     parse(p, caseFile, loadCase, varargin{:});
@@ -82,6 +83,14 @@ function result = run_meet_static(caseFile, loadCase, varargin)
     if nLayer < 1
         nLayer = 10;
     end
+    % The bundled element routine fills the full PE/PM diagonal during
+    % every physical-layer call.  Assembly therefore repeats Kft/Kzt once
+    % per layer.  Correct the duplicated pyro-electric/pyro-magnetic block
+    % here while retaining an explicit legacy switch for reproducibility.
+    if p.Results.CorrectPyroAssembly
+        KftT = KftT / nLayer;
+        KztT = KztT / nLayer;
+    end
 
     PhiaMT = zeros(FinalDofMEE, 1);
     MgaT = zeros(FinalDofMEE, 1);
@@ -129,7 +138,9 @@ function result = run_meet_static(caseFile, loadCase, varargin)
         end
     end
 
-    centerIdx = find_nearest_node(FinitElemInfo.Node, [0.15, 0.15, 0.0]);
+    coordinateBlock = FinitElemInfo.Node(:, 2:4);
+    targetCenter = (min(coordinateBlock, [], 1) + max(coordinateBlock, [], 1)) / 2;
+    centerIdx = find_nearest_node(FinitElemInfo.Node, targetCenter);
     wCenter = TQd(5 * (centerIdx - 1) + 3);
     thetaLayers = average_by_layer(SensM_T, nLayer);
     electricLayers = average_by_layer(SensM_E, nLayer);
@@ -161,8 +172,10 @@ function result = run_meet_static(caseFile, loadCase, varargin)
     result.volt = activeVolt;
     result.magnetic = activeMagnetic;
     result.nLayer = nLayer;
+    result.correct_pyro_assembly = logical(p.Results.CorrectPyroAssembly);
     result.centerNodeId = FinitElemInfo.Node(centerIdx, 1);
     result.centerCoord = FinitElemInfo.Node(centerIdx, 2:4);
+    result.centerTargetCoord = targetCenter;
     result.timestamp = datestr(now);
 
     tag = char(p.Results.OutTag);

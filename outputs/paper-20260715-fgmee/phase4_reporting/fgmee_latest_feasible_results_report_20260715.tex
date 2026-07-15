@@ -1,0 +1,366 @@
+\documentclass[UTF8,fontset=windows,11pt,a4paper]{ctexart}
+\usepackage[margin=2.05cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,tabularx,array,multirow}
+\usepackage{graphicx,xcolor,enumitem,fancyhdr,hyperref,xurl,float,caption}
+\graphicspath{{../figures/}}
+
+\definecolor{ok}{RGB}{25,120,70}
+\definecolor{blue}{RGB}{35,75,130}
+\definecolor{shade}{RGB}{245,247,250}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  pdfauthor={FG-MEE numerical validation workbench},
+  pdftitle={FG-MEE 板壳最新可行数值结果报告}
+}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{FG-MEE 板壳最新可行数值结果}
+\rhead{2026-07-15}
+\cfoot{\thepage}
+\setlength{\headheight}{15pt}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.28em}
+\renewcommand{\arraystretch}{1.16}
+\captionsetup{font=small,labelfont=bf}
+\newcommand{\pass}{\textcolor{ok}{\textbf{通过}}}
+\newcommand{\tierA}{\textcolor{ok}{\textbf{A 级}}}
+\newcommand{\tierB}{\textcolor{blue}{\textbf{B 级}}}
+\input{../experiments/curvature_fg/curvature_fg_report_macros.tex}
+
+\title{\textbf{FG-MEE 板壳最新可行数值结果报告}\\[0.35em]
+\large MATLAB--COMSOL 同构验证、全半径曲率响应与双向耦合结果}
+\author{FG-MEE 数值验证工作台}
+\date{2026年7月15日}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+本文汇总截至 2026 年 7 月 15 日已经完成复算的 FG-MEE 板壳数值实验结果。首先，在 $300\,\mathrm{mm}\times300\,\mathrm{mm}\times6\,\mathrm{mm}$ 悬臂平板上建立 MATLAB H20 与 COMSOL 二次巧凑三维实体同构模型；10/15/20 三档面内网格、两类外应力载荷的中心位移最大相对差为 $1.7690\times10^{-4}\%$，自由端中点最大相对差为 $1.2127\times10^{-4}\%$。平板压力、电致和磁致结果另与前人已发表表格核对，同工况差异为 $0.010\%$--$0.92\%$。其次，对 $R=1.0,0.4,0.3,0.2$ m 四个曲率半径、U/X 两种厚度分布及压力、电致、磁致三类载荷完成 20/30 网格复算；24 个正式工况的最大网格变化为 $0.00787753\%$。归一化结果显示，电致和磁致曲率--梯度交互为 $1.3568$--$1.5421$ 个百分点，且均高于三倍离散界。代表性的 $R=0.4$ m 独立 COMSOL 三维曲壳在 15 到 20 网格间变化为 $0.9651\%$；其与 MATLAB LRT5 的 $8.0830\%$ 差异作为非同构模型形式敏感性报告。反向感知方面，0.5 mm 位移下 MATLAB 得到 $78.4803$ V 和 $0.0309000$ A，COMSOL 力学--本构后处理得到 $81.1999$ V 和 $0.0319709$ A，相对差均为 $3.4654\%$。这些结果构成当前可直接用于小论文数值章节的证据主体。
+
+\noindent\textbf{关键词：}功能梯度磁电弹；MATLAB；COMSOL；同构验证；曲壳；网格收敛；反向感知
+\end{abstract}
+
+\begin{center}
+\fcolorbox{blue}{shade}{
+\begin{minipage}{0.93\textwidth}
+\textbf{核心结论。}
+在严格统一单元族、三维运动学、材料、边界、载荷与探针后，MATLAB--COMSOL 的最大差异低于 $0.00018\%$；平板三类载荷与前人公开表格的差异为 $0.010\%$--$0.92\%$。四个正文半径的 24 个曲壳工况全部通过 0.5\% 网格门槛，电致/磁致曲率--梯度交互在全部半径上均已被离散边界分辨。独立曲壳和反向感知结果分别作为 B 级模型敏感性与量级交叉验证使用，不扩展为全耦合 PDE 的 A 级闭合结论。
+\end{minipage}}
+\end{center}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{研究范围与证据口径}
+
+本报告只纳入当前可重复运行的最终数据，不讨论计算过程记录。本文把 MATLAB/COMSOL 求解、网格复算、参数扫描与跨软件对照统称为\textbf{数值实验}，这些工作已经实际完成。尚未开展的是实体样件制备及传感器、位移计等仪器参与的台架测量，因此本文结果属于数值实验验证；只有向真实器件性能外推时，才需要补充实物测试。数值证据按模型是否同构分级：A 级要求两个求解器共享几何、材料、边界、载荷实现、单元运动学与输出位置；B 级允许模型形式不同，用于检验符号、量级、趋势及模型敏感性。
+
+\begin{table}[H]
+\centering
+\caption{本文纳入的结果及其证据边界}
+\small
+\begin{tabularx}{\textwidth}{p{0.24\textwidth}Xp{0.16\textwidth}}
+\toprule
+结果模块 & 可支持的结论 & 等级 \\
+\midrule
+MATLAB H20--COMSOL 二次实体 & 外应力机械核的跨软件实现一致性 & \tierA \\
+平板三类载荷前人表格 & 同几何、同载荷下的外部数值基准一致性 & \textbf{外部基准} \\
+四半径 20/30 网格复算 & MATLAB 曲壳响应的离散收敛与参数趋势 & \tierA \\
+$R=0.4$ m 独立 COMSOL 曲壳 & 三维曲壳自身收敛及 LRT5 模型形式敏感性 & \tierB \\
+位移反推电势/磁势 & 当前本构装配的量级、线性与交叉一致性 & \tierB \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{理论模型与评价指标}
+
+\subsection{几何、材料分布与载荷}
+
+主体结构的轴向长度、弧长和厚度分别为 300 mm、300 mm 和 6 mm，厚度划分为 10 个物理层，$x=0$ 端面固支，其余边界自由。曲壳半径取 $R=1.0,0.4,0.3,0.2$ m，对应曲率 $1/R=1.0,2.5,3.33,5.0\ \mathrm{m}^{-1}$。材料为 BaTiO$_3$/CoFe$_2$O$_4$ 混合体系，当前比较使用两种厚度分布：
+\[
+V_{\mathrm{BTO}}^{U}(z)=0.6,
+\qquad
+V_{\mathrm{BTO}}^{X}(z)=0.6\frac{|z|}{h/2},
+\qquad -\frac{h}{2}\le z\le\frac{h}{2}.
+\]
+U 表示厚度均匀分布，X 表示上下表面富 BaTiO$_3$、中面富 CoFe$_2$O$_4$ 的对称分布。三类正向载荷分别为 15 kPa 横向压力、300 V 电势差和 200 A 磁势差；主要输出为几何中心的法向位移 $w_c$。
+
+\subsection{MEE 耦合本构与逐层材料混合}
+
+在线性、小变形假设下，磁电弹材料采用应力--电位移--磁感应强度形式的耦合本构：
+\[
+\begin{aligned}
+\boldsymbol\sigma
+  &=\mathbf C\boldsymbol\varepsilon-\mathbf e^{\mathsf T}\mathbf E
+    -\mathbf q^{\mathsf T}\mathbf H-\boldsymbol\lambda\Delta T,\\
+\mathbf D
+  &=\mathbf e\boldsymbol\varepsilon+\boldsymbol\chi\mathbf E
+    +\boldsymbol\kappa\mathbf H+\mathbf p_E\Delta T,\\
+\mathbf B
+  &=\mathbf q\boldsymbol\varepsilon+\boldsymbol\kappa^{\mathsf T}\mathbf E
+    +\boldsymbol\gamma\mathbf H+\mathbf p_M\Delta T.
+\end{aligned}
+\]
+其中，$\boldsymbol\sigma$、$\boldsymbol\varepsilon$、$\mathbf E$、$\mathbf H$、$\mathbf D$ 和 $\mathbf B$ 分别为应力、应变、电场、磁场、电位移和磁感应强度；$\mathbf C$、$\mathbf e$、$\mathbf q$、$\boldsymbol\chi$、$\boldsymbol\kappa$ 和 $\boldsymbol\gamma$ 依次表示弹性、压电、压磁、介电、磁电和磁导系数。本文静力工况取 $\Delta T=0$，保留温度项仅用于说明完整本构结构。
+
+厚度方向划分为 10 个物理层。对任一层 $k$，全部材料参数按 BaTiO$_3$ 与 CoFe$_2$O$_4$ 的体积分数作同一线性混合：
+\[
+\mathbf P_k
+=V_{\mathrm{BTO}}(z_k)\mathbf P_{\mathrm{BTO}}
++\left[1-V_{\mathrm{BTO}}(z_k)\right]\mathbf P_{\mathrm{CFO}},
+\]
+其中 $\mathbf P$ 统一代表上述弹性、压电、压磁、介电、磁电和磁导参数。U/X 分布只改变 $V_{\mathrm{BTO}}(z_k)$，几何、边界、载荷和层数均保持不变，因此后文 U/X 差异可直接归因于厚度梯度形式。
+
+\subsection{LRT5 板壳离散与正反向载荷链}
+
+MATLAB 曲壳模型采用五参数一阶板壳运动学。局部坐标下的位移写为
+\[
+u(x,y,z)=u_0(x,y)+z\beta_x(x,y),\qquad
+v(x,y,z)=v_0(x,y)+z\beta_y(x,y),\qquad
+w(x,y,z)=w_0(x,y),
+\]
+即中面三个位移与两个转角共同描述板壳变形。逐层积分后的单元机械刚度可概括为
+\[
+\mathbf K_{uu}^{e}
+=\int_{\Omega_e}\sum_{k=1}^{10}
+  \int_{z_k^-}^{z_k^+}
+  \mathbf B_u^{\mathsf T}\mathbf C_k\mathbf B_u
+  \,\mathrm dz\,\mathrm d\Omega .
+\]
+在规定外载、电势或磁势时，静力正向方程写为
+\[
+\mathbf K_{uu}\mathbf Q_d
+=\mathbf F_{\mathrm{mech}}
+-\mathbf K_{u\phi}\boldsymbol\Phi_a
+-\mathbf K_{u\psi}\boldsymbol\Psi_a,
+\]
+分别给出压力、电致和磁致位移。反向感知则在规定位移 $\mathbf Q_d$ 后求解
+\[
+\begin{bmatrix}
+\mathbf K_{\phi\phi} & \mathbf K_{\phi\psi}\\
+\mathbf K_{\psi\phi} & \mathbf K_{\psi\psi}
+\end{bmatrix}
+\begin{bmatrix}\boldsymbol\Phi_s\\\boldsymbol\Psi_s\end{bmatrix}
+=-
+\begin{bmatrix}\mathbf K_{\phi u}\\\mathbf K_{\psi u}\end{bmatrix}
+\mathbf Q_d .
+\]
+这两组方程构成本文“载荷/外场 $\rightarrow$ 位移”和“位移 $\rightarrow$ 感生电势/磁势”的双向计算链；后续证据等级取决于另一求解器是否采用完全同构的自由度与边界实现。
+
+\subsection{误差、网格变化与交互量}
+
+跨软件相对误差和相邻网格变化统一定义为
+\[
+\varepsilon_{AB}=100\frac{|w_A-w_B|}{|w_A|},
+\qquad
+\eta_{20\rightarrow30}=100\frac{|w_{30}-w_{20}|}{|w_{30}|}.
+\]
+同构跨软件验收门槛为 $\varepsilon_{AB}\le0.1\%$；曲率扫描的网格变化优先门槛为 $\eta_{20\rightarrow30}\le0.5\%$。为识别曲率与材料分布的非加性交互，先以同模式的 30$\times$30 平板结果归一化，再定义
+\[
+I_R=100\left[
+\frac{|w_X(R)|}{|w_X(\infty)|}
+-\frac{|w_U(R)|}{|w_U(\infty)|}
+\right]\quad\text{(百分点)}.
+\]
+当 $|I_R|$ 超过同半径、同载荷 U/X 最大网格变化的三倍时，记为“已分辨”。
+
+\section{平板基准与前人结果对照}
+
+旧报告中仍可直接支撑当前正文的外部证据，是相同平板几何、边界和载荷下的已发表表格数据。本文将当前 MATLAB 结果与 Zhang 等的全耦合板模型及其 COMSOL 结果逐项对照\footnote{S.-Q. Zhang, S.-Y. Qian, S. Liu, C.-Y. Ling and S.-Y. Ma, ``Fully coupled modeling for static and dynamic analysis of thermo-magneto-electro-elastic plates,'' \emph{International Journal of Mechanics and Materials in Design}, vol.~22, article~17, 2026, \href{https://doi.org/10.1007/s10999-025-09834-9}{doi:10.1007/s10999-025-09834-9}.}。压力工况比较自由端中点，电致和磁致工况比较几何中心，三类测点定义不混用。
+
+\begin{table}[H]
+\centering
+\caption{平板三类载荷与已发表表格结果对照}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+工况（测点） & 本文/mm & 文献模型/mm & 文献 COMSOL/mm & 差异（模型/COMSOL） \\
+\midrule
+15 kPa，自由端中点 & $-5.99822273$ & $-5.9976$ & $-5.9525$ & $0.010\%/0.768\%$ \\
+300 V，中心点 & $-0.05225709$ & $-0.0523$ & $-0.0523$ & $0.08\%/0.08\%$ \\
+200 A，中心点 & $0.17458575$ & $0.175$ & $0.173$ & $0.24\%/0.92\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+三类载荷的同工况差异为 $0.010\%$--$0.92\%$，均低于 1\% 量级，可作为当前平板正向计算的外部数值基准。另将前人同工况代码原样复跑时，13,800 个机械自由度和 15 个探针结果均全精度一致；这证明复跑与原实现的一致性，但因计算逻辑同源，不将其替代独立求解器验证。
+
+\section{MATLAB--COMSOL 三维实体同构验证}
+
+\subsection{同构设置}
+
+MATLAB 使用 20 节点巧凑六面体和 $3\times3\times3$ 全积分，COMSOL 使用二次巧凑实体。两侧均采用 $E=1.206\times10^{11}$ Pa、$\nu=0.3398$，并在最外两层施加大小相等、方向相反的面内外应力：电等效应力为 $\pm4.934$ MPa，磁等效应力为 $\mp16.49$ MPa。10/15/20 三档面内网格均按每个物理层一个厚度单元建模，探针固定在中心点和自由端中点。
+
+MATLAB 单元按
+\[
+\mathbf K_e=\int_{\Omega_e}\mathbf B^{\mathsf T}\mathbf D\mathbf B\,\mathrm d\Omega,
+\qquad
+\mathbf f_e^{*}=-\int_{\Omega_e}\mathbf B^{\mathsf T}\boldsymbol\sigma^{*}\,\mathrm d\Omega
+\]
+装配。该对照检验三维力学与等效外应力机械核，不代表电势或磁势自由度已经逐自由度同构。
+
+\subsection{跨软件结果}
+
+\begin{table}[H]
+\centering
+\caption{同构三维实体中心位移比较}
+\small
+\begin{tabular}{llrrr}
+\toprule
+载荷 & 面内网格 & MATLAB/mm & COMSOL/mm & 相对差/\% \\
+\midrule
+电等效应力 & 10$\times$10 & $-0.0568420386$ & $-0.0568419865$ & $9.1689\times10^{-5}$ \\
+电等效应力 & 15$\times$15 & $-0.0569719915$ & $-0.0569719693$ & $3.8925\times10^{-5}$ \\
+电等效应力 & 20$\times$20 & $-0.0570732011$ & $-0.0570733018$ & $1.7651\times10^{-4}$ \\
+磁等效应力 & 10$\times$10 & $0.1899726827$ & $0.1899725089$ & $9.1457\times10^{-5}$ \\
+磁等效应力 & 15$\times$15 & $0.1904070002$ & $0.1904069249$ & $3.9570\times10^{-5}$ \\
+磁等效应力 & 20$\times$20 & $0.1907452545$ & $0.1907455919$ & $1.7690\times10^{-4}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+六组中心点最大相对差为 $1.7690\times10^{-4}\%$，自由端中点最大相对差为 $1.2127\times10^{-4}\%$；MATLAB 相对平衡残差最大为 $5.741\times10^{-9}$。两个探针均以超过两个数量级的裕量通过 0.1\% 门槛，说明在当前同构机械核内，两套实现给出一致结果。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{Fig_03_isomorphic_solid_closure.pdf}
+\caption{MATLAB H20 与 COMSOL 二次三维实体的同构闭合。前两幅图比较中心和自由端中点位移，右图给出实际相对差。}
+\end{figure}
+
+\section{全半径曲壳 20/30 网格结果}
+
+\subsection{网格收敛}
+
+四个半径均完成 U/X 两种分布和三类载荷的 20$\times$20、30$\times$30 复算，共 48 条原始结果；最终 30$\times$30 主结果为 24 条。输入护照显示 U、X 各自跨网格材料数值哈希唯一，节点实际半径与声明半径一致。
+
+\begin{table}[H]
+\centering
+\caption{各半径六类中心位移的 20$\rightarrow$30 网格变化}
+\begin{tabular}{rrrrl}
+\toprule
+$R$/m & 曲率/$\mathrm{m}^{-1}$ & 最大变化/\% & 平均变化/\% & 0.5\% 门槛 \\
+\midrule
+\RadiusSummaryRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+全部 24 个工况均通过 0.5\% 门槛；全表最大变化为 $0.00787753\%$，位于 $R=1.0$ m、U 分布的压力工况。30$\times$30 结果可以作为当前曲率参数比较的统一离散基准。
+
+\subsection{\texorpdfstring{30$\times$30 正向响应}{30x30 正向响应}}
+
+用于曲率归一化的平板参考值为：U 分布下压力、电致、磁致中心位移分别为 $-2.12751986$、$-0.05225709$、$0.17458575$ mm；X 分布下分别为 $-1.81035762$、$-0.04239145$、$0.30499453$ mm。
+
+\begin{table}[H]
+\centering
+\caption{四个有限半径的 30$\times$30 中心位移}
+\small
+\begin{tabular}{rrr@{\hspace{1.0em}}rrr}
+\toprule
+$R$/m & 分布 & 压力/mm & 300 V/mm & 200 A/mm & 最大网格变化/\% \\
+\midrule
+1.0 & U & $-2.06935194$ & $-0.05942373$ & $0.19852877$ & 0.0079 \\
+1.0 & X & $-1.75905248$ & $-0.04885880$ & $0.35152531$ & 0.0066 \\
+0.4 & U & $-1.96016405$ & $-0.06295316$ & $0.21032023$ & 0.0059 \\
+0.4 & X & $-1.66709368$ & $-0.05170161$ & $0.37197854$ & 0.0047 \\
+0.3 & U & $-1.88188008$ & $-0.06290962$ & $0.21017479$ & 0.0053 \\
+0.3 & X & $-1.60068092$ & $-0.05163844$ & $0.37152405$ & 0.0042 \\
+0.2 & U & $-1.68102664$ & $-0.06171448$ & $0.20618191$ & 0.0046 \\
+0.2 & X & $-1.42994343$ & $-0.05063854$ & $0.36433004$ & 0.0035 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+压力位移绝对值随曲率增大而单调降低：从 $R=1.0$ m 到 $R=0.2$ m，U 和 X 分布分别降低 18.77\% 和 18.71\%。电致与磁致响应则在 $R=0.4$ m 附近达到本组离散半径中的最大值；两类载荷的归一化曲线一致，符合线性结构方程中载荷幅值缩放的预期。
+
+\subsection{曲率--梯度交互}
+
+\begin{table}[H]
+\centering
+\caption{30$\times$30 曲率--梯度交互及离散边界}
+\scriptsize
+\begin{tabular}{rllrrr}
+\toprule
+$R$/m & 载荷 & $I_R$/百分点 & 最大网格变化/\% & $|I_R|$/网格界 & 判定 \\
+\midrule
+\InteractionRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+12 个交互量全部高于三倍离散界。机械交互为 $-0.0999$ 至 $-0.0266$ 个百分点，表明曲率下 U/X 的归一化机械响应十分接近；电致和磁致交互为 $1.3568$ 至 $1.5421$ 个百分点，且同半径两者最大差仅 $1.602\times10^{-8}$ 个百分点。由此可将“曲率改变 U/X 分布对内禀致动的相对效果”作为当前可分辨的数值规律，其中本组最强交互位于 $R=1.0$ m。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{Fig_04_all_radius_curvature_validation.pdf}
+\caption{四个半径的 30$\times$30 响应及曲率--梯度交互。位移误差棒采用对应的 20$\rightarrow$30 变化，交互图实心点表示超过三倍离散界。}
+\end{figure}
+
+\section{代表曲壳独立 COMSOL 结果}
+
+代表工况取 U 分布、$R=0.4$ m、15 kPa 压力。COMSOL 模型为轴向 300 mm、弧长 300 mm、厚度 6 mm 的三维圆柱扇段，固支端为 $\theta=0$ 整个端面，外曲面受压；网格沿轴向和周向分别取 10/15/20，厚度固定 10 层。中心输出采用中面径向投影
+\[
+u_r=-v\sin\theta+w\cos\theta.
+\]
+
+\begin{table}[H]
+\centering
+\caption{$R=0.4$ m 代表曲壳的独立 COMSOL 网格结果}
+\begin{tabular}{lrrrr}
+\toprule
+模型 & 面内网格 & 厚度网格 & 中心径向位移/mm & 相邻网格变化/\% \\
+\midrule
+COMSOL 三维实体 & 10$\times$10 & 10 & $-1.98666673$ & -- \\
+COMSOL 三维实体 & 15$\times$15 & 10 & $-2.09847443$ & 5.6279 \\
+COMSOL 三维实体 & 20$\times$20 & 10 & $-2.11872753$ & 0.9651 \\
+MATLAB LRT5 & 20$\times$20 & 10 层 & $-1.96027889$ & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+COMSOL 的 15$\rightarrow$20 变化为 0.9651\%，通过 1\% 曲壳独立模型门槛。20$\times$20 时两种模型的位移符号和数量级一致，相对差为 8.0830\%。由于 MATLAB 使用 LRT5 曲壳、COMSOL 使用二次三维实体，这一差异用于量化模型形式敏感性，不作为跨软件数值误差。它与上一节的 A 级同构误差共同说明：当前软件实现能够在同构条件下闭合，而板壳降维与三维实体之间仍存在约 8\% 的模型层级差异。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{Fig_05_curved_comsol_validation.pdf}
+\caption{代表曲壳独立 COMSOL 结果。左图为网格收敛及 MATLAB LRT5 参考线，右图为 20$\times$20$\times$10 模型的轴向中线径向位移。}
+\end{figure}
+
+\section{位移反推电势与磁势}
+
+反向感知计算以规定中心位移为输入。MATLAB 采用当前逐物理层本构装配，COMSOL 采用三维力学位移场与同层材料本构后处理。20$\times$20 面内网格、每层 5 个厚度单元的结果如下。
+
+\begin{table}[H]
+\centering
+\caption{位移反推电势和磁势的当前结果}
+\small
+\begin{tabular}{rrrrrrr}
+\toprule
+位移/mm & MATLAB/V & COMSOL/V & 差/\% & MATLAB/A & COMSOL/A & 差/\% \\
+\midrule
+0.5 & 78.4803 & 81.1999 & 3.4654 & 0.0309000 & 0.0319709 & 3.4654 \\
+1.0 & 156.9605 & 162.3999 & 3.4654 & 0.0618001 & 0.0639417 & 3.4654 \\
+2.0 & 313.9211 & 324.7998 & 3.4654 & 0.1236002 & 0.1278834 & 3.4654 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+电势和磁势在 0.5--2.0 mm 范围内均严格随位移线性缩放，跨实现相对差稳定为 3.4654\%。其中 0.5 mm 工况给出数十伏和 $3.09\times10^{-2}$ A 的结果，可作为后续与完全相同边界、参考势和测点定义的前人算例对照值。该链为 B 级，因为 COMSOL 侧使用力学--本构后处理，尚未形成独立传感 PDE 的自由度级闭合。
+
+\section{综合结论与适用边界}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=2.3em]
+\item MATLAB H20 与 COMSOL 二次三维实体的六组同构结果全部通过 0.1\% 门槛，中心点最大差为 $0.0001769\%$。这项 A 级证据支持当前三维力学和等效外应力实现的一致性。
+\item 四个正文半径的 U/X、压力/电致/磁致共 24 个 30$\times$30 工况均有 20$\times$20 复算，最大网格变化仅 $0.00787753\%$。曲率趋势和交互量已具有明确离散误差边界。
+\item 压力响应随曲率增加单调减弱；电致和磁致响应在 $R=0.4$ m 附近达到本组最大值。电致/磁致曲率--梯度交互为 $1.3568$--$1.5421$ 个百分点，全部被三倍离散界分辨。
+\item 代表曲壳 COMSOL 自身达到 0.9651\% 的 15$\rightarrow$20 收敛变化；与 LRT5 的 8.0830\% 差异属于模型形式敏感性，可作为正文讨论项，不能表述为求解器误差。
+\item 反向感知在 0.5--2.0 mm 范围内呈严格线性，0.5 mm 时当前 MATLAB 结果为 78.4803 V 和 0.0309000 A；其与 COMSOL 力学--本构后处理相差 3.4654\%。
+\end{enumerate}
+
+上述结论的适用范围限于当前几何、CFFF 边界、材料混合规则、10 层离散和静力载荷。H20 同构链只闭合了外应力机械核；独立 COMSOL 曲壳目前只有 $R=0.4$ m、U 分布、压力载荷一个代表工况；反向感知尚缺完整独立传感 PDE。本文 MATLAB/COMSOL 求解、网格复算、参数扫描与交叉对照均属于已经完成的数值实验；尚未开展的是实物样件和台架仪器测量。这不削弱算法一致性、网格收敛和参数趋势结论，但真实器件性能仍需由后续实物测试确认。论文正文应据此区分 A 级实现验证、B 级模型敏感性和待实物测量确认的工程外推。
+
+\end{document}

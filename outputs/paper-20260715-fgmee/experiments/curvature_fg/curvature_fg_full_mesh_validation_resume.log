@@ -1,0 +1,112 @@
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+CURVATURE_FULL_RESUME,existing_rows,39
+CURVATURE_FULL_SKIP_COMPLETED,mesh,20,mode,U,radius_m,1
+CURVATURE_FULL_SKIP_COMPLETED,mesh,20,mode,X,radius_m,1
+CURVATURE_FULL_SKIP_COMPLETED,mesh,20,mode,U,radius_m,0.4
+CURVATURE_FULL_SKIP_COMPLETED,mesh,20,mode,X,radius_m,0.4
+CURVATURE_FULL_SKIP_COMPLETED,mesh,20,mode,U,radius_m,0.3
+CURVATURE_FULL_SKIP_COMPLETED,mesh,20,mode,X,radius_m,0.3
+CURVATURE_FULL_SKIP_COMPLETED,mesh,20,mode,U,radius_m,0.2
+CURVATURE_FULL_SKIP_COMPLETED,mesh,20,mode,X,radius_m,0.2
+CURVATURE_FULL_SKIP_COMPLETED,mesh,30,mode,U,radius_m,1
+CURVATURE_FULL_SKIP_COMPLETED,mesh,30,mode,X,radius_m,1
+CURVATURE_FULL_SKIP_COMPLETED,mesh,30,mode,U,radius_m,0.4
+CURVATURE_FULL_SKIP_COMPLETED,mesh,30,mode,X,radius_m,0.4
+CURVATURE_FULL_SKIP_COMPLETED,mesh,30,mode,U,radius_m,0.3
+CURVATURE_FULL_START,mesh,30,mode,X,radius_m,0.3
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+Saved G:\fg-meet-workbench\output\static_elastic_curvfull_30_X_R0p3_elastic.mat
+w_center = -1.600681 mm
+theta_span = 2.018648 K
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+Reused assembled matrices for G:\fg-meet-workbench\cases\curvature_fg\30x30\Thermal_CFFF_X_Vf0.6_R0.3m-30x30-10layer.txt
+Saved G:\fg-meet-workbench\output\static_electro_curvfull_30_X_R0p3_electro.mat
+w_center = -0.051638 mm
+theta_span = 0.166235 K
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+Reused assembled matrices for G:\fg-meet-workbench\cases\curvature_fg\30x30\Thermal_CFFF_X_Vf0.6_R0.3m-30x30-10layer.txt
+Saved G:\fg-meet-workbench\output\static_magneto_curvfull_30_X_R0p3_magneto.mat
+w_center = 0.371524 mm
+theta_span = 1.196011 K
+CURVATURE_FULL_DONE,mesh,30,mode,X,radius_m,0.3,rows,42
+CURVATURE_FULL_START,mesh,30,mode,U,radius_m,0.2
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+Saved G:\fg-meet-workbench\output\static_elastic_curvfull_30_U_R0p2_elastic.mat
+w_center = -1.681027 mm
+theta_span = 2.152008 K
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+Reused assembled matrices for G:\fg-meet-workbench\cases\curvature_fg\30x30\Thermal_CFFF_U_Vf0.6_R0.2m-30x30-10layer.txt
+Saved G:\fg-meet-workbench\output\static_electro_curvfull_30_U_R0p2_electro.mat
+w_center = -0.061714 mm
+theta_span = 0.191554 K
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+Reused assembled matrices for G:\fg-meet-workbench\cases\curvature_fg\30x30\Thermal_CFFF_U_Vf0.6_R0.2m-30x30-10layer.txt
+Saved G:\fg-meet-workbench\output\static_magneto_curvfull_30_U_R0p2_magneto.mat
+w_center = 0.206182 mm
+theta_span = 0.639964 K
+CURVATURE_FULL_DONE,mesh,30,mode,U,radius_m,0.2,rows,45
+CURVATURE_FULL_START,mesh,30,mode,X,radius_m,0.2
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+Saved G:\fg-meet-workbench\output\static_elastic_curvfull_30_X_R0p2_elastic.mat
+w_center = -1.429943 mm
+theta_span = 1.908766 K
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+Reused assembled matrices for G:\fg-meet-workbench\cases\curvature_fg\30x30\Thermal_CFFF_X_Vf0.6_R0.2m-30x30-10layer.txt
+Saved G:\fg-meet-workbench\output\static_electro_curvfull_30_X_R0p2_electro.mat
+w_center = -0.050639 mm
+theta_span = 0.163459 K
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+Reused assembled matrices for G:\fg-meet-workbench\cases\curvature_fg\30x30\Thermal_CFFF_X_Vf0.6_R0.2m-30x30-10layer.txt
+Saved G:\fg-meet-workbench\output\static_magneto_curvfull_30_X_R0p2_magneto.mat
+w_center = 0.364330 mm
+theta_span = 1.176042 K
+CURVATURE_FULL_DONE,mesh,30,mode,X,radius_m,0.2,rows,48
+CURVATURE_FULL_COMPLETED,G:\fg-meet-workbench\outputs\paper-20260715-fgmee\experiments\curvature_fg\curvature_fg_full_mesh_convergence.csv
+    mesh    mode    radius_m    load_case    w_center_mm    w_change_from_previous_pct    mesh_gate_20_to_30
+    ____    ____    ________    _________    ___________    __________________________    __________________
+
+     30     "U"         1       "elastic"       -2.0694              0.0078775                  "pass"      
+     30     "U"         1       "electro"     -0.059424              0.0032155                  "pass"      
+     30     "U"         1       "magneto"       0.19853              0.0032155                  "pass"      
+     30     "X"         1       "elastic"       -1.7591              0.0066241                  "pass"      
+     30     "X"         1       "electro"     -0.048859              0.0022085                  "pass"      
+     30     "X"         1       "magneto"       0.35153              0.0022085                  "pass"      
+     30     "U"       0.4       "elastic"       -1.9602              0.0058588                  "pass"      
+     30     "U"       0.4       "electro"     -0.062953             0.00071448                  "pass"      
+     30     "U"       0.4       "magneto"       0.21032             0.00071449                  "pass"      
+     30     "X"       0.4       "elastic"       -1.6671              0.0047049                  "pass"      
+     30     "X"       0.4       "electro"     -0.051702              0.0015293                  "pass"      
+     30     "X"       0.4       "magneto"       0.37198              0.0015293                  "pass"      
+     30     "U"       0.3       "elastic"       -1.8819              0.0053494                  "pass"      
+     30     "U"       0.3       "electro"      -0.06291              0.0012338                  "pass"      
+     30     "U"       0.3       "magneto"       0.21017              0.0012338                  "pass"      
+     30     "X"       0.3       "elastic"       -1.6007               0.004215                  "pass"      
+     30     "X"       0.3       "electro"     -0.051638              0.0020223                  "pass"      
+     30     "X"       0.3       "magneto"       0.37152              0.0020223                  "pass"      
+     30     "U"       0.2       "elastic"        -1.681              0.0046377                  "pass"      
+     30     "U"       0.2       "electro"     -0.061714              0.0014697                  "pass"      
+     30     "U"       0.2       "magneto"       0.20618              0.0014697                  "pass"      
+     30     "X"       0.2       "elastic"       -1.4299              0.0035354                  "pass"      
+     30     "X"       0.2       "electro"     -0.050639              0.0022733                  "pass"      
+     30     "X"       0.2       "magneto"       0.36433              0.0022733                  "pass"      
+

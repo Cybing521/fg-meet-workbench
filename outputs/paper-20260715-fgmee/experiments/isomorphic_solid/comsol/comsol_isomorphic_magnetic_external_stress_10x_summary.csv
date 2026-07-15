@@ -1,0 +1,2 @@
+load_case,inplane_divisions,thickness_elements_per_physical_layer,bottom_stress_Pa,top_stress_Pa,w_center_mm,w_free_mid_mm,total_elements,fixed_face_count,bottom_domain_count,top_domain_count,status
+magnetic_external_stress,10,1,-1.649E7,1.649E7,0.1899725089225852,0.8097540471739064,1000.0,10,1,1,completed

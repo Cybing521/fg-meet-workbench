@@ -1,0 +1,133 @@
+%% Full 20x20/30x30 curvature-gradient validation for all manuscript radii.
+clear; clc;
+paths = setup_paths();
+outDir = fullfile(paths.workbench, 'outputs', 'paper-20260715-fgmee', ...
+    'experiments', 'curvature_fg');
+if ~isfolder(outDir)
+    mkdir(outDir);
+end
+outRaw = fullfile(outDir, 'curvature_fg_full_mesh_20_30_raw.csv');
+outConv = fullfile(outDir, 'curvature_fg_full_mesh_convergence.csv');
+
+rows = struct('mesh', {}, 'mode', {}, 'radius_m', {}, 'curvature_1pm', {}, ...
+    'load_case', {}, 'w_center_mm', {}, 'electric_span', {}, 'magnetic_span', {}, ...
+    'theta_span_K', {}, 'center_node_id', {}, 'center_coord_1', {}, ...
+    'center_coord_2', {}, 'center_coord_3', {}, 'case_file', {}, 'status', {});
+if isfile(outRaw)
+    checkpoint = readtable(outRaw, 'TextType', 'string');
+    expected = fieldnames(rows);
+    if all(ismember(expected, checkpoint.Properties.VariableNames))
+        checkpoint = checkpoint(:, expected);
+        rows = table2struct(checkpoint).';
+        fprintf('CURVATURE_FULL_RESUME,existing_rows,%d\n', numel(rows));
+    end
+end
+radii = [1.0, 0.4, 0.3, 0.2];
+
+for mesh = [20, 30]
+    for radius = radii
+        radiusTag = strrep(sprintf('%.1f', radius), '.', 'p');
+        radiusFile = sprintf('%g', radius);
+        for mode = ["U", "X"]
+            filename = sprintf('Thermal_CFFF_%s_Vf0.6_R%sm-%dx%d-10layer.txt', ...
+                mode, radiusFile, mesh, mesh);
+            caseFile = fullfile(paths.cases, 'curvature_fg', ...
+                sprintf('%dx%d', mesh, mesh), filename);
+            if ~isfile(caseFile)
+                error('run_matlab_curvature_fg_full_mesh_validation:MissingCase', ...
+                    'Missing %s', caseFile);
+            end
+            completed = arrayfun(@(r) r.mesh == mesh && r.mode == mode && ...
+                abs(r.radius_m - radius) < 1e-12, rows);
+            completedLoads = string({rows(completed).load_case});
+            if all(ismember(["elastic", "electro", "magneto"], completedLoads))
+                fprintf('CURVATURE_FULL_SKIP_COMPLETED,mesh,%d,mode,%s,radius_m,%.6g\n', ...
+                    mesh, mode, radius);
+                continue
+            end
+            baseTag = sprintf('curvfull_%d_%s_R%s', mesh, mode, radiusTag);
+            fprintf('CURVATURE_FULL_START,mesh,%d,mode,%s,radius_m,%.6g\n', ...
+                mesh, mode, radius);
+            elastic = run_meet_static(caseFile, 'elastic', ...
+                'LoadScale', -15000, 'OutTag', [baseTag '_elastic'], ...
+                'SolveSensors', true, 'CorrectPyroAssembly', true, ...
+                'UseCache', true, 'Quiet', true);
+            electro = run_meet_static(caseFile, 'electro', ...
+                'Volt', 300, 'OutTag', [baseTag '_electro'], ...
+                'SolveSensors', true, 'CorrectPyroAssembly', true, ...
+                'UseCache', true, 'Quiet', true);
+            magneto = run_meet_static(caseFile, 'magneto', ...
+                'Magnetic', 200, 'OutTag', [baseTag '_magneto'], ...
+                'SolveSensors', true, 'CorrectPyroAssembly', true, ...
+                'UseCache', true, 'Quiet', true);
+            rows(end+1) = make_row(mesh, mode, radius, caseFile, "elastic", elastic); %#ok<SAGROW>
+            rows(end+1) = make_row(mesh, mode, radius, caseFile, "electro", electro); %#ok<SAGROW>
+            rows(end+1) = make_row(mesh, mode, radius, caseFile, "magneto", magneto); %#ok<SAGROW>
+            writetable(struct2table(rows), outRaw);
+            fprintf('CURVATURE_FULL_DONE,mesh,%d,mode,%s,radius_m,%.6g,rows,%d\n', ...
+                mesh, mode, radius, numel(rows));
+        end
+    end
+end
+
+results = struct2table(rows);
+pilotPath = fullfile(outDir, 'curvature_fg_pilot_10x10.csv');
+pilot = readtable(pilotPath, 'TextType', 'string');
+pilotRows = table(pilot.mesh, pilot.mode, pilot.radius_m, 1 ./ pilot.radius_m, ...
+    pilot.load_case, pilot.w_center_mm, pilot.electric_span, pilot.magnetic_span, ...
+    pilot.theta_span_K, pilot.center_node_id, pilot.center_coord_1, ...
+    pilot.center_coord_2, pilot.center_coord_3, pilot.case_file, ...
+    repmat("completed_pilot_corrected_pyro", height(pilot), 1), ...
+    'VariableNames', results.Properties.VariableNames);
+allLevels = [pilotRows; results];
+allLevels = sortrows(allLevels, {'radius_m','mode','load_case','mesh'}, ...
+    {'descend','ascend','ascend','ascend'});
+allLevels.w_change_from_previous_pct = nan(height(allLevels), 1);
+allLevels.electric_change_from_previous_pct = nan(height(allLevels), 1);
+allLevels.magnetic_change_from_previous_pct = nan(height(allLevels), 1);
+allLevels.theta_change_from_previous_pct = nan(height(allLevels), 1);
+
+for radius = radii
+    for mode = ["U", "X"]
+        for loadCase = ["elastic", "electro", "magneto"]
+            idx = find(abs(allLevels.radius_m - radius) < 1e-12 & ...
+                allLevels.mode == mode & allLevels.load_case == loadCase);
+            [~, order] = sort(allLevels.mesh(idx));
+            idx = idx(order);
+            for j = 2:numel(idx)
+                previous = idx(j-1); current = idx(j);
+                allLevels.w_change_from_previous_pct(current) = relchange( ...
+                    allLevels.w_center_mm(current), allLevels.w_center_mm(previous));
+                allLevels.electric_change_from_previous_pct(current) = relchange( ...
+                    allLevels.electric_span(current), allLevels.electric_span(previous));
+                allLevels.magnetic_change_from_previous_pct(current) = relchange( ...
+                    allLevels.magnetic_span(current), allLevels.magnetic_span(previous));
+                allLevels.theta_change_from_previous_pct(current) = relchange( ...
+                    allLevels.theta_span_K(current), allLevels.theta_span_K(previous));
+            end
+        end
+    end
+end
+allLevels.mesh_gate_20_to_30 = strings(height(allLevels), 1);
+is30 = allLevels.mesh == 30;
+allLevels.mesh_gate_20_to_30(is30 & allLevels.w_change_from_previous_pct <= 0.5) = "pass";
+allLevels.mesh_gate_20_to_30(is30 & allLevels.w_change_from_previous_pct > 0.5) = "fail";
+writetable(allLevels, outConv);
+fprintf('CURVATURE_FULL_COMPLETED,%s\n', outConv);
+disp(allLevels(is30, {'mesh','mode','radius_m','load_case','w_center_mm', ...
+    'w_change_from_previous_pct','mesh_gate_20_to_30'}));
+
+function row = make_row(mesh, mode, radius, caseFile, loadCase, result)
+coord = result.centerCoord;
+row = struct('mesh', mesh, 'mode', string(mode), 'radius_m', radius, ...
+    'curvature_1pm', 1 / radius, 'load_case', string(loadCase), ...
+    'w_center_mm', result.wCenter_mm, 'electric_span', result.electric_span, ...
+    'magnetic_span', result.magnetic_span, 'theta_span_K', result.theta_span_K, ...
+    'center_node_id', result.centerNodeId, 'center_coord_1', coord(1), ...
+    'center_coord_2', coord(2), 'center_coord_3', coord(3), ...
+    'case_file', string(caseFile), 'status', "completed_corrected_pyro");
+end
+
+function value = relchange(current, previous)
+value = 100 * abs(current - previous) / max(abs(current), eps);
+end

@@ -1,0 +1,27 @@
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+Saved G:\fg-meet-workbench\output\static_elastic_inverse_pyrofix_10x10_corrected.mat
+w_center = -2.128498 mm
+theta_span = 2.227548 K
+[fg-meet] workbench: G:\fg-meet-workbench
+[fg-meet] meet-elastic: G:\fg-meet-workbench\matlab\meet-elastic-thermal
+[fg-meet] meet-fem-core: G:\fg-meet-workbench\matlab\meet-fem-core
+Reused assembled matrices for G:\fg-meet-workbench\cases\validation_mesh\Thermal_CFFF_U_Vf0.6-10x10-10layer.txt
+Saved G:\fg-meet-workbench\output\static_elastic_inverse_pyrofix_10x10_legacy.mat
+w_center = -2.128498 mm
+theta_span = 2.227548 K
+MATLAB_INVERSE_PYRO_FIX_VERIFIED,G:\fg-meet-workbench\outputs\paper-20260715-fgmee\experiments\inverse_sensing\matlab_inverse_pyro_fix_10x10.csv
+       mode        target_w_mm    probe_w_center_mm     scale     electric_span    magnetic_span    correct_pyro_assembly
+    ___________    ___________    _________________    _______    _____________    _____________    _____________________
+
+    "corrected"        0.5             -2.1285         0.23491       78.432          0.030881               true         
+    "corrected"          1             -2.1285         0.46981       156.86          0.061762               true         
+    "corrected"          2             -2.1285         0.93963       313.73           0.12352               true         
+    "legacy"           0.5             -2.1285         0.23491       164.54           0.17029               false        
+    "legacy"             1             -2.1285         0.46981       329.09           0.34057               false        
+    "legacy"             2             -2.1285         0.93963       658.18           0.68115               false        
+

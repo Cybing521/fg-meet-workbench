@@ -1,0 +1,2 @@
+load_case,inplane_divisions,thickness_elements_per_physical_layer,bottom_stress_Pa,top_stress_Pa,w_center_mm,w_free_mid_mm,total_elements,fixed_face_count,bottom_domain_count,top_domain_count,status
+electric_equivalent_stress,10,1,4934000.0,-4934000.0,-0.05684198646758306,-0.2422878388534174,1000.0,10,1,1,completed
