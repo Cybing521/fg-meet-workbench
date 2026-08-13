@@ -1,0 +1,3 @@
+channel,target_abs_w_mm,matlab_inverted_load,comsol_cross_applied_w_mm,comsol_w_over_target,comsol_target_difference_pct,interpretation
+electric,0.5,2870.423627868996,0.5538629038121122,1.1077258076242245,10.772580762422447,nonisomorphic_model_form_difference_not_solver_failure
+magnetic,0.5,572.7844432631446,0.5463396053249225,1.092679210649845,9.267921064984508,nonisomorphic_model_form_difference_not_solver_failure

@@ -1,0 +1,2 @@
+case_id,voltage_layer_V,w_center_mm,w_free_mid_mm,matlab_reference_mm,qian_reference_mm,relative_error_matlab_pct,relative_error_qian_pct,V_bottom_outer,V_bottom_inner,V_top_inner,V_top_outer,Ez_bottom_Vpm,Ez_top_Vpm,status
+direct_electro_CFFF_U_Vf06_recovered,300.0,-0.05804928273568053,-0.2446845287572249,-0.0522570949,-0.0523,11.084021885955487,10.992892420039258,299.99950300374775,5.030045906759331E-4,5.030045912496533E-4,299.999503003748,500000.175447922,-500000.175456416,completed_from_saved_converged_solution

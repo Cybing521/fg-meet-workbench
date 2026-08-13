@@ -34,8 +34,10 @@ def main() -> None:
 
     iso = read(BASE / "experiments" / "isomorphic_solid" / "isomorphic_solid_cross_solver_comparison.csv")
     iso_max = max(float(row["center_relative_error_pct"]) for row in iso)
+    iso_free_max = max(float(row["free_mid_relative_error_pct"]) for row in iso)
     check("isomorphic_six_rows", len(iso) == 6, len(iso))
     check("isomorphic_center_error_le_0p1pct", iso_max <= 0.1, iso_max)
+    check("isomorphic_free_mid_error_le_0p1pct", iso_free_max <= 0.1, iso_free_max)
     check("isomorphic_all_acceptance_gates", all(row["acceptance_gate"] == "pass" for row in iso), [row["acceptance_gate"] for row in iso])
     iso_dir = BASE / "experiments" / "isomorphic_solid" / "comsol"
     iso_logs = sorted(path for path in iso_dir.glob("comsol_isomorphic_*x.log") if "smoke" not in path.name)
@@ -100,29 +102,119 @@ def main() -> None:
     check("curved_comsol_three_clean_logs", all(path.is_file() and clean_completed_log(path) for path in curved_logs), [path.name for path in curved_logs])
     check("curved_comsol_three_models", all(path.is_file() and path.stat().st_size > 100_000 for path in curved_models), [(path.name, path.stat().st_size if path.is_file() else 0) for path in curved_models])
 
-    inverse = read(BASE / "experiments" / "inverse_sensing" / "inverse_sensor_corrected_comparison.csv")
-    inverse_20_0p5 = [
-        row for row in inverse
-        if int(float(row["mesh_inplane"])) == 20 and float(row["target_w_mm"]) == 0.5
-    ]
-    inverse_model = BASE / "experiments" / "inverse_sensing" / "comsol_inverse_sensor_20x20x5_Model.mph"
-    check("inverse_corrected_nine_rows", len(inverse) == 9, len(inverse))
-    check(
-        "inverse_20x20_0p5_below_5pct",
-        len(inverse_20_0p5) == 1
-        and float(inverse_20_0p5[0]["corrected_e_error_pct"]) <= 5.0
-        and float(inverse_20_0p5[0]["corrected_m_error_pct"]) <= 5.0,
-        inverse_20_0p5,
+    inverse_dir = BASE / "experiments" / "inverse_actuation"
+    actuation = read(inverse_dir / "inverse_actuation_comsol_validation.csv")
+    cross_model = read(inverse_dir / "inverse_actuation_matlab_load_comsol_crosscheck.csv")
+    conditioning = read(inverse_dir / "inverse_local_constitutive_conditioning.csv")
+    sensing_status = read(inverse_dir / "inverse_sensing_evidence_status.csv")
+    max_actuation_residual = max(
+        max(
+            float(row["comsol_voltage_forward_residual_pct"]),
+            float(row["comsol_magnetic_forward_residual_pct"]),
+        )
+        for row in actuation
     )
-    check("inverse_comsol_final_model", inverse_model.is_file() and inverse_model.stat().st_size > 100_000, str(inverse_model))
+    check("inverse_actuation_three_targets", len(actuation) == 3, len(actuation))
+    check(
+        "inverse_actuation_target_specific_comsol_residual_le_0p001pct",
+        max_actuation_residual <= 0.001,
+        max_actuation_residual,
+    )
+    check(
+        "inverse_local_constitutive_scaled_condition_le_1p1",
+        len(conditioning) == 1
+        and float(conditioning[0]["determinant"]) > 0
+        and float(conditioning[0]["dimensionless_condition_number"]) <= 1.1,
+        conditioning,
+    )
+    cross_by_channel = {row["channel"]: row for row in cross_model}
+    check(
+        "inverse_actuation_matlab_load_cross_applied_to_comsol",
+        len(cross_model) == 2
+        and set(cross_by_channel) == {"electric", "magnetic"}
+        and abs(float(cross_by_channel["electric"]["comsol_cross_applied_w_mm"]) - 0.5538629038121122) <= 1e-9
+        and abs(float(cross_by_channel["magnetic"]["comsol_cross_applied_w_mm"]) - 0.5463396053249225) <= 1e-9
+        and 9.0 < float(cross_by_channel["magnetic"]["comsol_target_difference_pct"]) < 10.0
+        and 10.0 < float(cross_by_channel["electric"]["comsol_target_difference_pct"]) < 11.0,
+        cross_model,
+    )
+    check(
+        "inverse_sensing_explicitly_not_independent_phi_psi_pde",
+        len(sensing_status) == 3
+        and all(row["independent_comsol_phi_psi_pde"] == "no" for row in sensing_status)
+        and all(row["reporting_status"] == "exploratory_nonindependent_constitutive_postprocess" for row in sensing_status)
+        and all("KTu_u_plus_KTT_T_equals_zero" in row["thermal_boundary_for_corrected_span"] for row in sensing_status),
+        sensing_status,
+    )
+    inverse_logs = sorted(
+        path
+        for path in inverse_dir.glob("comsol_inverse_actuation_*_target_*.log")
+        if "matlab_load_crosscheck" not in path.name
+    )
+    inverse_models = sorted(
+        path
+        for path in inverse_dir.glob("comsol_inverse_actuation_*_target_*_Model.mph")
+        if "matlab_load_crosscheck" not in path.name
+    )
+    check(
+        "inverse_actuation_six_clean_comsol_logs",
+        len(inverse_logs) == 6 and all(clean_completed_log(path) for path in inverse_logs),
+        [path.name for path in inverse_logs],
+    )
+    check(
+        "inverse_actuation_six_comsol_models",
+        len(inverse_models) == 6 and all(path.stat().st_size > 100_000 for path in inverse_models),
+        [(path.name, path.stat().st_size) for path in inverse_models],
+    )
+    cross_logs = sorted(inverse_dir.glob("comsol_inverse_actuation_*_matlab_load_crosscheck.log"))
+    cross_models = sorted(inverse_dir.glob("comsol_inverse_actuation_*_matlab_load_crosscheck_Model.mph"))
+    check(
+        "inverse_actuation_two_clean_cross_application_logs",
+        len(cross_logs) == 2 and all(clean_completed_log(path) for path in cross_logs),
+        [path.name for path in cross_logs],
+    )
+    check(
+        "inverse_actuation_two_cross_application_models",
+        len(cross_models) == 2 and all(path.stat().st_size > 100_000 for path in cross_models),
+        [(path.name, path.stat().st_size) for path in cross_models],
+    )
 
     tex = BASE / "phase4_reporting" / "fgmee_latest_feasible_results_report_20260715.tex"
     tex_text = tex.read_text(encoding="utf-8")
     check("latex_placeholders_resolved", "@@" not in tex_text, [line for line in tex_text.splitlines() if "@@" in line])
     check(
+        "report_model_and_load_explanation_complete",
+        all(
+            token in tex_text
+            for token in (
+                "300\\,\\mathrm{mm}\\times300\\,\\mathrm{mm}\\times6\\,\\mathrm{mm}",
+                "|\\Delta\\phi_{\\ell}|=300",
+                "|\\Delta\\psi_{\\ell}|=200",
+                "\\boldsymbol\\sigma^{E}=-\\mathbf e^{\\mathsf T}\\mathbf E",
+                "\\boldsymbol\\sigma^{H}=-\\mathbf q^{\\mathsf T}\\mathbf H",
+                "\\label{tab:iso_free_mid}",
+                "-0.2422879984",
+                "0.8109578441",
+                "磁标势之差，不表示 200 A 电流",
+                "x=L-10^{-9}",
+                "沿用的是载荷数值",
+                "不把差异唯一归因于舍入",
+            )
+        ),
+        "geometry, potential-to-stress conversion, evidence-qualified wording, and six free-midpoint rows",
+    )
+    check(
         "latest_report_scope_wording",
         "数值实验" in tex_text
         and "实物样件" in tex_text
+        and "加载反算" in tex_text
+        and "感生势反算" in tex_text
+        and "不是外加载势" in tex_text
+        and "尚无独立场 PDE" in tex_text
+        and "自洽回代" in tex_text
+        and "交叉施加" in tex_text
+        and "无外加热源" in tex_text
+        and "强制等温" in tex_text
         and "数据追溯与质量控制" not in tex_text
         and "AI 使用说明" not in tex_text
         and "全部结果尚无实验数据支撑" not in tex_text,
@@ -136,6 +228,27 @@ def main() -> None:
         for suffix in ("png", "pdf"):
             matches = list((BASE / "figures").glob(f"Fig_0{number}_*.{suffix}"))
             check(f"figure_{number}_{suffix}", len(matches) == 1 and matches[0].stat().st_size > 1000 if matches else False, [str(path) for path in matches])
+    for stem in ("Fig_00_curved_shell_geometry_loads", "Fig_00_material_boundary_loads"):
+        for suffix in ("png", "pdf"):
+            figure = BASE / "figures" / f"{stem}.{suffix}"
+            check(
+                f"{stem}_{suffix}",
+                figure.is_file() and figure.stat().st_size > 1000,
+                str(figure),
+            )
+    figure_script = ROOT / "tools" / "plotting" / "plot_model_geometry_loads.py"
+    figure_provenance = BASE / "figures" / "model_schematic_provenance.md"
+    requirement_recheck = BASE / "phase4_reporting" / "fgmee_requirement_recheck_20260718.md"
+    check("model_figure_script_exists", figure_script.is_file() and figure_script.stat().st_size > 1000, str(figure_script))
+    check("model_figure_provenance_exists", figure_provenance.is_file() and figure_provenance.stat().st_size > 100, str(figure_provenance))
+    requirement_text = requirement_recheck.read_text(encoding="utf-8") if requirement_recheck.is_file() else ""
+    check(
+        "screenshot_requirements_R1_to_R9_traced",
+        requirement_recheck.is_file()
+        and all(f"| R{number} |" in requirement_text for number in range(1, 10))
+        and "九项需求均已落实" in requirement_text,
+        str(requirement_recheck),
+    )
     pdf = BASE / "phase4_reporting" / "fgmee_latest_feasible_results_report_20260715.pdf"
     check("compiled_pdf_exists", pdf.is_file() and pdf.stat().st_size > 10_000, str(pdf))
 

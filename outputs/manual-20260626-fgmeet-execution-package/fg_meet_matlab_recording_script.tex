@@ -1,0 +1,310 @@
+\documentclass[UTF8,fontset=windows]{ctexart}
+
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fvextra}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue
+}
+
+\setlist{nosep}
+\DefineVerbatimEnvironment{code}{Verbatim}{
+  fontsize=\footnotesize,
+  breaklines=true,
+  breakanywhere=true,
+  frame=single,
+  rulecolor=\color{black!25}
+}
+
+\title{FG-MEET MATLAB 录屏演示脚本}
+\author{}
+\date{2026 年 6 月 25 日}
+
+\begin{document}
+
+\maketitle
+
+\section{录屏目标}
+
+本视频只演示 MATLAB 中的程序执行顺序，不讲解代码实现。目标是证明程序应从项目根目录运行，通过主入口读取 \texttt{txt} 输入文件并调用有限元核心求解，而不是直接运行 \texttt{materials} 文件夹下的辅助函数。
+
+\section{录屏前准备}
+
+\begin{enumerate}
+  \item 打开 MATLAB。
+  \item 确认交付包已经解压。
+  \item 确认交付包根目录中包含：
+  \begin{itemize}
+    \item \texttt{setup\_paths.m}
+    \item \texttt{run\_phase1\_static\_elastic.m}
+    \item \texttt{run\_meet\_static.m}
+    \item \texttt{cases/}
+    \item \texttt{matlab/}
+    \item \texttt{materials/}
+    \item \texttt{output/}
+  \end{itemize}
+\end{enumerate}
+
+\section{镜头 1：进入交付包根目录}
+
+\textbf{画面操作：} MATLAB 命令行窗口。
+
+\textbf{输入命令：}
+
+\begin{code}
+cd('C:\Users\You Huiwen\Desktop\fg-meet-workbench_code_delivery_2026-06-17\fg-meet-workbench_code_delivery_2026-06-17')
+\end{code}
+
+\textbf{画面展示：} 左侧当前文件夹切换到交付包根目录。
+
+\textbf{旁白或字幕：}
+
+\begin{quote}
+首先进入交付包根目录，后续所有命令都从该目录执行。
+\end{quote}
+
+\section{镜头 2：初始化 MATLAB 路径}
+
+\textbf{输入命令：}
+
+\begin{code}
+setup_paths
+\end{code}
+
+\textbf{预期现象：}
+
+MATLAB 命令行输出工作目录、有限元核心目录等路径信息。
+
+\textbf{旁白或字幕：}
+
+\begin{quote}
+先执行 \texttt{setup\_paths}，加载材料函数、工具函数和实验室有限元核心程序路径。
+\end{quote}
+
+\section{镜头 3：运行快速验证算例}
+
+\textbf{输入命令：}
+
+\begin{code}
+run('run_phase1_static_elastic.m')
+\end{code}
+
+\textbf{预期现象：}
+
+MATLAB 开始读取输入文件、装配矩阵并执行静力求解。运行完成后会输出结果文件路径。
+
+\textbf{旁白或字幕：}
+
+\begin{quote}
+这是最小验证入口。该脚本会读取已有 \texttt{txt} 输入文件，并执行一次力载荷静力计算。
+\end{quote}
+
+\section{镜头 4：展示快速验证输出文件}
+
+\textbf{输入命令：}
+
+\begin{code}
+dir output
+\end{code}
+
+\textbf{预期现象：}
+
+在命令行中看到 \texttt{phase1\_static\_elastic\_summary.csv} 或相关输出文件。
+
+\textbf{继续输入：}
+
+\begin{code}
+open('output/phase1_static_elastic_summary.csv')
+\end{code}
+
+\textbf{旁白或字幕：}
+
+\begin{quote}
+运行完成后，结果写入 \texttt{output} 文件夹。这里打开汇总表确认程序已经正常输出。
+\end{quote}
+
+\section{镜头 5：指定单个 txt 输入文件}
+
+\textbf{输入命令：}
+
+\begin{code}
+paths = setup_paths;
+
+caseFile = fullfile(paths.cases, ...
+    'Thermal_CFFF_U_Vf0.6-30x30-10layer.txt');
+\end{code}
+
+\textbf{预期现象：}
+
+工作区出现 \texttt{paths} 和 \texttt{caseFile} 变量。
+
+\textbf{旁白或字幕：}
+
+\begin{quote}
+也可以手动指定某一个 \texttt{txt} 输入文件。该文件包含节点、单元、材料和边界条件。
+\end{quote}
+
+\section{镜头 6：运行力载荷工况}
+
+\textbf{输入命令：}
+
+\begin{code}
+result_elastic = run_meet_static(caseFile, 'elastic', ...
+    'OutTag', 'U_Vf06_elastic_demo');
+\end{code}
+
+\textbf{预期现象：}
+
+MATLAB 执行力载荷静力求解，工作区出现 \texttt{result\_elastic}。
+
+\textbf{旁白或字幕：}
+
+\begin{quote}
+这里运行力载荷工况，入口是 \texttt{run\_meet\_static}，不是材料辅助函数。
+\end{quote}
+
+\section{镜头 7：运行电载荷工况}
+
+\textbf{输入命令：}
+
+\begin{code}
+result_electro = run_meet_static(caseFile, 'electro', ...
+    'OutTag', 'U_Vf06_electro_demo');
+\end{code}
+
+\textbf{预期现象：}
+
+MATLAB 执行电载荷工况，工作区出现 \texttt{result\_electro}。
+
+\textbf{旁白或字幕：}
+
+\begin{quote}
+同一个输入文件可以切换为电载荷工况。
+\end{quote}
+
+\section{镜头 8：运行磁载荷工况}
+
+\textbf{输入命令：}
+
+\begin{code}
+result_magneto = run_meet_static(caseFile, 'magneto', ...
+    'OutTag', 'U_Vf06_magneto_demo');
+\end{code}
+
+\textbf{预期现象：}
+
+MATLAB 执行磁载荷工况，工作区出现 \texttt{result\_magneto}。
+
+\textbf{旁白或字幕：}
+
+\begin{quote}
+同一个输入文件也可以切换为磁载荷工况。
+\end{quote}
+
+\section{镜头 9：展示结果变量}
+
+\textbf{输入命令：}
+
+\begin{code}
+result_elastic
+result_electro
+result_magneto
+\end{code}
+
+\textbf{预期现象：}
+
+MATLAB 命令行展示结果结构体字段，例如中心挠度、温差均值、温差跨度等。
+
+\textbf{旁白或字幕：}
+
+\begin{quote}
+这里展示三个工况的结果变量，说明三个主工况均已通过统一入口执行。
+\end{quote}
+
+\section{镜头 10：展示正确调用链路}
+
+\textbf{画面操作：} 在 MATLAB 编辑器中打开 \texttt{run\_meet\_static.m}。
+
+\textbf{需要展示的位置：}
+
+\begin{itemize}
+  \item \texttt{InputFile = caseFile}
+  \item \texttt{Main\_FOSDLIN851T5MEET\_V4(...)}
+\end{itemize}
+
+\textbf{旁白或字幕：}
+
+\begin{quote}
+主入口会把指定的 \texttt{caseFile} 作为 \texttt{InputFile}，并调用实验室原有有限元核心程序完成装配和求解。
+\end{quote}
+
+\section{镜头 11：说明不应直接运行材料辅助函数}
+
+\textbf{画面操作：} 打开 \texttt{materials/build\_layer\_materials.m}，只展示函数第一行。
+
+\textbf{需要展示的位置：}
+
+\begin{code}
+function layers = build_layer_materials(nLayer, h, vf0, fgMode, varargin)
+\end{code}
+
+\textbf{旁白或字幕：}
+
+\begin{quote}
+\texttt{build\_layer\_materials} 是材料层参数辅助函数，需要输入参数。它不是主程序，不能零参数直接运行。
+\end{quote}
+
+\section{建议录屏结尾}
+
+\textbf{字幕：}
+
+\begin{quote}
+正确执行顺序是先进入交付包根目录，再执行路径初始化和主程序入口。程序通过 \texttt{txt} 输入文件进入实验室有限元核心代码完成计算。
+\end{quote}
+
+\begin{code}
+setup_paths
+run('run_phase1_static_elastic.m')
+run_meet_static(caseFile, loadCase)
+\end{code}
+
+\section{完整命令清单}
+
+录屏时可以按以下命令顺序复制执行：
+
+\begin{code}
+cd('C:\Users\You Huiwen\Desktop\fg-meet-workbench_code_delivery_2026-06-17\fg-meet-workbench_code_delivery_2026-06-17')
+
+setup_paths
+
+run('run_phase1_static_elastic.m')
+
+dir output
+
+open('output/phase1_static_elastic_summary.csv')
+
+paths = setup_paths;
+caseFile = fullfile(paths.cases, ...
+    'Thermal_CFFF_U_Vf0.6-30x30-10layer.txt');
+
+result_elastic = run_meet_static(caseFile, 'elastic', ...
+    'OutTag', 'U_Vf06_elastic_demo');
+
+result_electro = run_meet_static(caseFile, 'electro', ...
+    'OutTag', 'U_Vf06_electro_demo');
+
+result_magneto = run_meet_static(caseFile, 'magneto', ...
+    'OutTag', 'U_Vf06_magneto_demo');
+
+result_elastic
+result_electro
+result_magneto
+\end{code}
+
+\end{document}

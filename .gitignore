@@ -1,10 +1,25 @@
 # Runtime outputs
 output/
 delivery/
+tmp/
 *.mat
 *.fig
 *.asv
 *.m~
+
+# Local scratch / session markers
+on.status
+
+# Large local COMSOL model libraries (keep out of git)
+COMSOL仿真/
+
+# Packaged deliverable archives and duplicated trees
+*.zip
+outputs/fg_meet_execution_materials_*/
+outputs/fg_meet_execution_runnable_complete_*/
+outputs/fgmee_final_delivery_*/
+outputs/fgmee_latest_minimal_*/
+outputs/fgmee_minimal_issue_report_*/
 
 # MATLAB solver working dirs
 matlab/**/CurrentComp/
@@ -19,10 +34,34 @@ paper/*.aux
 paper/*.log
 paper/*.out
 paper/*.toc
+**/*.aux
+**/*.toc
+**/*.lof
+**/*.lot
+outputs/**/*.log
+outputs/**/*.out
 
-# COMSOL exports (regenerable)
+# COMSOL exports / transient solver junk (regenerable)
 comsol/export/
 tools/comsol/*.class
+*.mph.recovery
+*.mph.status
+*.class.recovery
+*.class.status
+tools/comsol/*_ExportSource.mph
+tools/comsol/*_InspectModel.mph
+
+# Diagnostic / intermediate COMSOL dumps (keep summaries & scripts in git)
+outputs/**/experiments/comsol/comsol_diag_*.mph
+outputs/**/experiments/comsol/comsol_direct_*.mph
+outputs/**/experiments/comsol/inspect_*.mph
+outputs/**/experiments/comsol/recover_*.mph
+outputs/**/comsol/*smoke*.mph
+outputs/**/comsol/inspect_*.mph
+outputs/**/inverse_actuation/*.mph
+outputs/**/inverse_sensing/*smoke*_rerun_Model.mph
+outputs/code_closure/**/*.mph
+outputs/code_closure/**/*.status
 
 # Local screen recordings can include private desktop content
 reports/**/gui-recordings/

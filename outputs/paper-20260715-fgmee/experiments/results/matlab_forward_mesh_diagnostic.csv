@@ -1,0 +1,4 @@
+mesh_divisions,case_file,electric_w_center_mm,magnetic_w_center_mm,mechanical_w_center_mm,status,electric_change_from_previous_pct,magnetic_change_from_previous_pct,mechanical_change_from_previous_pct
+10,G:\fg-meet-workbench\cases\validation_mesh\Thermal_CFFF_U_Vf0.6-10x10-10layer.txt,-0.0522383070440412,0.174522978746455,-2.12849830358636,completed,NaN,NaN,NaN
+20,G:\fg-meet-workbench\cases\validation_mesh\Thermal_CFFF_U_Vf0.6-20x20-10layer.txt,-0.0522520042318895,0.174568739689739,-2.1277404885835,completed,0.0262137080665155,0.0262137100637476,0.0356159506729255
+30,G:\fg-meet-workbench\cases\Thermal_CFFF_U_Vf0.6-30x30-10layer.txt,-0.0522570949262148,0.174585747179692,-2.12751986193692,completed,0.00974163284902266,0.00974162566373526,0.010370133342904

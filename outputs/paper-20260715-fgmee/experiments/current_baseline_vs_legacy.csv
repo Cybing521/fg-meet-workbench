@@ -1,0 +1,7 @@
+check_id,metric,legacy_value,current_value,current_over_legacy,change_pct,interpretation
+E_to_w,driver_value_V,90075.3298702999,11481.694511476,0.12746769318534357,-87.25323068146564,baseline_version_drift
+M_to_w,driver_value_A,17974.2624645234,2291.13777305258,0.12746769318489148,-87.25323068151086,baseline_version_drift
+w_to_E,generated_electric_span_V,3882.79210351007,658.585489744207,0.1696164698462329,-83.03835301537671,baseline_version_drift
+w_to_M,generated_magnetic_span_A,4.01830377137074,0.681570500469709,0.16961646984623288,-83.03835301537671,baseline_version_drift
+M_to_w_to_E,transfer_coefficient,0.590534614723955,0.590534614725304,1.0000000000022844,2.2844249322330273e-10,invariant_within_numerical_precision
+E_to_w_to_M,transfer_coefficient,0.000121952077842993,0.00012195207784421,1.0000000000099794,9.97935752808289e-10,invariant_within_numerical_precision

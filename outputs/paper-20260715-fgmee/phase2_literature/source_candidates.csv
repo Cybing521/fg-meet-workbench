@@ -1,0 +1,23 @@
+citation_key,title,doi,theme
+zhang2026_full,"Fully coupled modeling for static and dynamic analysis of thermo-magneto-electro-elastic plates",10.1007/s10999-025-09834-9,validation
+zhao2024_porous_shell,"Finite element analysis of functionally graded magneto-electro-elastic porous cylindrical shells subjected to thermal loads",10.1080/15376494.2023.2188326,porous_shell
+zhang2022_fgmee_shell,"Static and dynamic analysis of functionally graded magneto-electro-elastic plates and shells",10.1016/j.compstruct.2021.114950,fgmee_shell
+zhao2022_cntmee,"Nonlinear analysis of carbon nanotube reinforced functionally graded plates with magneto-electro-elastic multiphase matrix",10.1016/j.compstruct.2022.115969,nonlinear
+zhou2023_migam,"The magneto-electro-elastic coupling isogeometric analysis method for the static and dynamic analysis of magneto-electro-elastic structures under thermal loading",10.1016/j.compstruct.2023.116984,method
+tarkashvand2025_moving_heat,"Novel multi-physics simulation of transient dynamics in functionally graded porous multiferroic cylindrical shells under moving heat flux: A magneto-electro-thermoelastic analysis",10.1016/j.engstruct.2024.119116,porous_shell
+gan2024_imperfect_shell,"Nonlinear transient response of magneto-electro-elastic cylindrical shells with initial geometric imperfection",10.1016/j.apm.2024.04.049,curved_shell
+tran2024_double_curved,"An isogeometric analysis approach for dynamic response of doubly-curved magneto electro elastic composite shallow shell subjected to blast loading",10.1016/j.dt.2024.06.005,curved_shell
+belbachir2023_double_curved,"Numerical modeling of geometrically nonlinear responses of smart magneto-electro-elastic functionally graded double curved shallow shells based on improved FSDT",10.1016/j.camwa.2023.09.040,curved_shell
+ozmen2023_nanoplates,"Thermomechanical vibration and buckling response of magneto-electro-elastic higher order laminated nanoplates",10.1016/j.apm.2023.06.005,porous_plate
+koc2024_porous_core,"Thermomechanical vibration response of nanoplates with magneto-electro-elastic face layers and functionally graded porous core using nonlocal strain gradient elasticity",10.1080/15376494.2023.2199412,porous_plate
+esen2025_porous_nanoplate,"Investigation of the Critical Buckling Temperatures and Free Vibration Response of Porous Functionally Graded Magneto-Electro-Elastic Sandwich Higher-Order Nanoplates with Temperature-Dependent Material Properties",10.1007/s42417-024-01542-6,porous_plate
+kar2025_porous_microplate,"Dynamic analysis and structural optimization study of porous FG-MEE microplate with impact and hygrothermal loads",10.1177/09544062241299210,porous_plate
+brischetto2025_3d,"3D Exact Magneto-Electro-Elastic Static Analysis of Multilayered Plates",10.32604/cmes.2025.066313,benchmark
+gong2025_comsol3d,"A general magneto-electro-elastic 3D FE model for free vibration and dynamic responses of multiphase composites",10.1016/j.tws.2025.113242,comsol
+dat2022_auxetic,"Vibration analysis of auxetic laminated plate with magneto-electro-elastic face sheets subjected to blast loading",10.1016/j.compstruct.2021.114925,plate
+tassi2022_effective,"Mathematical modeling of fully coupled reinforced magneto-electro-thermo-mechanical effective properties based on conditioned micromechanics",10.1016/j.compstruct.2021.114896,material
+zhou2022_enriched,"Evaluation of the transient performance of magneto-electro-elastic based structures with the enriched finite element method",10.1016/j.compstruct.2021.114888,method
+sladek2013_large_deflection,"The MLPG analyses of large deflections of magnetoelectroelastic plates",10.1016/j.enganabound.2013.02.001,benchmark
+vinyas2018_arrangement,"Investigation of the effect of BaTiO3/CoFe2O4 particle arrangement on the static response of magneto-electro-thermo-elastic plates",10.1016/j.compstruct.2017.10.073,material
+kondaiah2012_cantilever,"Studies on magneto-electro-elastic cantilever beam under thermal environment",10.12989/csm.2012.1.2.205,benchmark
+nan2008_review,"Multiferroic magnetoelectric composites: Historical perspective, status, and future directions",10.1063/1.2836410,foundation

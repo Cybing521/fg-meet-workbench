@@ -1,0 +1,285 @@
+\documentclass[UTF8,fontset=windows,12pt,a4paper]{ctexart}
+
+\usepackage[margin=2.35cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{xurl}
+\usepackage{float}
+\setCJKmonofont{SimSun}
+
+\definecolor{passgreen}{RGB}{30,125,70}
+\definecolor{warnorange}{RGB}{190,105,10}
+\definecolor{failred}{RGB}{180,35,45}
+\definecolor{titleblue}{RGB}{35,75,130}
+\definecolor{lightgray}{RGB}{245,247,250}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=titleblue,
+  urlcolor=titleblue,
+  pdfauthor={FG-MEE 组会验证工作台},
+  pdftitle={MATLAB--COMSOL 力致位移一致性复核报告}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{MATLAB--COMSOL 力致位移复核}
+\rhead{2026-07-14}
+\cfoot{\thepage}
+\setlength{\headheight}{15pt}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.35em}
+\renewcommand{\arraystretch}{1.18}
+
+\newcommand{\pass}{\textcolor{passgreen}{\textbf{通过}}}
+\newcommand{\warn}{\textcolor{warnorange}{\textbf{受限}}}
+\newcommand{\fail}{\textcolor{failred}{\textbf{失败}}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\title{\textbf{MATLAB--COMSOL 力致位移一致性复核报告}\\[0.4em]
+\large 基于钱沈云论文同工况的热--压电类比耦合重建}
+\author{FG-MEE 组会验证工作台}
+\date{2026年7月14日}
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+\fcolorbox{titleblue}{lightgray}{
+\begin{minipage}{0.91\textwidth}
+\textbf{结论摘要。}
+本次复核已定位并修正此前 MATLAB 与 COMSOL 偏差偏大的主要原因：COMSOL 验证模型曾仅保留纯固体力学场，未复现钱沈云论文采用的“压电材料模型 + 电势标量场”热类比耦合口径。重建耦合模型后，$5\times5$ 与 $10\times10$ 随动压力网格的总自由度与论文完全一致，自由端中点位移对论文 COMSOL 值的偏差分别为 $0.0202\%$ 和 $0.00675\%$。在成功完成的 $45\times45\times10$ 完整耦合面力模型中，COMSOL 对论文 COMSOL 值的偏差为 $0.0520\%$；MATLAB 对 COMSOL 的自由端中点偏差为 $0.7107\%$，中心点偏差为 $0.9878\%$。因此，按论文表格采用的自由端中点主口径，力致位移验证已进入 $1\%$ 以内。所有结果均使用刚度缩放系数 $1.0$，没有通过刚度修正追数。
+\end{minipage}}
+\end{center}
+
+{\small
+\setlength{\parskip}{0pt}
+\tableofcontents
+}
+\newpage
+
+\section{复核目标与判据}
+
+本报告回答三个问题：
+\begin{enumerate}[label=\arabic*.]
+  \item MATLAB 与 COMSOL 是否真正使用了同一几何、边界、载荷、材料与输出点口径；
+  \item COMSOL 是否复现了钱沈云论文中用于热问题验证的压电类比耦合场，而不是只计算纯固体力学；
+  \item 去除人为刚度缩放后，自由端中点主位移偏差能否进入 $1\%$ 以内。
+\end{enumerate}
+
+采用如下分级判据：
+\begin{itemize}
+  \item \textbf{论文同口径主判据：}自由端中点 $p_{16}=(0.300,0.150,0)\,\mathrm{m}$ 的位移相对偏差不超过 $1\%$；
+  \item \textbf{中心点辅助判据：}$p_8=(0.150,0.150,0)\,\mathrm{m}$ 的位移相对偏差不超过 $1\%$；
+  \item \textbf{局部点披露：}对靠近固支端的小位移点同时报告绝对差和相对差，避免小分母放大被误解为整体失配。
+\end{itemize}
+
+\section{统一工况}
+
+\begin{table}[H]
+\centering
+\caption{冻结后的力致位移基准工况}
+\label{tab:case}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+项目 & 冻结值 \\
+\midrule
+几何 & $300\,\mathrm{mm}\times300\,\mathrm{mm}\times6\,\mathrm{mm}$ 方板 \\
+边界 & CFFF，$x=0$ 侧完全固支，其余三侧自由 \\
+载荷 & 上表面均布压力 $15000\,\mathrm{Pa}$，方向指向板内 \\
+材料 & 钱沈云论文表 1 的磁--电--弹材料参数，以热--压电类比方式输入 COMSOL \\
+MATLAB & $30\times30$ 板壳网格，10 层，原始计算，不做刚度缩放 \\
+COMSOL & 10 层三维实体，面内映射网格，厚度方向每层 1 个六面体单元 \\
+形函数 & 位移：二次 Serendipity（\code{2s}）；电势：二次 Lagrange \\
+非线性 & 几何非线性开启 \\
+输出 & 中面 $z=0$ 的 15 个内部点及自由端中点 $p_{16}$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{根因定位：纯力学模型漏掉了标量耦合场}
+
+早期 COMSOL 模型将钱沈云表 1 的刚度矩阵输入三维实体，但只启用了 \emph{Solid Mechanics}。该模型在 $45\times45\times10$ 网格下得到自由端中点位移
+\[
+  w_{\mathrm{COMSOL,pure}}=-6.433678\ \mathrm{mm},
+\]
+而本次 MATLAB 原始值为
+\[
+  w_{\mathrm{MATLAB}}=-5.998223\ \mathrm{mm},
+\]
+两者相对偏差为 $7.2597\%$。这说明仅匹配弹性刚度矩阵不足以复现论文 COMSOL 口径。
+
+对本地 COMSOL 6.2 模型 {\small\CJKfamily{zhfs} COMSOL仿真/热弹耦合/plate-CFFF-10layer.mph} 的模型树与 \code{dmodel.xml} 进行只读提取后，确认论文验证链路同时包含：
+\begin{itemize}
+  \item \code{PiezoelectricMaterialModel}；
+  \item \code{Electrostatics} 与 \code{ChargeConservationPiezo}；
+  \item \code{PiezoelectricEffect} 多物理场耦合；
+  \item 上、下表面接地；
+  \item 几何非线性与随动压力。
+\end{itemize}
+
+重建模型采用的主要类比材料矩阵为
+\[
+\mathbf{c}^{E}=10^9
+\begin{bmatrix}
+200&110&110&0&0&0\\
+110&200&110&0&0&0\\
+110&110&190&0&0&0\\
+0&0&0&45&0&0\\
+0&0&0&0&45&0\\
+0&0&0&0&0&45
+\end{bmatrix}\ \mathrm{Pa},
+\]
+压电类比矩阵的非零项为 $e_{31}=e_{32}=4.857\times10^6\,\mathrm{C/m^2}$、$e_{33}=4.320\times10^6\,\mathrm{C/m^2}$，相对介电矩阵仅保留 $\epsilon_{33}^{S}=3.693\times10^{13}$。这些数值用于复现论文中的热--压电数学类比，不应解释为常规压电陶瓷的实际电学参数。
+
+\subsection{自由度公式的独立证据}
+
+对于面内 $n\times n$、厚度 10 层的映射六面体网格，重建后的总自由度满足
+\[
+N_{\mathrm{DOF}}(n)
+=\underbrace{129n^2+192n+63}_{\text{位移场}}
++\underbrace{21(2n+1)^2}_{\text{二次电势标量场}}
+=213n^2+276n+84.
+\]
+因此 $n=5,10,45$ 时分别得到 $6789$、$24144$、$443829$ 个自由度，与论文表 2 的网格自由度完全一致。这一证据直接证明论文 COMSOL 模型并非纯固体力学，而是额外包含一个二次标量场。
+
+\section{COMSOL 对论文结果的复现}
+
+\begin{table}[H]
+\centering
+\caption{网格收敛点与钱沈云论文 COMSOL 位移的对照}
+\label{tab:mesh}
+\small
+\begin{tabular}{rrrrrrl}
+\toprule
+$n$ & 单元数 & 自由度 & 本次 $w_{p16}$ / mm & 论文 / mm & 偏差 / \% & 状态 \\
+\midrule
+5  & 250   & 6789   & $-5.562278$ & $-5.5634$ & 0.02018 & \pass \\
+10 & 1000  & 24144  & $-5.798791$ & $-5.7984$ & 0.00675 & \pass \\
+45 & 20250 & 443829 & $-5.955593$ & $-5.9525$ & 0.05196 & \pass（注） \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.4em}
+\begin{minipage}{0.96\textwidth}
+\footnotesize
+\textbf{注：}$45\times45$ 成功值来自完整热--压电类比耦合、几何非线性开启的恒定面力实现。严格切换为 \code{FollowerPressure} 后，$5\times5$ 与 $10\times10$ 已成功并列于表中；$45\times45$ 在 COMSOL 6.0 中建立了正确的 443829 自由度，但非线性装配时出现内存不足，未产生可用位移，因此未用失败模型替换本表成功结果。
+\end{minipage}
+\end{table}
+
+钱沈云论文给出的 $45\times45\times10$ COMSOL 自由端中点位移为 $-5.9525\,\mathrm{mm}$，present shell 结果为 $-5.9976\,\mathrm{mm}$，论文报告两者位移偏差约 $0.76\%$。本次成功的 $45\times45$ COMSOL 值与论文 COMSOL 值仅差 $0.05196\%$，说明重建模型已经恢复论文量级。
+
+\section{MATLAB 与 COMSOL 原始结果对照}
+
+本节使用当日重新计算的 MATLAB 原始文件 \nolinkurl{output/static_elastic_raw_20260714.mat}，并与 $45\times45\times10$ 成功 COMSOL 点表逐点比较。刚度缩放系数固定为 $1.0$。
+
+\begin{table}[H]
+\centering
+\caption{主验证点结果}
+\label{tab:mainpoints}
+\small
+\begin{tabular}{lrrrrl}
+\toprule
+位置 & MATLAB / mm & COMSOL / mm & 绝对差 / mm & 相对差 / \% & 判断 \\
+\midrule
+中心点 $p_8$ & $-2.127520$ & $-2.106503$ & 0.021017 & 0.98784 & \pass \\
+自由端中点 $p_{16}$ & $-5.998223$ & $-5.955593$ & 0.042630 & 0.71070 & \pass \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{逐点统计与解释边界}
+\label{tab:stats}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedleft\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+指标 & 数值 & 对应位置 & 解释 \\
+\midrule
+16 点平均相对误差 & $1.18283\%$ & 全部点 & 包含固支端附近的小位移点 \\
+15 个内部点平均相对误差 & $1.21431\%$ & $p_1$--$p_{15}$ & 不包含自由端中点 \\
+内部点最大相对误差 & $2.32837\%$ & $p_6$ & 绝对差仅 $0.007093\,\mathrm{mm}$，属于小分母放大 \\
+全局归一化最大绝对误差 & $0.71070\%$ & 以最大 MATLAB 位移归一化 & 与论文主位移判据一致 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+因此，本结果不能写成“所有局部点均小于 $1\%$”；准确表述应为：
+\begin{quote}
+在钱沈云论文采用的自由端中点主位移口径下，MATLAB 与 COMSOL 偏差为 $0.71\%$，中心点偏差为 $0.99\%$，力致位移主验证已进入 $1\%$ 以内。靠近固支端的个别小位移点相对误差最高为 $2.33\%$，但对应绝对差仅约 $0.007\,\mathrm{mm}$，需与主位移误差分开报告。
+\end{quote}
+
+\section{刚度缩放的处理}
+
+早期曾用统一刚度缩放 $1.021505$ 将中心偏差由约 $3.77\%$ 降至约 $1.59\%$。该做法仅能说明位移对整体刚度的敏感性，不能作为原始 MATLAB--COMSOL 一致性证据。本次所有重建与最终对照均显式设置
+\[
+  \texttt{FG\_COMSOL\_STIFFNESS\_SCALE}=1.0,
+\]
+因此本报告结论不依赖参数校准。
+
+\section{计算限制与未闭合项}
+
+\begin{enumerate}[label=\arabic*.]
+  \item \textbf{$45\times45$ 随动压力内存限制。}COMSOL 6.0 在可用内存 $32.51\,\mathrm{GB}$ 的环境中建立了 $443829$ 自由度，但在第二次非线性装配时虚拟内存达到约 $33.31\,\mathrm{GB}$ 并中止。该失败被保留在日志中，不作为数值结果使用。
+  \item \textbf{局部三维实体与板壳运动学差异。}固支端附近的小位移点对三维局部约束、剪切与厚度运动学更敏感，点对点相对误差高于自由端主位移。
+  \item \textbf{本报告只闭合“力 $\rightarrow$ 位移”。}300 V、200 A 正向致位移，以及位移反推电势/磁势，仍需分别建立独立基准，不能由本报告外推为已通过。
+\end{enumerate}
+
+\section{阶段结论与下一步}
+
+\begin{table}[H]
+\centering
+\caption{阶段门槛状态}
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+阶段 & 完成内容 & 状态 \\
+\midrule
+1 & 冻结几何、材料、边界、载荷、网格、输出点及单位口径 & \pass \\
+2 & 去除刚度缩放，复现论文热--压电类比耦合并完成力致位移主验证 & \pass \\
+3 & 300 V / 200 A 正向致位移独立验证 & 待开展 \\
+4 & 位移 $\rightarrow$ 电势/磁势反向传感链路 & 待开展 \\
+5 & 平板、翘曲及功能梯度创新工况 & 基线闭环后开展 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+力致位移主链路已经达到进入下一阶段的条件。下一步应保持本报告冻结的几何、边界与输出口径，分别建立 300 V 和 200 A 的单激励工况；电、磁激励不得与机械载荷混合后再判断误差来源。
+
+\section{证据文件与可复现入口}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}p{0.70\textwidth}}
+\toprule
+证据 & 路径 \\
+\midrule
+\endfirsthead
+\toprule
+证据 & 路径 \\
+\midrule
+\endhead
+MATLAB 原始结果 & \nolinkurl{output/static_elastic_raw_20260714.mat} \\
+$45\times45$ 点表 & \nolinkurl{output/comsol_elastic_validation_stage1_qian_thermal_piezo_mapped45x45x10_refcoords_20260714_points.csv} \\
+MATLAB--COMSOL 逐点表 & \nolinkurl{outputs/manual-20260714-fgmeet-validation/force-displacement/comparison_points_qianThermalPiezo_45x45x10.csv} \\
+对比摘要 & \nolinkurl{outputs/manual-20260714-fgmeet-validation/force-displacement/comparison_summary_qianThermalPiezo_45x45x10.csv} \\
+$5\times5$ 随动压力日志 & \nolinkurl{output/comsol_elastic_validation_stage1_qian_thermal_piezo_follower_mapped5x5x10_20260714.log} \\
+$10\times10$ 随动压力日志 & \nolinkurl{output/comsol_elastic_validation_stage1_qian_thermal_piezo_follower_mapped10x10x10_20260714.log} \\
+$45\times45$ 内存失败日志 & \nolinkurl{output/comsol_elastic_validation_stage1_qian_thermal_piezo_follower_mapped45x45x10_20260714.log} \\
+COMSOL Java 入口 & \nolinkurl{tools/comsol/RunElasticCfffValidation.java} \\
+一键运行脚本 & \nolinkurl{RUN_COMSOL_MAIN.ps1} \\
+论文表格证据摘录 & \nolinkurl{outputs/manual-20260611-fgmeet/qian-force-displacement/qian_mechanical_table23_evidence.csv} \\
+\bottomrule
+\end{longtable}
+
+\subsection*{AI 使用说明}
+本报告由 AI 辅助整理实验日志、复核数值、生成 LaTeX 结构并执行一致性检查。报告中的数值均来自本地 MATLAB、COMSOL 输出或已保存的论文证据摘录；关键结论、误差口径与失败边界需由研究者最终审阅并承担责任。
+
+\end{document}

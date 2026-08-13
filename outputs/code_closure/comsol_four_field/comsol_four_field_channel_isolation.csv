@@ -1,0 +1,4 @@
+channel,gateE,gateM,gateT,w_center_mm,phi_span_V,psi_span_A,reciprocal_temperature_avg_K,isolation_status
+electric,1,0,0,-2.236956926027804,322.1646602013154,0.0,0.0,pass
+magnetic,0,1,0,-2.236956926027821,0.0,0.17430382669327238,0.0,pass
+thermal,0,0,1,-2.0749002081016874,0.0,0.0,-1.9456012521472664E-4,pass

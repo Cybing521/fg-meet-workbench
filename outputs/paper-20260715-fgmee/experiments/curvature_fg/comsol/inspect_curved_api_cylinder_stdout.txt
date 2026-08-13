@@ -1,0 +1,161 @@
+FEATURE_BEGIN,workplane
+PROPERTY,workplane,contributeto,value,none,allowed,[none]
+PROPERTY,workplane,selresult,value,off,allowed,[on, off]
+PROPERTY,workplane,selresultshow,value,bnd,allowed,[all, bnd, edg, pnt, off]
+PROPERTY,workplane,color,value,none,allowed,[none, custom, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+PROPERTY,workplane,customcolor,value,[[0, 0, 0]],allowed,null
+PROPERTY,workplane,selplaneshow,value,off,allowed,[on, off]
+PROPERTY,workplane,cumselkey,value,0,allowed,null
+PROPERTY,workplane,geomattr,value,[[]],allowed,null
+PROPERTY,workplane,geomattrlevel,value,[[]],allowed,null
+PROPERTY,workplane,planetype,value,quick,allowed,[quick, faceparallel, edgeparallel, edgeangle, circleperpendicular, normalvector, vertices, coordinates, transformed]
+PROPERTY,workplane,quickplane,value,xy,allowed,[xy, yz, zx, yx, zy, xz]
+PROPERTY,workplane,quickoffsettype,value,distance,allowed,[distance, vertex]
+PROPERTY,workplane,offsetvertex,value,<unreadable>,allowed,null
+PROPERTY,workplane,offsetcoordinatename,value,z,allowed,[0, x, y, z]
+PROPERTY,workplane,quickx,value,0,allowed,null
+PROPERTY,workplane,quicky,value,0,allowed,null
+PROPERTY,workplane,quickz,value,0,allowed,null
+PROPERTY,workplane,face,value,<unreadable>,allowed,null
+PROPERTY,workplane,offsettype,value,distance,allowed,[distance, vertex]
+PROPERTY,workplane,offset,value,0,allowed,null
+PROPERTY,workplane,reverse,value,off,allowed,[on, off]
+PROPERTY,workplane,planaredge,value,<unreadable>,allowed,null
+PROPERTY,workplane,edge,value,<unreadable>,allowed,null
+PROPERTY,workplane,adjface,value,<unreadable>,allowed,null
+PROPERTY,workplane,angle,value,0,allowed,null
+PROPERTY,workplane,circedge,value,<unreadable>,allowed,null
+PROPERTY,workplane,circpoint,value,startvertex,allowed,[startvertex, endvertex, othervertex]
+PROPERTY,workplane,circvertex,value,<unreadable>,allowed,null
+PROPERTY,workplane,circoffset,value,0,allowed,null
+PROPERTY,workplane,normalvector,value,[[0, 0, 1]],allowed,null
+PROPERTY,workplane,normalpoint,value,coord,allowed,[coord, vertex]
+PROPERTY,workplane,normalcoord,value,[[0, 0, 0]],allowed,null
+PROPERTY,workplane,normalvertex,value,<unreadable>,allowed,null
+PROPERTY,workplane,vertex1,value,<unreadable>,allowed,null
+PROPERTY,workplane,vertex2,value,<unreadable>,allowed,null
+PROPERTY,workplane,vertex3,value,<unreadable>,allowed,null
+PROPERTY,workplane,genpoints,value,[[0, 0, 0], [1, 0, 0], [0, 1, 0]],allowed,null
+PROPERTY,workplane,workplanesrc,value,this,allowed,[this]
+PROPERTY,workplane,workplane,value,xyplane,allowed,[xyplane]
+PROPERTY,workplane,transdispl,value,[[0, 0, 0]],allowed,null
+PROPERTY,workplane,transaxis,value,[[0, 0, 1]],allowed,null
+PROPERTY,workplane,transspecify,value,axis,allowed,[axis, eulerang, edge]
+PROPERTY,workplane,transaxistype,value,z,allowed,[x, y, z, cartesian, spherical]
+PROPERTY,workplane,transax3,value,[[0, 0, 1]],allowed,null
+PROPERTY,workplane,transax2,value,[[0, 0]],allowed,null
+PROPERTY,workplane,transrot,value,0,allowed,null
+PROPERTY,workplane,transeulerang,value,[[0, 0, 0]],allowed,null
+PROPERTY,workplane,transedge,value,<unreadable>,allowed,null
+PROPERTY,workplane,csplanetype,value,quick,allowed,[quick, faceparallel, edgeparallel, edgeangle, circleperpendicular, normalvector, vertices, coordinates, transformed]
+PROPERTY,workplane,quickorigin,value,global,allowed,[global, vertexproj]
+PROPERTY,workplane,originvertex,value,<unreadable>,allowed,null
+PROPERTY,workplane,quickaxis,value,natural,allowed,[natural, vertexproj]
+PROPERTY,workplane,axisvertex,value,<unreadable>,allowed,null
+PROPERTY,workplane,displ,value,[[0, 0]],allowed,null
+PROPERTY,workplane,rot,value,0,allowed,null
+PROPERTY,workplane,origin,value,facecenter,allowed,[facecenter, boxcorner, vertexproj]
+PROPERTY,workplane,faceparallelaxis,value,s1,allowed,[s1, s2, vertexproj]
+PROPERTY,workplane,edgeparallelorigin,value,startvertex,allowed,[startvertex, endvertex, vertexproj]
+PROPERTY,workplane,edgeparallelaxis,value,tangent,allowed,[tangent, vertexproj]
+PROPERTY,workplane,unite,value,off,allowed,[on, off]
+PROPERTY,workplane,repairtoltype,value,auto,allowed,[auto, relative, absolute]
+PROPERTY,workplane,repairtol,value,1.0E-6,allowed,null
+PROPERTY,workplane,absrepairtol,value,1.0E-6,allowed,null
+PROPERTY,workplane,workplane3d,value,off,allowed,[on, off]
+PROPERTY,workplane,showcoincident,value,on,allowed,[on, off]
+PROPERTY,workplane,showintersection,value,on,allowed,[on, off]
+PROPERTY,workplane,showprojection,value,on,allowed,[on, off]
+PROPERTY,workplane,extrainputkey,value,0,allowed,null
+PROPERTY,workplane,buildwpmatrix,value,[],allowed,null
+FEATURE_END,workplane
+FEATURE_BEGIN,rectangle
+PROPERTY,rectangle,contributeto,value,none,allowed,[none]
+PROPERTY,rectangle,selresult,value,off,allowed,[on, off]
+PROPERTY,rectangle,selresultshow,value,dom,allowed,[all, obj, dom, bnd, pnt, off]
+PROPERTY,rectangle,color,value,none,allowed,[none, custom, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+PROPERTY,rectangle,customcolor,value,[[0, 0, 0]],allowed,null
+PROPERTY,rectangle,geomattr,value,[[]],allowed,null
+PROPERTY,rectangle,geomattrlevel,value,[[]],allowed,null
+PROPERTY,rectangle,posconstr,value,[[off, off]],allowed,null
+PROPERTY,rectangle,pos,value,[[0, 0]],allowed,null
+PROPERTY,rectangle,x,value,0,allowed,null
+PROPERTY,rectangle,y,value,0,allowed,null
+PROPERTY,rectangle,rotconstr,value,off,allowed,[on, off]
+PROPERTY,rectangle,rot,value,0,allowed,null
+PROPERTY,rectangle,type,value,solid,allowed,[solid, curve]
+PROPERTY,rectangle,base,value,corner,allowed,[center, corner]
+PROPERTY,rectangle,layerold,value,[[]],allowed,null
+PROPERTY,rectangle,layername,value,[[]],allowed,null
+PROPERTY,rectangle,layer,value,[[]],allowed,null
+PROPERTY,rectangle,layerleft,value,off,allowed,[on, off]
+PROPERTY,rectangle,layerright,value,off,allowed,[on, off]
+PROPERTY,rectangle,layerbottom,value,on,allowed,[on, off]
+PROPERTY,rectangle,layertop,value,off,allowed,[on, off]
+PROPERTY,rectangle,lx,value,1,allowed,null
+PROPERTY,rectangle,ly,value,1,allowed,null
+PROPERTY,rectangle,sizeconstr,value,[[off, off]],allowed,null
+PROPERTY,rectangle,size,value,[[1, 1]],allowed,null
+PROPERTY,rectangle,arrowdispl,value,[[NaN, NaN]],allowed,null
+PROPERTY,rectangle,labelpos,value,[[0.5, 0.5]],allowed,null
+PROPERTY,rectangle,arrowint,value,[[on, on]],allowed,[on, off]
+FEATURE_END,rectangle
+FEATURE_BEGIN,revolve
+PROPERTY,revolve,contributeto,value,none,allowed,[none]
+PROPERTY,revolve,selresult,value,off,allowed,[on, off]
+PROPERTY,revolve,selresultshow,value,dom,allowed,[all, dom, bnd, edg, pnt, off]
+PROPERTY,revolve,color,value,none,allowed,[none, custom, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+PROPERTY,revolve,customcolor,value,[[0, 0, 0]],allowed,null
+PROPERTY,revolve,cumselkey,value,0,allowed,null
+PROPERTY,revolve,geomattr,value,[[]],allowed,null
+PROPERTY,revolve,geomattrlevel,value,[[]],allowed,null
+PROPERTY,revolve,revolvefrom,value,workplane,allowed,[workplane, faces]
+PROPERTY,revolve,workplane,value,wp1,allowed,[wp1, none]
+PROPERTY,revolve,input,value,[],allowed,null
+PROPERTY,revolve,inputface,value,<unreadable>,allowed,null
+PROPERTY,revolve,inputhandling,value,unite,allowed,[keep, remove, unite]
+PROPERTY,revolve,designbool,value,off,allowed,[on, off]
+PROPERTY,revolve,angles,value,[[0, 2*pi]],allowed,null
+PROPERTY,revolve,angles_vector_method,value,step,allowed,null
+PROPERTY,revolve,angles_vector_start,value,,allowed,null
+PROPERTY,revolve,angles_vector_stop,value,,allowed,null
+PROPERTY,revolve,angles_vector_step,value,,allowed,null
+PROPERTY,revolve,angles_vector_numvalues,value,,allowed,null
+PROPERTY,revolve,angles_vector_function,value,none,allowed,null
+PROPERTY,revolve,angles_vector_interval,value,octave,allowed,null
+PROPERTY,revolve,angles_vector_freqperdec,value,,allowed,null
+PROPERTY,revolve,angtype,value,specang,allowed,[full, specang]
+PROPERTY,revolve,origfaces,value,on,allowed,[on, off]
+PROPERTY,revolve,angle1,value,0,allowed,null
+PROPERTY,revolve,angle2,value,360,allowed,null
+PROPERTY,revolve,axistype,value,2d,allowed,[2d, 3d]
+PROPERTY,revolve,pos,value,[[0, 0]],allowed,null
+PROPERTY,revolve,axis,value,[[0, 1]],allowed,null
+PROPERTY,revolve,pos3,value,[[0, 0, 0]],allowed,null
+PROPERTY,revolve,axis3,value,[[0, 1, 0]],allowed,null
+PROPERTY,revolve,revaxis,value,[[0, 0], [0, 1]],allowed,null
+FEATURE_END,revolve
+FEATURE_BEGIN,cylinder_selection
+PROPERTY,cylinder_selection,entitydim,value,3,allowed,[3, 2, 1, 0]
+PROPERTY,cylinder_selection,showcontangoption,value,off,allowed,[on, off]
+PROPERTY,cylinder_selection,groupcontang,value,off,allowed,[on, off]
+PROPERTY,cylinder_selection,showangletol,value,off,allowed,[on, off]
+PROPERTY,cylinder_selection,angletol,value,5,allowed,null
+PROPERTY,cylinder_selection,inputent,value,all,allowed,[all, selections]
+PROPERTY,cylinder_selection,showinputsel,value,off,allowed,[on, off]
+PROPERTY,cylinder_selection,input,value,[],allowed,[]
+PROPERTY,cylinder_selection,r,value,0,allowed,null
+PROPERTY,cylinder_selection,rin,value,0,allowed,null
+PROPERTY,cylinder_selection,top,value,Inf,allowed,null
+PROPERTY,cylinder_selection,bottom,value,-Inf,allowed,null
+PROPERTY,cylinder_selection,angle1,value,0,allowed,null
+PROPERTY,cylinder_selection,angle2,value,360,allowed,null
+PROPERTY,cylinder_selection,pos,value,[[0, 0, 0]],allowed,null
+PROPERTY,cylinder_selection,axis,value,[[0, 0, 1]],allowed,null
+PROPERTY,cylinder_selection,axistype,value,z,allowed,[x, y, z, cartesian, spherical]
+PROPERTY,cylinder_selection,ax3,value,[[0, 0, 1]],allowed,null
+PROPERTY,cylinder_selection,ax2,value,[[0, 0]],allowed,null
+PROPERTY,cylinder_selection,condition,value,intersects,allowed,[intersects, inside, somevertex, allvertices]
+PROPERTY,cylinder_selection,color,value,none,allowed,[none, custom, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+PROPERTY,cylinder_selection,customcolor,value,[[0, 0, 0]],allowed,null
+FEATURE_END,cylinder_selection

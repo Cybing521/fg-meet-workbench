@@ -1,0 +1,265 @@
+\documentclass[UTF8,fontset=windows]{ctexart}
+
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fvextra}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue
+}
+
+\setlist{nosep}
+\DefineVerbatimEnvironment{code}{Verbatim}{
+  fontsize=\footnotesize,
+  breaklines=true,
+  breakanywhere=true,
+  frame=single,
+  rulecolor=\color{black!25}
+}
+
+\title{FG-MEET 程序执行方案}
+\author{}
+\date{2026 年 6 月 25 日}
+
+\begin{document}
+
+\maketitle
+
+\section{执行目标}
+
+本文档用于说明 FG-MEET 交付包在 MATLAB 中的正确执行方式。执行流程包括：
+
+\begin{enumerate}
+  \item 进入交付包根目录；
+  \item 初始化 MATLAB 路径；
+  \item 运行快速验证算例；
+  \item 按需指定单个 \texttt{txt} 输入文件执行力、电、磁三类工况；
+  \item 必要时重新生成功能梯度 \texttt{txt} 输入文件。
+\end{enumerate}
+
+主要求解入口是项目根目录下的脚本和 \texttt{run\_meet\_static} 函数，不是 \texttt{materials} 文件夹中的材料辅助函数。
+
+\section{目录要求}
+
+首先进入交付包根目录。该目录应包含以下文件和文件夹：
+
+\begin{itemize}
+  \item \texttt{setup\_paths.m}
+  \item \texttt{run\_phase1\_static\_elastic.m}
+  \item \texttt{run\_meet\_static.m}
+  \item \texttt{matlab/}
+  \item \texttt{materials/}
+  \item \texttt{cases/}
+  \item \texttt{tools/}
+\end{itemize}
+
+示例路径如下：
+
+\begin{code}
+C:\Users\You Huiwen\Desktop\fg-meet-workbench_code_delivery_2026-06-17\fg-meet-workbench_code_delivery_2026-06-17
+\end{code}
+
+在 MATLAB 命令行中执行：
+
+\begin{code}
+cd('C:\Users\You Huiwen\Desktop\fg-meet-workbench_code_delivery_2026-06-17\fg-meet-workbench_code_delivery_2026-06-17')
+\end{code}
+
+\section{步骤一：初始化路径}
+
+进入交付包根目录后，先执行：
+
+\begin{code}
+setup_paths
+\end{code}
+
+该命令会加入以下路径：
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+路径 & 作用 \\
+\midrule
+\texttt{materials/} & 功能梯度分布、材料混合律和材料层参数函数 \\
+\texttt{tools/} & 输入文件生成和辅助工具 \\
+\texttt{matlab/} & 统一 MATLAB 求解入口 \\
+\texttt{matlab/meet-fem-core/} & 实验室原有有限元核心程序 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+若未先执行 \texttt{setup\_paths}，MATLAB 可能无法找到求解器核心函数或材料辅助函数。
+
+\section{步骤二：运行快速验证算例}
+
+推荐先运行阶段 1 静力验证算例，用于确认路径、输入文件读取、矩阵装配和求解流程均正常：
+
+\begin{code}
+run('run_phase1_static_elastic.m')
+\end{code}
+
+该脚本默认读取：
+
+\begin{code}
+cases/Thermal_CFFF_U_Vf0.6-30x30-10layer.txt
+\end{code}
+
+并执行力载荷静力计算。正常运行后会生成：
+
+\begin{code}
+output/phase1_static_elastic_summary.csv
+\end{code}
+
+\section{步骤三：指定单个工况运行}
+
+若需要手动指定某一个 \texttt{txt} 输入文件，可以执行：
+
+\begin{code}
+paths = setup_paths;
+
+caseFile = fullfile(paths.cases, ...
+    'Thermal_CFFF_U_Vf0.6-30x30-10layer.txt');
+
+result = run_meet_static(caseFile, 'elastic', ...
+    'OutTag', 'U_Vf06_check');
+\end{code}
+
+参数含义如下：
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+参数 & 含义 \\
+\midrule
+\texttt{caseFile} & 待读取的 MEET \texttt{txt} 输入文件 \\
+\texttt{elastic} & 力载荷工况 \\
+\texttt{OutTag} & 输出文件标签，用于区分不同运行结果 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{步骤四：运行不同载荷类型}
+
+同一个 \texttt{txt} 输入文件可以用于不同载荷类型。
+
+\subsection{力载荷}
+
+\begin{code}
+result_elastic = run_meet_static(caseFile, 'elastic', ...
+    'OutTag', 'U_Vf06_elastic');
+\end{code}
+
+\subsection{电载荷}
+
+\begin{code}
+result_electro = run_meet_static(caseFile, 'electro', ...
+    'OutTag', 'U_Vf06_electro');
+\end{code}
+
+\subsection{磁载荷}
+
+\begin{code}
+result_magneto = run_meet_static(caseFile, 'magneto', ...
+    'OutTag', 'U_Vf06_magneto');
+\end{code}
+
+输出结果通常包括中心挠度、层平均温差、温差跨度等指标。
+
+\section{实际调用链路}
+
+正确执行时，程序调用链路如下：
+
+\begin{code}
+run_meet_static(caseFile, loadCase)
+    -> Main_FOSDLIN851T5MEET_V4(InputFile, ...)
+        -> SF_GetInputDataMEEP(InputFile)
+\end{code}
+
+因此，实际矩阵装配和求解仍然使用实验室原有有限元核心程序；节点、单元、材料、边界条件等信息仍然来自 \texttt{txt} 输入文件。
+
+\section{重新生成输入文件}
+
+如需重新生成或刷新功能梯度输入文件，可在交付包根目录执行：
+
+\begin{code}
+python tools/generate_cases.py
+\end{code}
+
+该脚本会生成：
+
+\begin{code}
+cases/manifest_full.csv
+cases/pilot_cases.csv
+cases/Thermal_CFFF_*.txt
+\end{code}
+
+生成后的 \texttt{txt} 文件即为后续有限元求解的输入文件。
+
+\section{材料辅助函数的用途}
+
+\texttt{build\_layer\_materials.m} 是材料层参数生成函数，不是主求解程序。正确调用方式示例如下：
+
+\begin{code}
+setup_paths
+layers = build_layer_materials(10, 6e-3, 0.6, 'U');
+\end{code}
+
+该函数只生成 10 层材料参数，不执行有限元装配和求解。因此不能在 MATLAB 命令行中零参数直接执行：
+
+\begin{code}
+build_layer_materials
+\end{code}
+
+否则 MATLAB 会报“输入参数数目不足”。该错误仅说明辅助函数调用方式错误，不能作为主程序无法运行的依据。
+
+\section{推荐完整执行顺序}
+
+推荐先按以下顺序进行最小验证：
+
+\begin{code}
+cd('交付包根目录')
+setup_paths
+run('run_phase1_static_elastic.m')
+\end{code}
+
+若阶段 1 算例正常完成，再运行指定工况：
+
+\begin{code}
+paths = setup_paths;
+caseFile = fullfile(paths.cases, ...
+    'Thermal_CFFF_U_Vf0.6-30x30-10layer.txt');
+
+result_elastic = run_meet_static(caseFile, 'elastic');
+result_electro = run_meet_static(caseFile, 'electro');
+result_magneto = run_meet_static(caseFile, 'magneto');
+\end{code}
+
+\section{正常运行判断标准}
+
+若程序正常运行，应至少出现以下结果之一：
+
+\begin{itemize}
+  \item MATLAB 命令行输出有限元装配和求解过程；
+  \item 生成 \texttt{output/phase1\_static\_elastic\_summary.csv}；
+  \item 生成对应的 \texttt{output/*.csv} 或 \texttt{output/*.mat}；
+  \item MATLAB 工作区中出现 \texttt{result.wCenter\_mm} 等结果字段。
+\end{itemize}
+
+\section{执行注意事项}
+
+\begin{enumerate}
+  \item 不应直接进入 \texttt{materials} 文件夹运行单个辅助函数。
+  \item 不应将 \texttt{build\_layer\_materials.m} 当作主程序。
+  \item 正确入口应从交付包根目录执行 \texttt{setup\_paths}。
+  \item 主求解应通过 \texttt{run\_phase1\_static\_elastic.m} 或 \texttt{run\_meet\_static} 执行。
+  \item 输入数据来自 \texttt{cases/*.txt} 或实验室原始 \texttt{InputFile/*.txt} 文件。
+\end{enumerate}
+
+\end{document}

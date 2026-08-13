@@ -1,0 +1,652 @@
+\documentclass[UTF8,fontset=windows,12pt,a4paper]{ctexart}
+
+\usepackage[top=2.25cm,bottom=2.25cm,left=2.50cm,right=2.50cm]{geometry}
+\usepackage{amsmath,amssymb,bm,mathtools}
+\usepackage{booktabs,tabularx,longtable,array,multirow}
+\usepackage{graphicx,float,caption}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{hyperref,xurl}
+
+% 使用本机 Windows 字体，避免编译时下载字体。
+\setmainfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont{Consolas}
+\setCJKmonofont{FangSong}
+
+\definecolor{auditblue}{RGB}{35,75,130}
+\definecolor{auditgreen}{RGB}{25,120,70}
+\definecolor{auditred}{RGB}{170,45,45}
+\definecolor{auditgray}{RGB}{245,247,250}
+\definecolor{auditgold}{RGB}{160,105,15}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=auditblue,
+  urlcolor=auditblue,
+  pdfauthor={FG-MEE 数值验证工作台},
+  pdftitle={FG-MEE 反向感知代码闭环与跨软件验证报告}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{FG-MEE 反向感知代码闭环}
+\rhead{2026年7月20日}
+\cfoot{\thepage}
+\setlength{\headheight}{15pt}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.30em}
+\setlength{\emergencystretch}{2.5em}
+\renewcommand{\arraystretch}{1.18}
+\captionsetup{font=small,labelfont=bf}
+\setcounter{tocdepth}{2}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\pass}{\textcolor{auditgreen}{\textbf{通过}}}
+\newcommand{\risk}{\textcolor{auditgold}{\textbf{保留风险}}}
+\newcommand{\notclaim}{\textcolor{auditred}{\textbf{不得外推}}}
+\newcommand{\codepath}[1]{\path{#1}}
+
+\title{\textbf{FG-MEE 反向感知代码闭环与跨软件验证报告}\\[0.45em]
+\large 热释电/热释磁逐层装配修复、MATLAB 网格复算与 COMSOL 四场核验}
+\author{FG-MEE 数值验证工作台}
+\date{2026年7月20日（闭环更新版）}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+本报告更新并替代同名旧版中“总装后按层数归一化”和“COMSOL 仅作三维力学后处理”的阶段性结论。当前实际修改发生在本项目运行时代码，而不是钱沈云参考目录：热释电、热释磁系数已经按当前物理层写入对应的活动 MEE 自由度；层凝聚、活动层自由度映射、几何中心探针和各向异性材料项也已同步修正。正式求解入口不再对耦合矩阵实施全局除层数补偿。
+
+MATLAB 已对 $10\times10$、$15\times15$、$20\times20$ 和 $30\times30$ 四档面内网格分别重新组装并求解。以目标中心位移 $0.5$~mm 为例，电势跨度由 78.431689~V 平滑变化至 78.480275~V，磁势跨度由 0.030880910~A 变化至 0.030900039~A。$30\times30$ 机械--热块的相对残差为 $5.2003\times10^{-10}$、后向误差为 $9.9544\times10^{-22}$；但倒数条件数仅为 $1.7132\times10^{-15}$，因此报告明确保留病态矩阵导致的前向误差风险。
+
+COMSOL 正式模型包含十个三维实体物理层、固体位移场以及逐层独立的电势、磁标势和互易温度弱式自由度。三次通道隔离、一次载荷归一化和三次目标位移独立重求共形成 7 次 Stationary 求解，正式状态为 \texttt{completed\_full\_field}，证据字段为 \texttt{A\_independent\_block\_triangular\_fields}。在相同 $10\times10$ 面内划分下，MATLAB 与 COMSOL 的电势、磁势相对差均为约 1.839143\%。该对照是 LRT5 壳与三维二次实体之间的非同构交叉验证，不是机器精度同构验证。
+
+最终代码交付包已通过 \texttt{PASS\_FULL\_CODE\_CLOSURE}：MATLAB 10/10、Python 33/33、COMSOL 契约 2/2、PowerShell AST 3/3，包内 MATLAB 四档网格实跑与正式 CSV 逐行一致。由此可以证明本项目当前代码链在规定门禁内闭合；不能据此断言钱沈云论文整体错误，也不能替代物理台架实验。
+
+\noindent\textbf{关键词：}FG-MEE；反向感知；热释电；热释磁；逐层装配；MATLAB；COMSOL；代码闭环
+\end{abstract}
+
+\begin{center}
+\fcolorbox{auditblue}{auditgray}{
+\begin{minipage}{0.92\textwidth}
+\textbf{直接回答。} 本次调整的是\textbf{我们的 MATLAB/COMSOL 实现}，不是钱沈云参考代码。旧报告中的全局 \texttt{/nLayer} 只是阶段性补偿，现已由逐层结构性组装取代；旧报告中的 COMSOL 力学后处理也已由正式十层四场有限元求解取代。六个代码闭环步骤目前全部完成，最终包门禁为 \texttt{PASS\_FULL\_CODE\_CLOSURE}。
+\end{minipage}}
+\end{center}
+
+\clearpage
+\tableofcontents
+\clearpage
+\listoftables
+
+\clearpage
+\section{审计范围、对象与证据口径}
+
+\subsection{这份报告回答什么}
+
+本报告只回答以下六个可复核问题：
+
+\begin{enumerate}[leftmargin=2.7em]
+  \item 历史热释电/热释磁重复装配是怎样形成的；
+  \item 当前到底修改了哪些本项目文件，是否改动钱沈云参考目录；
+  \item MATLAB 正式结果是否由各档网格重新组装和求解；
+  \item 小残差、后向误差和条件数分别能够说明什么；
+  \item COMSOL 是否真正含有独立的 $u,\phi,\psi,T$ 有限元未知量；
+  \item 最终交付包能否从包内编译、复算并通过统一门禁。
+\end{enumerate}
+
+\subsection{代码归属与结论边界}
+
+钱沈云相关程序保存在 \codepath{reference/predecessor-code/qian-shenyun}，本轮没有改写该目录。它用于历史缺陷定位和对照，不作为本项目当前正确性的唯一依据。本轮实际修改集中在 \codepath{matlab/meet-fem-core}、MATLAB 统一入口、COMSOL Java 正式生产器、测试与交付门禁。
+
+因此，下列两句话必须同时成立：
+
+\begin{itemize}[leftmargin=2.4em]
+  \item 可以说“钱沈云相关旧程序所采用的某种热释矩阵写法会造成逐层重复贡献”；
+  \item 不可以把这一代码事实扩大成“钱沈云论文全部结果都已被证明错误”。
+\end{itemize}
+
+\subsection{六步证据链}
+
+\begin{table}[H]
+\centering
+\caption{六步代码闭环及当前状态}
+\label{tab:six-step-overview}
+\small
+\begin{tabularx}{\textwidth}{p{0.08\textwidth}p{0.27\textwidth}Yp{0.12\textwidth}}
+\toprule
+步骤 & 核心动作 & 主要证据 & 状态 \\
+\midrule
+1 & 热释电/热释磁逐物理层装配 & 材料矩阵、单元矩阵与入口源码 & \pass \\
+2 & 层映射、凝聚、中心探针及各向异性项修复 & 10 个 MATLAB 单元/结构测试 & \pass \\
+3 & 四档 MATLAB 网格正式复算 & 12 行正式 inverse CSV & \pass \\
+4 & 残差、后向误差和条件数审计 & 每档求解诊断字段 & \pass/\risk \\
+5 & COMSOL 十层块三角四场核验 & 7 次 Stationary、物理清单与 MPH & \pass \\
+6 & 包内编译、重算、哈希和统一门禁 & \texttt{PASS\_FULL\_CODE\_CLOSURE} & \pass \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{center}
+\setlength{\fboxsep}{7pt}
+\fcolorbox{auditred}{auditgray}{历史代码溯源}
+$\Longrightarrow$
+\fcolorbox{auditblue}{auditgray}{逐层结构修复}
+$\Longrightarrow$
+\fcolorbox{auditblue}{auditgray}{MATLAB 四网格}
+$\Longrightarrow$
+\fcolorbox{auditblue}{auditgray}{COMSOL 四场}
+$\Longrightarrow$
+\fcolorbox{auditgreen}{auditgray}{包内闭环}
+\end{center}
+
+\section{历史重复装配问题的数学推理}
+
+\subsection{旧写法为何产生重复贡献}
+
+设共有 $m$ 个活动 MEE 物理层，第 $\ell$ 层的热释电系数和热释磁系数分别为 $p_\ell$、$t_\ell$。正确的层选择矩阵应只作用在本层自由度：
+
+\begin{equation}
+\mathbf P^{(\ell)}_{\mathrm{correct}}
+=p_\ell\mathbf e_\ell\mathbf e_\ell^{\mathsf T},\qquad
+\mathbf T^{(\ell)}_{\mathrm{correct}}
+=t_\ell\mathbf e_\ell\mathbf e_\ell^{\mathsf T},
+\label{eq:correct-local}
+\end{equation}
+
+其中 $\mathbf e_\ell$ 是第 $\ell$ 个单位基向量。逐层累加后应得到
+
+\begin{equation}
+\mathbf P_{\mathrm{correct}}=\operatorname{diag}(p_1,\ldots,p_m),\qquad
+\mathbf T_{\mathrm{correct}}=\operatorname{diag}(t_1,\ldots,t_m).
+\label{eq:correct-total}
+\end{equation}
+
+历史参考写法在处理第 $\ell$ 层时，把该层系数写入全部活动势自由度，等价于
+
+\begin{equation}
+\mathbf P^{(\ell)}_{\mathrm{old}}=p_\ell\mathbf I_m,\qquad
+\mathbf T^{(\ell)}_{\mathrm{old}}=t_\ell\mathbf I_m.
+\end{equation}
+
+主程序再对所有物理层累加，因此
+
+\begin{equation}
+\mathbf P_{\mathrm{old}}=\left(\sum_{\ell=1}^{m}p_\ell\right)\mathbf I_m,
+\qquad
+\mathbf T_{\mathrm{old}}=\left(\sum_{\ell=1}^{m}t_\ell\right)\mathbf I_m.
+\label{eq:old-total}
+\end{equation}
+
+均匀十层时 $p_\ell=p$、$t_\ell=t$，式~\eqref{eq:old-total} 变成 $10p\mathbf I$ 与 $10t\mathbf I$，而正确结果是 $p\mathbf I$ 与 $t\mathbf I$。这解释的是\textbf{耦合矩阵的十倍重复}，不是最终电势或磁势必然精确放大十倍。
+
+\subsection{为什么不能把最终输出直接除以十}
+
+传感求解并非单一标量比例，而是
+
+\begin{equation}
+\begin{bmatrix}
+\mathbf K_{\phi\phi} & \mathbf K_{\phi\psi}\\
+\mathbf K_{\psi\phi} & \mathbf K_{\psi\psi}
+\end{bmatrix}
+\begin{bmatrix}\bm\phi\\\bm\psi\end{bmatrix}
+=-
+\begin{bmatrix}
+\mathbf K_{\phi u}\mathbf u+\mathbf K_{\phi T}\mathbf T\\
+\mathbf K_{\psi u}\mathbf u+\mathbf K_{\psi T}\mathbf T
+\end{bmatrix}.
+\label{eq:sensor-block}
+\end{equation}
+
+热释项只占右端中的一部分；机械压电、压磁以及磁电交叉项仍同时参与。即使 $\mathbf K_{\phi T}$、$\mathbf K_{\psi T}$ 曾重复十次，最终 $\bm\phi$、$\bm\psi$ 也不应整体除以十。对 X 分布、非等厚层或部分非活动层，全局除层数更无法恢复式~\eqref{eq:correct-total} 的逐层结构。因此当前实现从源头修正层选择矩阵，不再保留全局 \texttt{/nLayer} 作为正式算法。
+
+\section{步骤一：逐层结构性组装已经落地}
+
+\subsection{当前修复位置}
+
+当前材料例程只在本物理层映射到的活动 MEE 自由度上写入系数：
+
+\begin{equation}
+P_{ij}=p_\ell\delta_{i\ell}\delta_{j\ell},\qquad
+T_{ij}=t_\ell\delta_{i\ell}\delta_{j\ell}.
+\end{equation}
+
+对应实现为：
+
+\begin{itemize}[leftmargin=2.4em]
+  \item \codepath{matlab/meet-fem-core/SF_GetMatePropMEEP.m:108--109}：仅写 \texttt{p(MEELayIndex,MEELayIndex)} 与 \texttt{t(MEELayIndex,MEELayIndex)}；
+  \item \codepath{matlab/meet-fem-core/SF_ElemComptLIN851T5MEEP_V4.m:184--187}：直接使用本层 \texttt{Mate\_p/Mate\_t}；
+  \item 同一单元文件第 235--236 行：本层 \texttt{PE/PM} 进入厚度积分；
+  \item \codepath{matlab/run_meet_static.m:81--86}：建立活动层映射，并明确禁止非均匀或部分活动层的全局缩放；
+  \item 同一入口第 187--189 行：输出 \texttt{layer\_local} 与 \texttt{layer\_local\_pyro\_v3} 身份字段。
+\end{itemize}
+
+\subsection{调整前后的直接数值变化}
+
+表~\ref{tab:before-after} 采用同一 $10\times10$ 工况。调整前数值是历史实现的回归证据，不代表钱沈云论文公开结果，也不进入当前正式门禁。
+
+\begin{table}[H]
+\centering
+\caption{历史旧实现与当前逐层组装结果对比（$10\times10$）}
+\label{tab:before-after}
+\small
+\begin{tabular}{rrrrrrr}
+\toprule
+$|w_c|$/mm & 旧电势/V & 当前电势/V & 下降/\% & 旧磁势/A & 当前磁势/A & 下降/\% \\
+\midrule
+0.5 & 164.544443 & 78.431689 & 52.3340 & 0.170287139 & 0.030880910 & 81.8654 \\
+1.0 & 329.088887 & 156.863379 & 52.3340 & 0.340574277 & 0.061761819 & 81.8654 \\
+2.0 & 658.177773 & 313.726757 & 52.3340 & 0.681148555 & 0.123523638 & 81.8654 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+电、磁下降比例不同，正是式~\eqref{eq:sensor-block} 中多项耦合共同作用的结果，也再次说明“输出整体除以十”不是合法修复。
+
+\section{步骤二：映射、凝聚、探针和各向异性项闭合}
+
+\subsection{四个配套问题}
+
+仅修正 $p/t$ 写入仍不足以保证输出可信。本轮同时封闭了四个可能继续污染结果的结构问题。
+
+\begin{longtable}{p{0.23\textwidth}p{0.31\textwidth}p{0.36\textwidth}}
+\caption{配套结构修复与完成标准}\label{tab:support-fixes}\\
+\toprule
+问题 & 当前处理 & 验证重点 \\
+\midrule
+\endfirsthead
+\toprule
+问题 & 当前处理 & 验证重点 \\
+\midrule
+\endhead
+物理层与紧凑 MEE 层错位 & \codepath{SF_Condensation.m:69--83} 显式构造 \texttt{PhysicalToMEELayer} & 中间非活动层被删除时，后续层的电、磁、热及交叉块仍同步对应 \\
+活动层输出 DOF 不统一 & \codepath{build_active_layer_dof_map.m} 从单元存在性和材料类型重建紧凑编号 & 边界势、层平均和输出使用同一物理层映射 \\
+奇数网格无几何中心节点 & \codepath{interpolate_shell_dof_at_point.m:49--59} 使用八节点 Serendipity 形函数 & 15、30 等网格不再用最近节点冒充几何中心 \\
+各向异性 $g_{33}$ 索引错误 & \codepath{SF_GetMatePropMEEP.m:103} 使用 $d_{31}e_{M,1}+d_{32}e_{M,2}$ & 正确值 93.2203389830509；旧索引会得到 62.7118644067797 \\
+\bottomrule
+\end{longtable}
+
+\subsection{MATLAB 回归测试}
+
+测试目录包含五个测试文件、10 个测试函数，覆盖均匀十层、非均匀 X 分布、非活动层压缩、单层映射、中间层凝聚、中心插值、各向异性系数和正式基准。执行结果为
+
+\begin{center}
+\fcolorbox{auditgreen}{auditgray}{\textbf{10 Passed, 0 Failed, 0 Incomplete}}
+\end{center}
+
+命令为：
+
+\begin{quote}
+\small\ttfamily
+matlab -batch ``addpath(pwd); results = runtests('tests/matlab');\\
+disp(results); assertSuccess(results);''
+\end{quote}
+
+这些测试证明的是代码结构与小型回归关系；它们不替代跨软件完整结果验证，后者由步骤五单独承担。
+
+\section{步骤三：MATLAB 四档网格正式复算}
+
+\subsection{实际执行顺序}
+
+入口 \codepath{run_matlab_inverse_pyro_fix_verification.m} 依次执行 $10\times10$、$15\times15$、$20\times20$、$30\times30$。每档网格均设置 \texttt{UseCache=false}，重新读取输入、组装矩阵并求解一次机械--热块和一次电--磁传感块。
+
+同一网格内的 0.5、1.0、2.0~mm 三个目标由该网格自身压力基准解按线性比例换算。因此应准确表述为：\textbf{四档网格是四次独立 MATLAB 组装与求解；每档的三个位移不是三次独立 MATLAB 求解。}
+
+\subsection{网格结果}
+
+\begin{table}[H]
+\centering
+\caption{$0.5$~mm 目标位移下的 MATLAB 网格复算}
+\label{tab:matlab-mesh}
+\small
+\begin{tabular}{rrrrr}
+\toprule
+网格 & 电势/V & 磁势/A & 相邻电势变化/\% & 状态 \\
+\midrule
+$10\times10$ & 78.431689371 & 0.0308809096 & --- & ok \\
+$15\times15$ & 78.453286433 & 0.0308894130 & 0.027536 & ok \\
+$20\times20$ & 78.467891998 & 0.0308951636 & 0.018617 & ok \\
+$30\times30$ & 78.480274839 & 0.0309000391 & 0.015781 & ok \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+$10\times10$ 到 $30\times30$ 的电势相对差约为 0.06191\%，变化随网格细化继续减小。$30\times30$ 三个目标结果列于表~\ref{tab:matlab-targets}。
+
+\begin{table}[H]
+\centering
+\caption{$30\times30$ 网格的正式反向感知结果}
+\label{tab:matlab-targets}
+\small
+\begin{tabular}{rrrr}
+\toprule
+$|w_c|$/mm & 电势/V & 磁势/A & 互易温度跨度/K \\
+\midrule
+0.5 & 78.480274839 & 0.0309000391 & 0.5235916569 \\
+1.0 & 156.960549679 & 0.0618000782 & 1.0471833139 \\
+2.0 & 313.921099358 & 0.1236001565 & 2.0943666277 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+正式数据文件为 \codepath{outputs/code_closure/inverse_sensing/matlab_inverse_structural_pyro_mesh.csv}，包含 12 行、4 档网格、3 个目标，所有记录均为 \texttt{layer\_local\_pyro\_v3}、\texttt{solve\_status=ok}、\texttt{sensor\_status=ok}。
+
+\section{步骤四：残差、后向误差与条件数审计}
+
+\subsection{求解块}
+
+MATLAB 先求机械--热块
+
+\begin{equation}
+\begin{bmatrix}
+\mathbf K_{uu} & \mathbf K_{uT}\\
+\mathbf K_{Tu} & \mathbf K_{TT}
+\end{bmatrix}
+\begin{bmatrix}\mathbf u\\\mathbf T\end{bmatrix}
+=
+\begin{bmatrix}\mathbf f\\\mathbf 0\end{bmatrix},
+\label{eq:ut-block}
+\end{equation}
+
+再用式~\eqref{eq:sensor-block} 求开路电势和磁势。入口在每个块求解后记录相对残差、后向误差和倒数条件数估计。
+
+\begin{table}[H]
+\centering
+\caption{MATLAB 求解诊断}
+\label{tab:matlab-diagnostics}
+\small
+\begin{tabular}{rrrrr}
+\toprule
+网格 & 机械--热相对残差 & 机械--热后向误差 & 机械--热 rcond & 传感相对残差 \\
+\midrule
+$10\times10$ & $6.2655\times10^{-11}$ & $3.2673\times10^{-21}$ & $1.5900\times10^{-14}$ & $2.9668\times10^{-16}$ \\
+$15\times15$ & $1.2862\times10^{-10}$ & $1.9777\times10^{-21}$ & $6.8579\times10^{-15}$ & $2.8268\times10^{-16}$ \\
+$20\times20$ & $2.3060\times10^{-10}$ & $1.4926\times10^{-21}$ & $3.9972\times10^{-15}$ & $3.2554\times10^{-16}$ \\
+$30\times30$ & $5.2003\times10^{-10}$ & $9.9544\times10^{-22}$ & $1.7132\times10^{-15}$ & $2.8969\times10^{-16}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+相对残差和后向误差很小，说明计算向量很好地满足\textbf{已经组装出的离散方程}。但是 $30\times30$ 的 \texttt{rcond}$\approx1.71\times10^{-15}$ 表明机械--热矩阵高度病态。病态系统可以同时出现“小后向误差”和“对输入扰动敏感”，因此不能宣称前向误差也达到 $10^{-10}$ 或 $10^{-22}$。
+
+\begin{center}
+\fcolorbox{auditgold}{auditgray}{
+\begin{minipage}{0.90\textwidth}
+\textbf{数值解释边界：} 小残差证明求解器准确执行了当前离散模型；网格趋势和跨软件对照支持结果稳定性；但条件数风险意味着材料尺度化、自由度缩放和前向误差界仍可继续改进。
+\end{minipage}}
+\end{center}
+
+\section{步骤五：COMSOL 十层块三角四场验证}
+
+\subsection{当前模型实际求解什么}
+
+正式生产器为 \codepath{tools/comsol/RunBlockTriangularInverseSensorCfffValidation.java}。它建立十个三维实体物理层，并在固体力学之外，为每层建立独立的电势 \texttt{phiN}、磁标势 \texttt{psiN} 和互易温度 \texttt{tempN} Weak Form PDE。自然零通量对应开路电、开路磁和绝热边界，每类标量势仅固定一个规范点。
+
+模型与 MATLAB 的耦合顺序等价于“先机械--热、后开路电--磁”的块三角关系；它不是四场完全双向反馈模型，但 $\phi,\psi,T$ 是 COMSOL 有限元未知量，不是求解结束后的代数复制。Java 源码中第 424--483 行建立逐层弱式，第 578 行建立 Stationary study，第 788 行之后计算物理残差和门禁。
+
+正式执行包含：
+
+\begin{enumerate}[leftmargin=2.6em]
+  \item 电、磁、热三个通道隔离算例；
+  \item 一个载荷归一化算例；
+  \item 0.5、1.0、2.0~mm 三个目标位移的独立 Stationary 重求。
+\end{enumerate}
+
+共计 7 次 Stationary 求解。求解器采用同一稳态分离策略、固定 25 次外层迭代，并对物理弱矩、最终分离组误差和内部线性残差设置硬门槛。COMSOL 求解器属性的解释依据官方 Programming Reference Manual：\url{https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/COMSOL_ProgrammingReferenceManual.pdf}。
+
+\subsection{物理与求解器门禁}
+
+\begin{table}[H]
+\centering
+\caption{COMSOL 正式四场门禁}
+\label{tab:comsol-gates}
+\small
+\begin{tabularx}{\textwidth}{Yrrp{0.14\textwidth}}
+\toprule
+检查项 & 实值 & 门槛 & 结果 \\
+\midrule
+机械全局力平衡残差 & $4.7003\times10^{-14}$ & $\leq10^{-6}$ & \pass \\
+电场弱矩残差 & $1.2199\times10^{-15}$ & $\leq10^{-6}$ & \pass \\
+磁场弱矩残差 & $4.3264\times10^{-15}$ & $\leq10^{-6}$ & \pass \\
+温度弱矩残差 & $6.4770\times10^{-18}$ & $\leq10^{-6}$ & \pass \\
+四场最终分离组误差最大值 & $7.6\times10^{-11}$ & $\leq10^{-5}$ & \pass \\
+四场最终 LinRes 最大值 & $5.7\times10^{-14}$ & $\leq10^{-5}$ & \pass \\
+三个通道隔离 & 全部 pass & 必须全过 & \pass \\
+\texttt{solver\_has\_problems} & false & 必须 false & \pass \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+正式状态与证据字段分别为：
+
+\begin{center}
+\texttt{completed\_full\_field}\\[0.2em]
+\texttt{A\_independent\_block\_triangular\_fields}
+\end{center}
+
+正式 Java 源码 SHA-256 为：
+
+\begin{center}
+\footnotesize\ttfamily
+a42bc3aa158cdb948719c409a89eef88\\
+f51aafcd3586a8e2fb236298ec4609d1
+\end{center}
+
+该哈希与 summary、layers 和 physics manifest 中的 \texttt{source\_sha256} 一致。
+
+\subsection{独立目标求解与 MATLAB 对照}
+
+\begin{table}[H]
+\centering
+\caption{COMSOL 三个目标位移的独立 Stationary 结果}
+\label{tab:comsol-targets}
+\small
+\begin{tabular}{rrrrr}
+\toprule
+$|w_c|$/mm & 压力/Pa & 实际位移/mm & 电势/V & 磁势/A \\
+\midrule
+0.5 & 3614.631668 & $-0.5000000000$ & 79.874160188 & 0.0314488536 \\
+1.0 & 7229.263336 & $-1.0000000000$ & 159.748320376 & 0.0628977072 \\
+2.0 & 14458.526672 & $-2.0000000000$ & 319.496640751 & 0.1257954144 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+为避免把不同离散方法误称为同构复现，表~\ref{tab:cross-solver} 明确限定比较条件：几何、材料、层数、边界和观测量对齐；MATLAB 使用 LRT5 壳，COMSOL 使用三维二次实体。
+
+\begin{table}[H]
+\centering
+\caption{$10\times10$ 面内划分下的非同构跨软件对照}
+\label{tab:cross-solver}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rrrrrrr}
+\toprule
+$|w_c|$/mm & MATLAB/V & COMSOL/V & 差/\% & MATLAB/A & COMSOL/A & 差/\% \\
+\midrule
+0.5 & 78.431689371 & 79.874160188 & 1.839143 & 0.0308809096 & 0.0314488536 & 1.839143 \\
+1.0 & 156.863378742 & 159.748320376 & 1.839143 & 0.0617618191 & 0.0628977072 & 1.839143 \\
+2.0 & 313.726757484 & 319.496640751 & 1.839143 & 0.1235236383 & 0.1257954144 & 1.839143 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+两软件的 $|\Delta\phi/\Delta\psi|$ 均约为 2539.811504，比例差不超过 $7.2\times10^{-13}\%$。电、磁相对差相同源于同一线性本构比例，不能把它们当作两个统计独立的确认。1.839\% 低于当前 5\% 跨模型门槛，支持符号、量级、材料常数和通道尺度的一致性；它不证明壳模型与三维实体在机器精度上同构。
+
+\section{步骤六：交付包内的全链路验收}
+
+\subsection{门禁结果}
+
+最终包不再携带与当前实现冲突的旧 20260715 TEX/PDF、旧报告图和旧构建宏，只保留可运行代码、正式输入、原始数值证据、代表模型、六步 Markdown 报告及哈希清单。
+
+\begin{table}[H]
+\centering
+\caption{最终交付门禁与包内实跑结果}
+\label{tab:delivery-gates}
+\small
+\begin{tabularx}{\textwidth}{p{0.34\textwidth}Yp{0.13\textwidth}}
+\toprule
+验收项 & 实际结果 & 状态 \\
+\midrule
+MATLAB 单元/结构测试 & 10/10 通过 & \pass \\
+Python 正负门禁测试 & 33/33 通过 & \pass \\
+COMSOL 源码/正式证据契约 & 2/2 通过 & \pass \\
+PowerShell AST & 3/3 通过 & \pass \\
+包内 COMSOL inverse 编译 & 正式 Java 类编译成功 & \pass \\
+包内 MATLAB inverse 重算 & 四档网格全部完成，耗时约 602 s & \pass \\
+包内 CSV 与正式 MATLAB 数据 & 12 行逐项一致，0 项差异 & \pass \\
+\texttt{RUN\_CHECK.ps1} & 14 项检查、0 项失败 & \pass \\
+包内容与来源哈希 & 84 个载荷文件；75 个直接复制来源哈希通过 & \pass \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+最终总状态为：
+
+\begin{center}
+\fcolorbox{auditgreen}{auditgray}{\Large\textbf{PASS\_FULL\_CODE\_CLOSURE}}
+\end{center}
+
+\subsection{实跑中发现并修复的交付缺口}
+
+静态门禁首次通过并不等于包内一定能运行。包内实跑又发现两处缺口：
+
+\begin{enumerate}[leftmargin=2.6em]
+  \item \codepath{RUN_COMSOL.ps1} 原先没有设置正式 Java 要求的 \texttt{FG\_FOUR\_FIELD\_RUN\_ID} 和 \texttt{FG\_FOUR\_FIELD\_SOURCE\_SHA256}；现已在运行前生成 UTC 标识并计算源码哈希。
+  \item builder 原先漏复制 \codepath{build_active_layer_dof_map.m} 与 \codepath{interpolate_shell_dof_at_point.m}；包内 MATLAB 首次在 $10\times10$ 起点暴露缺函数。现已把两文件同时列入复制清单和 \texttt{RUN\_CHECK} 必需文件。
+\end{enumerate}
+
+这两次失败均转化为回归门禁，因此最终结论来自真实包内运行，不是只看文件列表得出的静态判断。
+
+\subsection{交付身份}
+
+交付目录：\codepath{outputs/fgmee_final_delivery_20260720}。
+
+压缩包：\codepath{outputs/fgmee_final_delivery_20260720.zip}。
+
+压缩包 SHA-256：
+
+\begin{center}
+\small\ttfamily
+\nolinkurl{8331ffbd5c14cc46fe54b074f7b701081d99daacec26c5a11a1e3f5bb069d208}
+\end{center}
+
+\section{调整前后：报告结论发生了什么变化}
+
+\begin{table}[H]
+\centering
+\caption{旧报告阶段与当前闭环阶段的差异}
+\label{tab:report-update}
+\small
+\begin{tabularx}{\textwidth}{p{0.23\textwidth}p{0.31\textwidth}Y}
+\toprule
+主题 & 旧报告阶段 & 当前闭环结论 \\
+\midrule
+热释装配修复 & 总装后按物理层数全局归一化 & 材料、单元和活动层 DOF 按物理层结构性组装；无全局缩放 \\
+运行时核心 & 与参考单元近似保持同写法 & 本项目运行时材料/单元/凝聚代码已调整，参考目录仍未改 \\
+MATLAB $30\times30$ & 由旧层值按倍率重构 & 四档网格均重新组装、求解并写出正式 CSV \\
+COMSOL 势场 & 三维力学加 Java 代数后处理 & 十层独立 $\phi/\psi/T$ Weak Form PDE 与固体力学，同一 Stationary 策略 \\
+跨软件误差 & 旧后处理差约 3.4654\% & 正式非同构四场对照差约 1.839143\% \\
+交付验证 & 报告级说明 & 包内编译、MATLAB 复算、哈希与 14 项统一门禁全部通过 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+这次更新的实质不是“把旧数值换成新数值”，而是把验证级别从阶段性矩阵补偿和共享后处理，提升为结构修复、独立网格复算、有限元四场求解和包内实跑组成的闭环证据链。
+
+\section{与钱沈云研究的关系：能够判断到哪里}
+
+\subsection{能够确认的内容}
+
+\begin{itemize}[leftmargin=2.4em]
+  \item 参考代码中的旧层选择写法在均匀十层条件下会把热释矩阵贡献重复十次；
+  \item 本项目当前实现已改为逐层结构性装配，并通过 U、X、非活动层和各向异性回归；
+  \item 当前 MATLAB 与独立 COMSOL 四场对照在规定的非同构门槛内一致；
+  \item 最终包可以从交付目录重新编译和重算，且数值与正式证据一致。
+\end{itemize}
+
+\subsection{仍然不能声称的内容}
+
+\begin{itemize}[leftmargin=2.4em]
+  \item \notclaim：不能把参考代码的局部缺陷等同于钱沈云论文全部理论和数据错误；
+  \item \notclaim：不能把历史旧实现输出直接标成钱沈云论文公开表值，除非有原文逐项对应；
+  \item \notclaim：不能把 1.839\% 非同构对照描述为机器精度同构复现；
+  \item \notclaim：不能把电势跨度单位 V 或磁标势跨度单位 A 直接称为实际闭合电路电流；
+  \item \notclaim：不能用数值闭环替代材料试验、传感电极和物理台架实验。
+\end{itemize}
+
+\section{源码、证据文件与复现顺序}
+
+\subsection{关键代码位置}
+
+\begin{longtable}{p{0.48\textwidth}p{0.13\textwidth}p{0.29\textwidth}}
+\caption{当前代码闭环的原始位置索引}\label{tab:code-index}\\
+\toprule
+文件 & 行号 & 作用 \\
+\midrule
+\endfirsthead
+\toprule
+文件 & 行号 & 作用 \\
+\midrule
+\endhead
+\codepath{matlab/meet-fem-core/SF_GetMatePropMEEP.m} & 97--109 & 各向异性 $g_{33}$ 与当前层 $p/t$ 写入 \\
+\codepath{matlab/meet-fem-core/SF_ElemComptLIN851T5MEEP_V4.m} & 184--236 & 当前层热释矩阵选择与厚度积分 \\
+\codepath{matlab/meet-fem-core/SF_Condensation.m} & 69--83, 150--175 & 物理层到紧凑 MEE 层的显式映射及同步凝聚 \\
+\codepath{matlab/build_active_layer_dof_map.m} & 1--61 & 输出阶段重建活动层 DOF 与物理层关系 \\
+\codepath{matlab/interpolate_shell_dof_at_point.m} & 25--67 & 八节点 Serendipity 几何中心插值 \\
+\codepath{matlab/run_meet_static.m} & 81--204 & 两块求解、诊断、层平均和算法身份 \\
+\codepath{run_matlab_inverse_pyro_fix_verification.m} & 1--末行 & 四档网格反向感知正式复算 \\
+\codepath{tools/comsol/RunBlockTriangularInverseSensorCfffValidation.java} & 294--651 & 十层几何、材料、弱式和求解器 \\
+同上 & 788--1095 & 物理残差、证据清单和 CSV 输出 \\
+\codepath{tools/build_fgmee_minimal_package.py} & 入口及验证段 & 白名单、来源哈希和最终包构建 \\
+\codepath{tools/package_fgmee/python/validate_package.py} & 入口及门禁段 & 包内 14 项统一验收 \\
+\bottomrule
+\end{longtable}
+
+\subsection{正式证据文件}
+
+\begin{itemize}[leftmargin=2.4em]
+  \item MATLAB 网格：\codepath{outputs/code_closure/inverse_sensing/matlab_inverse_structural_pyro_mesh.csv}；
+  \item COMSOL 目标：\codepath{outputs/code_closure/comsol_four_field/comsol_four_field_summary.csv}；
+  \item COMSOL 逐层：\codepath{outputs/code_closure/comsol_four_field/comsol_four_field_layers.csv}；
+  \item COMSOL 物理清单：\codepath{outputs/code_closure/comsol_four_field/comsol_four_field_physics_manifest.csv}；
+  \item 通道隔离：\codepath{outputs/code_closure/comsol_four_field/comsol_four_field_channel_isolation.csv}；
+  \item 代表模型：\codepath{outputs/code_closure/comsol_four_field/comsol_four_field_Model.mph}；
+  \item 六步执行记录：\codepath{outputs/code_closure/CODE_CLOSURE_SIX_STEP_REPORT.md}；
+  \item 包内哈希：\codepath{outputs/fgmee_final_delivery_20260720/metadata/SHA256SUMS.txt} 与 \codepath{SOURCE_PROVENANCE.csv}。
+\end{itemize}
+
+\subsection{按实际执行顺序复现}
+
+\begin{enumerate}[leftmargin=2.7em]
+  \item 运行 MATLAB 10 个回归测试；
+  \item 执行 \codepath{run_matlab_inverse_pyro_fix_verification.m} 生成四档网格 CSV；
+  \item 执行 \codepath{tools/comsol/run_block_triangular_inverse_sensor_validation.ps1} 生成四场正式证据；
+  \item 运行 Python 与 COMSOL 契约测试；
+  \item 执行 \codepath{tools/build_fgmee_minimal_package.py} 构建白名单包；
+  \item 在包内依次执行 COMSOL 编译、MATLAB inverse 重算和 \codepath{RUN_CHECK.ps1}。
+\end{enumerate}
+
+复现时必须冻结几何、材料、十层 U 分布、CFFF 机械边界、观测量定义、MATLAB 壳模型和 COMSOL 三维实体模型。若改变其中任一项，结果应当作为新工况重新建立证据链，不能与表~\ref{tab:cross-solver} 直接混用。
+
+\section{最终结论}
+
+\begin{enumerate}[leftmargin=2.7em]
+  \item \textbf{修改对象已经明确。} 本轮调整的是本项目运行时 MATLAB、COMSOL、测试和交付代码；钱沈云参考目录没有被改写。
+  \item \textbf{旧根因已经从数学和代码两侧闭合。} 历史写法把单层热释系数写满全部活动势自由度，再经逐层总装产生重复贡献；均匀十层时矩阵恰重复十次。
+  \item \textbf{当前修复不是全局除层数。} 现行实现从材料矩阵、单元积分、凝聚和输出映射四个位置恢复逐物理层关系，并补充中心插值与各向异性回归。
+  \item \textbf{MATLAB 数值已经重新生成。} 四档网格分别独立组装求解；$0.5$~mm 电势从 78.431689~V 收敛至 78.480275~V。残差通过，但 $30\times30$ 条件数风险仍被保留。
+  \item \textbf{COMSOL 不再只是后处理。} 正式模型包含逐层独立 $\phi/\psi/T$ 弱式自由度，7 次 Stationary 全部通过残差和通道门禁；与 MATLAB 的代表性差异为约 1.839143\%。
+  \item \textbf{代码闭环已经完成。} 最终包在包内完成编译、四档 MATLAB 重算、哈希校验和 14 项统一门禁，状态为 \texttt{PASS\_FULL\_CODE\_CLOSURE}。
+\end{enumerate}
+
+\begin{center}
+\fcolorbox{auditblue}{auditgray}{
+\begin{minipage}{0.92\textwidth}
+\textbf{最终判定：} 当前结果已修复旧装配问题并形成 MATLAB--COMSOL--交付包三层代码闭环，可用于说明“我们的代码为什么调整、调整前后发生了什么、当前证据支持到哪里”。仍需保留两项边界：COMSOL 与 MATLAB 的机械离散非同构；数值闭环不等同于对钱沈云论文整体的否定或物理实验验证。
+\end{minipage}}
+\end{center}
+
+\end{document}

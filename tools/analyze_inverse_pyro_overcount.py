@@ -135,7 +135,7 @@ def main() -> None:
                     "legacy_e_inflation_vs_corrected": ref["matlab_legacy_e"] / ref["matlab_corrected_e"],
                     "legacy_m_inflation_vs_corrected": ref["matlab_legacy_m"] / ref["matlab_corrected_m"],
                     "status": "completed_corrected_crosscheck",
-                    "evidence_tier": "B_nonisomorphic_3d_mechanics",
+                    "evidence_tier": "exploratory_nonindependent_constitutive_postprocess",
                 }
             )
     write_csv(
@@ -156,16 +156,16 @@ def main() -> None:
 
 - 电热项：本构预测 {expected_e_per_k:.12g} V/K，旧矩阵回归 {observed_e_per_k:.12g} V/K，比值 {observed_e_per_k / expected_e_per_k:.12f}。
 - 磁热项：本构预测 {expected_m_per_k:.12g} A/K，旧矩阵回归 {observed_m_per_k:.12g} A/K，比值 {observed_m_per_k / expected_m_per_k:.12f}。
-- `run_meet_static.m` 已默认将 `KftT`、`KztT` 除以层数；`CorrectPyroAssembly=false` 可复现旧结果。
+- 正式实现已在 `SF_ElemComptLIN851T5MEEP_V4.m` 中把 `p/t` 仅装配到当前物理层；`run_meet_static.m` 不再做除层数修补，也不再保留旧结果回退开关。
 
-## 0.5 mm 正式对比（20x20 COMSOL）
+## 0.5 mm 探索性对比（20x20 三维力学，每物理层 5 个厚度单元）
 
 - 修正后 MATLAB：电势 {float(mesh20['matlab_corrected_e_V']):.9f} V，磁势 {float(mesh20['matlab_corrected_m_A']):.9f} A。
 - COMSOL 三维力学 + 同一本构后处理：电势 {float(mesh20['comsol_corrected_e_V']):.9f} V，磁势 {float(mesh20['comsol_corrected_m_A']):.9f} A。
 - 相对差：电势 {float(mesh20['corrected_e_error_pct']):.4f}%，磁势 {float(mesh20['corrected_m_error_pct']):.4f}%。
 - COMSOL 15x15 -> 20x20 变化：电势 {conv_e:.4f}%，磁势 {conv_m:.4f}%。
 
-该约 3.5% 的剩余差异来自非同构力学场（LRT5 板与三维实体），不再是热释耦合装配错误。由于逆向工况按相同中心位移标定，差异小于直接电/磁致变形的 9%--11%。
+该约 3.5% 是两种非同构机械应变场经同一局部本构后处理得到的共享尺度差，不再是热释耦合十层重复装配造成的差异。它不是独立电势/磁势 PDE 的两个误差样本；由于逆向工况按相同中心位移标定，也不能与直接电/磁致变形的 9%--11% 当作同一误差量比较。
 """
     (OUT / "inverse_sensor_deep_diagnosis.md").write_text(markdown, encoding="utf-8")
 

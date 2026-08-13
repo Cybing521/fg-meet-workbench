@@ -1,0 +1,7 @@
+category,mesh_n,elements,dof,load_mode,geometric_nonlinear,matlab_w_p16_mm,comsol_w_p16_mm,paper_comsol_w_p16_mm,relative_error_pct,status,notes
+paper_reproduction,5,250,6789,FollowerPressure,true,,-5.562277523179554,-5.5634,0.020176094123123652,pass,Exact follower-pressure coarse-grid reproduction
+paper_reproduction,10,1000,24144,FollowerPressure,true,,-5.798791375030838,-5.7984,0.006749707347509149,pass,Exact follower-pressure coarse-grid reproduction
+paper_reproduction,45,20250,443829,ForceArea,true,,-5.955593075354291,-5.9525,0.051962626699562975,pass,Successful complete coupled solve; constant surface force
+matlab_comsol_main,45,20250,443829,ForceArea,true,-5.998222731879956,-5.955593075354291,,0.7107047942566783,pass,Free-end midpoint primary criterion
+matlab_comsol_center,45,20250,443829,ForceArea,true,-2.1275198619369178,-2.1065033577966914,,0.9878405610320704,pass,Center point p8
+resource_limit,45,20250,443829,FollowerPressure,true,,,,,failed,COMSOL 6.0 out of memory during nonlinear assembly; no displacement reported

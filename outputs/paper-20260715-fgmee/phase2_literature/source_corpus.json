@@ -1,0 +1,970 @@
+[
+  {
+    "citation_key": "zhang2026_full",
+    "title": "Fully coupled modeling for static and dynamic analysis of thermo-magneto-electro-elastic plates",
+    "authors": [
+      {
+        "family": "Zhang",
+        "given": "Shun-Qi"
+      },
+      {
+        "family": "Qian",
+        "given": "Shen-Yun"
+      },
+      {
+        "family": "Liu",
+        "given": "Shen"
+      },
+      {
+        "family": "Ling",
+        "given": "Chun-Yan"
+      },
+      {
+        "family": "Ma",
+        "given": "Song-Yun"
+      }
+    ],
+    "year": 2026,
+    "source_pointer": "https://doi.org/10.1007/s10999-025-09834-9",
+    "venue": "International Journal of Mechanics and Materials in Design",
+    "doi": "10.1007/s10999-025-09834-9",
+    "tags": [
+      "validation",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": true,
+    "source_verified_against_original": true,
+    "source_verification_method": "vision_check",
+    "description_source": "original_pdf",
+    "description_last_audit": "phase2-20260715",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    },
+    "source_acquisition_date": "2026-07-15T14:30:00+08:00",
+    "source_acquisition_path": "reference/predecessor-code/qian-shenyun/2026_Zhang_Fully coupled modeling for static and dynamic analysis .pdf"
+  },
+  {
+    "citation_key": "zhao2024_porous_shell",
+    "title": "Finite element analysis of functionally graded magneto-electro-elastic porous cylindrical shells subjected to thermal loads",
+    "authors": [
+      {
+        "family": "Zhao",
+        "given": "Ya-Fei"
+      },
+      {
+        "family": "Gao",
+        "given": "Ying-Shan"
+      },
+      {
+        "family": "Wang",
+        "given": "Xiang"
+      },
+      {
+        "family": "Markert",
+        "given": "Bernd"
+      },
+      {
+        "family": "Zhang",
+        "given": "Shun-Qi"
+      }
+    ],
+    "year": 2024,
+    "source_pointer": "https://doi.org/10.1080/15376494.2023.2188326",
+    "venue": "Mechanics of Advanced Materials and Structures",
+    "doi": "10.1080/15376494.2023.2188326",
+    "tags": [
+      "porous_shell",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "zhang2022_fgmee_shell",
+    "title": "Static and dynamic analysis of functionally graded magneto-electro-elastic plates and shells",
+    "authors": [
+      {
+        "family": "Zhang",
+        "given": "Shun-Qi"
+      },
+      {
+        "family": "Zhao",
+        "given": "Ya-Fei"
+      },
+      {
+        "family": "Wang",
+        "given": "Xiang"
+      },
+      {
+        "family": "Chen",
+        "given": "Min"
+      },
+      {
+        "family": "Schmidt",
+        "given": "Rüdiger"
+      }
+    ],
+    "year": 2022,
+    "source_pointer": "https://doi.org/10.1016/j.compstruct.2021.114950",
+    "venue": "Composite Structures",
+    "doi": "10.1016/j.compstruct.2021.114950",
+    "tags": [
+      "fgmee_shell",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "zhao2022_cntmee",
+    "title": "Nonlinear analysis of carbon nanotube reinforced functionally graded plates with magneto-electro-elastic multiphase matrix",
+    "authors": [
+      {
+        "family": "Zhao",
+        "given": "Ya-Fei"
+      },
+      {
+        "family": "Zhang",
+        "given": "Shun-Qi"
+      },
+      {
+        "family": "Wang",
+        "given": "Xiang"
+      },
+      {
+        "family": "Ma",
+        "given": "Song-Yun"
+      },
+      {
+        "family": "Zhao",
+        "given": "Guo-Zhong"
+      },
+      {
+        "family": "Kang",
+        "given": "Zhan"
+      }
+    ],
+    "year": 2022,
+    "source_pointer": "https://doi.org/10.1016/j.compstruct.2022.115969",
+    "venue": "Composite Structures",
+    "doi": "10.1016/j.compstruct.2022.115969",
+    "tags": [
+      "nonlinear",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "zhou2023_migam",
+    "title": "The magneto-electro-elastic coupling isogeometric analysis method for the static and dynamic analysis of magneto-electro-elastic structures under thermal loading",
+    "authors": [
+      {
+        "family": "Zhou",
+        "given": "Liming"
+      },
+      {
+        "family": "Qu",
+        "given": "Fangting"
+      }
+    ],
+    "year": 2023,
+    "source_pointer": "https://doi.org/10.1016/j.compstruct.2023.116984",
+    "venue": "Composite Structures",
+    "doi": "10.1016/j.compstruct.2023.116984",
+    "tags": [
+      "method",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "tarkashvand2025_moving_heat",
+    "title": "Novel multi-physics simulation of transient dynamics in functionally graded porous multiferroic cylindrical shells under moving heat flux: A magneto-electro-thermoelastic analysis",
+    "authors": [
+      {
+        "family": "Tarkashvand",
+        "given": "A."
+      },
+      {
+        "family": "Zafari",
+        "given": "H."
+      },
+      {
+        "family": "Aliakbari",
+        "given": "F."
+      }
+    ],
+    "year": 2025,
+    "source_pointer": "https://doi.org/10.1016/j.engstruct.2024.119116",
+    "venue": "Engineering Structures",
+    "doi": "10.1016/j.engstruct.2024.119116",
+    "tags": [
+      "porous_shell",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "gan2024_imperfect_shell",
+    "title": "Nonlinear transient response of magneto-electro-elastic cylindrical shells with initial geometric imperfection",
+    "authors": [
+      {
+        "family": "Gan",
+        "given": "Lei-Lei"
+      },
+      {
+        "family": "She",
+        "given": "Gui-Lin"
+      }
+    ],
+    "year": 2024,
+    "source_pointer": "https://doi.org/10.1016/j.apm.2024.04.049",
+    "venue": "Applied Mathematical Modelling",
+    "doi": "10.1016/j.apm.2024.04.049",
+    "tags": [
+      "curved_shell",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "tran2024_double_curved",
+    "title": "An isogeometric analysis approach for dynamic response of doubly-curved magneto electro elastic composite shallow shell subjected to blast loading",
+    "authors": [
+      {
+        "family": "Tu",
+        "given": "Pham Hoang"
+      },
+      {
+        "family": "Van Ke",
+        "given": "Tran"
+      },
+      {
+        "family": "Trai",
+        "given": "Vu Khac"
+      },
+      {
+        "family": "Hoai",
+        "given": "Le"
+      }
+    ],
+    "year": 2024,
+    "source_pointer": "https://doi.org/10.1016/j.dt.2024.06.005",
+    "venue": "Defence Technology",
+    "doi": "10.1016/j.dt.2024.06.005",
+    "tags": [
+      "curved_shell",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "belbachir2023_double_curved",
+    "title": "Numerical modeling of geometrically nonlinear responses of smart magneto-electro-elastic functionally graded double curved shallow shells based on improved FSDT",
+    "authors": [
+      {
+        "family": "Ellouz",
+        "given": "Hajer"
+      },
+      {
+        "family": "Jrad",
+        "given": "Hanen"
+      },
+      {
+        "family": "Wali",
+        "given": "Mondher"
+      },
+      {
+        "family": "Dammak",
+        "given": "Fakhreddine"
+      }
+    ],
+    "year": 2023,
+    "source_pointer": "https://doi.org/10.1016/j.camwa.2023.09.040",
+    "venue": "Computers &amp; Mathematics with Applications",
+    "doi": "10.1016/j.camwa.2023.09.040",
+    "tags": [
+      "curved_shell",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "ozmen2023_nanoplates",
+    "title": "Thermomechanical vibration and buckling response of magneto-electro-elastic higher order laminated nanoplates",
+    "authors": [
+      {
+        "family": "Özmen",
+        "given": "Ramazan"
+      }
+    ],
+    "year": 2023,
+    "source_pointer": "https://doi.org/10.1016/j.apm.2023.06.005",
+    "venue": "Applied Mathematical Modelling",
+    "doi": "10.1016/j.apm.2023.06.005",
+    "tags": [
+      "porous_plate",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "koc2024_porous_core",
+    "title": "Thermomechanical vibration response of nanoplates with magneto-electro-elastic face layers and functionally graded porous core using nonlocal strain gradient elasticity",
+    "authors": [
+      {
+        "given": "Mehmet Akif",
+        "family": "Koç"
+      },
+      {
+        "given": "İsmail",
+        "family": "Esen"
+      },
+      {
+        "given": "Mustafa",
+        "family": "Eroğlu"
+      }
+    ],
+    "year": 2024,
+    "source_pointer": "https://doi.org/10.1080/15376494.2023.2199412",
+    "venue": "Mechanics of Advanced Materials and Structures",
+    "doi": "10.1080/15376494.2023.2199412",
+    "tags": [
+      "porous_plate",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false
+    }
+  },
+  {
+    "citation_key": "esen2025_porous_nanoplate",
+    "title": "Investigation of the Critical Buckling Temperatures and Free Vibration Response of Porous Functionally Graded Magneto-Electro-Elastic Sandwich Higher-Order Nanoplates with Temperature-Dependent Material Properties",
+    "authors": [
+      {
+        "family": "Esen",
+        "given": "Ismail"
+      },
+      {
+        "family": "Aktaş",
+        "given": "Kerim Gökhan"
+      },
+      {
+        "family": "Pehlivan",
+        "given": "Fatih"
+      }
+    ],
+    "year": 2025,
+    "source_pointer": "https://doi.org/10.1007/s42417-024-01542-6",
+    "venue": "Journal of Vibration Engineering &amp; Technologies",
+    "doi": "10.1007/s42417-024-01542-6",
+    "tags": [
+      "porous_plate",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "kar2025_porous_microplate",
+    "title": "Dynamic analysis and structural optimization study of porous FG-MEE microplate with impact and hygrothermal loads",
+    "authors": [
+      {
+        "family": "Kar",
+        "given": "Uttam Kumar"
+      },
+      {
+        "family": "Srinivas",
+        "given": "Jonnalagadda"
+      }
+    ],
+    "year": 2025,
+    "source_pointer": "https://doi.org/10.1177/09544062241299210",
+    "venue": "Proceedings of the Institution of Mechanical Engineers, Part C: Journal of Mechanical Engineering Science",
+    "doi": "10.1177/09544062241299210",
+    "tags": [
+      "porous_plate",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "brischetto2025_3d",
+    "title": "3D Exact Magneto-Electro-Elastic Static Analysis of Multilayered Plates",
+    "authors": [
+      {
+        "family": "Brischetto",
+        "given": "Salvatore"
+      },
+      {
+        "family": "Cesare",
+        "given": "Domenico"
+      },
+      {
+        "family": "Mondino",
+        "given": "Tommaso"
+      }
+    ],
+    "year": 2025,
+    "source_pointer": "https://doi.org/10.32604/cmes.2025.066313",
+    "venue": "Computer Modeling in Engineering &amp; Sciences",
+    "doi": "10.32604/cmes.2025.066313",
+    "tags": [
+      "benchmark",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "gong2025_comsol3d",
+    "title": "A general magneto-electro-elastic 3D FE model for free vibration and dynamic responses of multiphase composites",
+    "authors": [
+      {
+        "family": "Gong",
+        "given": "Zheng"
+      },
+      {
+        "family": "Zhang",
+        "given": "Yinxiao"
+      },
+      {
+        "family": "Du",
+        "given": "Chunlin"
+      },
+      {
+        "family": "Pan",
+        "given": "Ernian"
+      },
+      {
+        "family": "Zhang",
+        "given": "Chao"
+      }
+    ],
+    "year": 2025,
+    "source_pointer": "https://doi.org/10.1016/j.tws.2025.113242",
+    "venue": "Thin-Walled Structures",
+    "doi": "10.1016/j.tws.2025.113242",
+    "tags": [
+      "comsol",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "dat2022_auxetic",
+    "title": "Vibration analysis of auxetic laminated plate with magneto-electro-elastic face sheets subjected to blast loading",
+    "authors": [
+      {
+        "family": "Dinh Dat",
+        "given": "Ngo"
+      },
+      {
+        "family": "Quoc Quan",
+        "given": "Tran"
+      },
+      {
+        "family": "Dinh Duc",
+        "given": "Nguyen"
+      }
+    ],
+    "year": 2022,
+    "source_pointer": "https://doi.org/10.1016/j.compstruct.2021.114925",
+    "venue": "Composite Structures",
+    "doi": "10.1016/j.compstruct.2021.114925",
+    "tags": [
+      "plate",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "tassi2022_effective",
+    "title": "Mathematical modeling of fully coupled reinforced magneto-electro-thermo-mechanical effective properties based on conditioned micromechanics",
+    "authors": [
+      {
+        "family": "Tassi",
+        "given": "Nada"
+      },
+      {
+        "family": "Bakkali",
+        "given": "Abderrahmane"
+      },
+      {
+        "family": "Fakri",
+        "given": "Nadia"
+      },
+      {
+        "family": "Azrar",
+        "given": "Lahcen"
+      },
+      {
+        "family": "Aljinaidi",
+        "given": "Abdulmalik"
+      }
+    ],
+    "year": 2022,
+    "source_pointer": "https://doi.org/10.1016/j.compstruct.2021.114896",
+    "venue": "Composite Structures",
+    "doi": "10.1016/j.compstruct.2021.114896",
+    "tags": [
+      "material",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "zhou2022_enriched",
+    "title": "Evaluation of the transient performance of magneto-electro-elastic based structures with the enriched finite element method",
+    "authors": [
+      {
+        "family": "Zhou",
+        "given": "Liming"
+      },
+      {
+        "family": "Wang",
+        "given": "Jiye"
+      },
+      {
+        "family": "Liu",
+        "given": "Mingrui"
+      },
+      {
+        "family": "Li",
+        "given": "Ming"
+      },
+      {
+        "family": "Chai",
+        "given": "Yingbin"
+      }
+    ],
+    "year": 2022,
+    "source_pointer": "https://doi.org/10.1016/j.compstruct.2021.114888",
+    "venue": "Composite Structures",
+    "doi": "10.1016/j.compstruct.2021.114888",
+    "tags": [
+      "method",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "sladek2013_large_deflection",
+    "title": "The MLPG analyses of large deflections of magnetoelectroelastic plates",
+    "authors": [
+      {
+        "family": "Sladek",
+        "given": "J."
+      },
+      {
+        "family": "Sladek",
+        "given": "V."
+      },
+      {
+        "family": "Krahulec",
+        "given": "S."
+      },
+      {
+        "family": "Pan",
+        "given": "E."
+      }
+    ],
+    "year": 2013,
+    "source_pointer": "https://doi.org/10.1016/j.enganabound.2013.02.001",
+    "venue": "Engineering Analysis with Boundary Elements",
+    "doi": "10.1016/j.enganabound.2013.02.001",
+    "tags": [
+      "benchmark",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "vinyas2018_arrangement",
+    "title": "Investigation of the effect of BaTiO3/CoFe2O4 particle arrangement on the static response of magneto-electro-thermo-elastic plates",
+    "authors": [
+      {
+        "family": "Vinyas",
+        "given": "M."
+      },
+      {
+        "family": "Kattimani",
+        "given": "S.C."
+      }
+    ],
+    "year": 2018,
+    "source_pointer": "https://doi.org/10.1016/j.compstruct.2017.10.073",
+    "venue": "Composite Structures",
+    "doi": "10.1016/j.compstruct.2017.10.073",
+    "tags": [
+      "material",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "kondaiah2012_cantilever",
+    "title": "Studies on magneto-electro-elastic cantilever beam under thermal environment",
+    "authors": [
+      {
+        "family": "Kondaiah",
+        "given": "P."
+      },
+      {
+        "family": "Shankar",
+        "given": "K."
+      },
+      {
+        "family": "Ganesan",
+        "given": "N."
+      }
+    ],
+    "year": 2012,
+    "source_pointer": "https://doi.org/10.12989/csm.2012.1.2.205",
+    "venue": "Coupled Systems Mechanics",
+    "doi": "10.12989/csm.2012.1.2.205",
+    "tags": [
+      "benchmark",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "nan2008_review",
+    "title": "Multiferroic magnetoelectric composites: Historical perspective, status, and future directions",
+    "authors": [
+      {
+        "family": "Nan",
+        "given": "Ce-Wen"
+      },
+      {
+        "family": "Bichurin",
+        "given": "M. I."
+      },
+      {
+        "family": "Dong",
+        "given": "Shuxiang"
+      },
+      {
+        "family": "Viehland",
+        "given": "D."
+      },
+      {
+        "family": "Srinivasan",
+        "given": "G."
+      }
+    ],
+    "year": 2008,
+    "source_pointer": "https://doi.org/10.1063/1.2836410",
+    "venue": "Journal of Applied Physics",
+    "doi": "10.1063/1.2836410",
+    "tags": [
+      "foundation",
+      "FG-MEE"
+    ],
+    "obtained_via": "other",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "adapter_name": "phase2-official-search-and-index-audit",
+    "adapter_version": "1.0",
+    "source_acquired": false,
+    "source_verified_against_original": false,
+    "source_verification_method": "none",
+    "description_source": "secondary_summary",
+    "description_last_audit": "none",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false,
+      "openalex_unmatched": false,
+      "crossref_unmatched": false
+    }
+  },
+  {
+    "citation_key": "zhao2023_dissertation",
+    "title": "磁电弹梯度结构多物理场耦合非线性建模与分析",
+    "authors": [
+      {
+        "family": "赵",
+        "given": "亚飞"
+      }
+    ],
+    "year": 2023,
+    "source_pointer": "file:///G:/fg-meet-workbench/reference/predecessor-code/zhao-yafei/赵亚飞论文最终版.pdf",
+    "venue": "上海大学博士学位论文",
+    "tags": [
+      "dissertation",
+      "FG-MEE",
+      "porous_shell",
+      "bidirectional"
+    ],
+    "obtained_via": "manual",
+    "obtained_at": "2026-07-15T14:30:00+08:00",
+    "source_acquired": true,
+    "source_acquisition_date": "2026-07-15T14:30:00+08:00",
+    "source_acquisition_path": "reference/predecessor-code/zhao-yafei/赵亚飞论文最终版.pdf",
+    "source_verified_against_original": true,
+    "source_verification_method": "vision_check",
+    "description_source": "original_pdf",
+    "description_last_audit": "phase2-20260715",
+    "contamination_signals": {
+      "preprint_post_llm_inflection": false
+    }
+  }
+]

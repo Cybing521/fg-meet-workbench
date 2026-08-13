@@ -2,7 +2,18 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+VENDORED = ROOT / "tmp" / "plot_pydeps"
+if VENDORED.is_dir():
+    sys.path.insert(0, str(VENDORED))
+
+import matplotlib as mpl
+
+mpl.use("Agg")
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -17,7 +28,6 @@ from scimplstyle_mssp import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "outputs" / "paper-20260715-fgmee"
 FIG_DIR = BASE / "figures"
 ISO = BASE / "experiments" / "isomorphic_solid"
@@ -40,7 +50,7 @@ def isomorphic_figure() -> list[Path]:
     fig, axes = plt.subplots(1, 3, figsize=figure_size("double", 0.34))
     cases = [
         ("electric_equivalent_stress", axes[0], "Electric-equivalent stress", "center dis. (mm)"),
-        ("magnetic_external_stress", axes[1], "Magnetic external stress", "center dis. (mm)"),
+        ("magnetic_external_stress", axes[1], "Magnetic-equivalent stress", "center dis. (mm)"),
     ]
     for i, (case, ax, title, ylabel) in enumerate(cases):
         d = data[data["load_case"] == case].sort_values("inplane_divisions")

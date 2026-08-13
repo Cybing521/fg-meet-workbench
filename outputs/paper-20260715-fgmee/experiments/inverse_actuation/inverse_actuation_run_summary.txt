@@ -1,0 +1,10 @@
+status=PASS
+mode=magnetic
+target_mm=0.5
+load_basis=matlab
+inplane_divisions=20
+thickness_divisions_per_layer=10
+matlab_electric_disp_at_300V_mm=0.0522570949262148
+comsol_electric_disp_at_300V_mm=0.0578865884889029
+matlab_magnetic_disp_at_200A_mm=0.174585747179692
+comsol_magnetic_disp_at_200A_mm=0.190766216387104

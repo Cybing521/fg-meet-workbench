@@ -1,0 +1,226 @@
+\documentclass[UTF8,fontset=windows,11pt,a4paper]{ctexart}
+\usepackage[margin=2.25cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,tabularx,longtable,array}
+\usepackage{xcolor,enumitem,fancyhdr,hyperref,xurl,float}
+\setCJKmonofont{SimSun}
+\definecolor{ok}{RGB}{25,120,70}
+\definecolor{pending}{RGB}{190,105,10}
+\definecolor{bad}{RGB}{180,35,45}
+\definecolor{blue}{RGB}{35,75,130}
+\definecolor{shade}{RGB}{245,247,250}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,pdfauthor={FG-MEE validation workbench},pdftitle={FG-MEE Stage 2 numerical closure report}}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{FG-MEE 数值闭环阶段报告}
+\rhead{2026-07-15}
+\cfoot{\thepage}
+\setlength{\headheight}{15pt}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.3em}
+\renewcommand{\arraystretch}{1.18}
+\newcommand{\pass}{\textcolor{ok}{\textbf{完成}}}
+\newcommand{\wait}{\textcolor{pending}{\textbf{待闭合}}}
+\newcommand{\failure}{\textcolor{bad}{\textbf{失败}}}
+\title{\textbf{FG-MEE 板双向耦合数值闭环阶段报告}\\[0.35em]\large MATLAB 三工况复算、基线漂移审计与独立 COMSOL 直驱网格验证}
+\author{FG-MEE 组会验证工作台}
+\date{2026年7月15日}
+
+\begin{document}
+\maketitle
+\begin{center}
+\fcolorbox{blue}{shade}{
+\begin{minipage}{0.92\textwidth}
+\textbf{阶段结论。}
+当前 MATLAB 基线的 0.5、1.0、2.0 mm 反向感知结果在数值精度内严格线性；固定 300 V 与 200 A 正向探针分别得到 $-0.052257$ mm 与 $+0.174586$ mm。旧 2 mm 快照与当前绝对量差异已定位为 2026-05-22 前后的代码/案例基线漂移。新电、磁直驱模型现均可端到端运行并自动导出结果；10×10、15×15、20×20 三档网格全部完成，15×15 到 20×20 的主位移变化分别为 $0.2811\%$ 与 $0.1736\%$，通过 $0.5\%$ 网格门槛。但 20×20 结果相对 MATLAB 仍偏差 $10.7727\%$ 与 $9.2679\%$，故运行闭环已经完成，$1\%$ 交叉精度门槛尚未通过。
+\end{minipage}}
+\end{center}
+
+\tableofcontents
+\newpage
+
+\section{验证目标与判据}
+本阶段针对组会提出的三个核心问题推进：其一，MATLAB 当前基线能否稳定复现；其二，0.5--2.0 mm 位移下电势、磁势是否符合线性缩放；其三，300 V 与 200 A 正向工况能否由独立 COMSOL 场变量模型交叉验证。主判据为符号一致、求解正常结束、主位移相对差优先进入 $1\%$；网格变化目标为 $0.5\%$。任何求解前错误均不计为数值结果。
+
+\section{材料与工况护照}
+\begin{table}[H]
+\centering
+\caption{冻结的 CFFF 基准工况}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+项目 & 冻结值 \\
+\midrule
+几何 & $300\,\mathrm{mm}\times300\,\mathrm{mm}\times6\,\mathrm{mm}$，10 层，每层 $0.6\,\mathrm{mm}$ \\
+边界 & CFFF，$x=0$ 整侧固支 \\
+材料 & $E=1.206\times10^{11}\,\mathrm{Pa}$，$\nu=0.3398$，$G=4.5\times10^{10}\,\mathrm{Pa}$ \\
+压电系数 & $d_{31}=d_{32}=-5.404\times10^{-11}\,\mathrm{C/N}$ \\
+压磁系数 & $q_{31}=q_{32}=49.47\,\mathrm{N/(A\,m)}$ \\
+介电/磁参数 & $g_{33}=9.203\times10^{-9}\,\mathrm{F/m}$，$k_{33}=1.755\times10^{-8}\,\mathrm{H/m}$ \\
+正向探针 & 外层 300 V 与 200 A，输出中心位移 \\
+反向工况 & 中心位移绝对值 0.5、1.0、2.0 mm，输出电势与磁势跨度 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{MATLAB 三个位移工况}
+\begin{table}[H]
+\centering
+\caption{当前基线的反向感知结果}
+\small
+\begin{tabular}{rrrrr}
+\toprule
+$|w_c|$ / mm & 电势跨度 & 磁势跨度 & 电势/mm & 磁势/mm \\
+\midrule
+0.5 & 164.646372 & 0.170392625 & 329.292745 & 0.340785250 \\
+1.0 & 329.292745 & 0.340785250 & 329.292745 & 0.340785250 \\
+2.0 & 658.585490 & 0.681570500 & 329.292745 & 0.340785250 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+电势的倍增残差不超过 $1.02\times10^{-12}$，磁势残差不超过 $9.99\times10^{-16}$。三次运行中的固定探针也完全一致：
+\[
+w_c(300\,\mathrm{V})=-0.052257\,\mathrm{mm},\qquad
+w_c(200\,\mathrm{A})=+0.174586\,\mathrm{mm}.
+\]
+这证明当前 MATLAB 基线在所测范围内确定且线性，但并不等价于独立 COMSOL 验证完成。
+
+\subsection{数值合理性边界}
+将目标位移从 2 mm 调到 0.5 mm 后，感生电势从 658.59 降到 164.65，已避开上万伏量级；感生磁势则仅为 0.1704，2 mm 时也只有 0.6816。该磁势绝对量仍明显低于组会中引用的前人“一两百”量级，因此必须核对前人所用输出定义、参考势和工况，不能仅凭线性良好就判断物理量级正确。
+
+\section{旧快照版本漂移}
+旧 2 mm CSV 与当前文件 SHA-256 不同。旧文件生成时间早于案例文件与 \nolinkurl{matlab/run_meet_static.m} 在提交 \texttt{2f46b54} 中的变更时间。两版主要差异如下。
+
+\begin{table}[H]
+\centering
+\caption{旧快照与当前 2 mm 基线比较}
+\small
+\begin{tabular}{lrrr}
+\toprule
+指标 & 旧值 & 当前值 & 当前/旧 \\
+\midrule
+2 mm 电驱动 / V & 90075.3299 & 11481.6945 & 0.127468 \\
+2 mm 磁驱动 / A & 17974.2625 & 2291.1378 & 0.127468 \\
+2 mm 感生电势 & 3882.7921 & 658.5855 & 0.169616 \\
+2 mm 感生磁势 & 4.018304 & 0.681571 & 0.169616 \\
+$M\!\to\!w\!\to\!E$ 归一化系数 & 0.590534615 & 0.590534615 & 1.000000000002 \\
+$E\!\to\!w\!\to\!M$ 归一化系数 & 0.000121952078 & 0.000121952078 & 1.000000000010 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+绝对量变化具有同方向、同尺度的系统性，而归一化串联传递系数保持到数值精度，故应归类为版本基线漂移。旧快照不得直接参与当前误差统计。
+
+\section{旧 COMSOL 模型独立性审计}
+对两个 6.2 保存的 CFFF 模型进行只读容器审计，结果如下。
+
+\begin{table}[H]
+\centering
+\caption{旧模型的实际物理实现}
+\small
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+模型 & 实际载荷 & 独立性判断 \\
+\midrule
+电模型 & 成对 $\pm4.934$ MPa 随动压力；只有 Ground，无非零 ElectricPotential & 仅等效载荷辅助复核 \\
+磁模型 & 成对 $\pm16.49$ MPa 随动压力；仍为固体+静电+压电，无磁场接口 & 不能称 200 A 直接验证 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+这些压力可由案例本构参数还原：
+\[
+dC\frac{300\,\mathrm{V}}{0.6\,\mathrm{mm}}\approx4.934\,\mathrm{MPa},\qquad
+q\frac{200\,\mathrm{A}}{0.6\,\mathrm{mm}}=16.49\,\mathrm{MPa}.
+\]
+因此旧模型并非任意调参，但它与 MATLAB 共享同一换算链，无法排除共享理解错误。
+
+\section{新独立模型、端到端执行与网格收敛}
+新电模型直接设置两外层电极电势，并调用固体力学、静电和压电效应；新磁模型在两外层直接求解归一化磁标势拉普拉斯场，由
+\[
+H_z=-\frac{\partial V_m}{\partial z},\qquad
+\sigma^{m}_{xx}=-q_{31}H_z,\quad \sigma^{m}_{yy}=-q_{32}H_z
+\]
+进入结构本构，不施加预计算面压力。两份 Java/API 驱动均已编译并完成正式求解。
+
+300 V 电模型前两次启动后，COMSOL 日志均报告“选择 \texttt{sel\_bottom\_outer} 的几何实体层错误”，且均未生成 summary CSV。虽然系统进程返回 0，仍必须按日志判定为\failure。
+
+第二次失败模型的内部定义证明，\texttt{sel\_bottom\_outer} 本身是合法二维边界；真正冲突来自 \texttt{sel\_outer\_electrodes}：创建 Union 时没有设置实体维度，COMSOL 将其默认成三维域选择，却接收二维边界输入。异常发生在求取 Union 计数时，尚未进入材料、物理场和网格构建，因而第一次仅修改网格引用没有生效。
+
+经确认的第三次运行成功输出固定面 10 个边界、上下外层各 1 个域、内外电极各 2 个面，证明 Union 修正生效；随后 COMSOL 报告“不可编辑选择”。失败模型的最后历史操作与源代码顺序共同表明，问题来自试图修改默认 \texttt{lemm1} 的域选择。COMSOL 6.0 中该默认节点继承固体力学物理场选择，不可直接编辑。现已删除该操作，让外层压电材料模型通过覆盖机制接管外层，内八层继续使用默认线弹性模型。
+
+经确认的第四次运行完成了 22,500 个扫掠六面体单元、492,969 个自由度的方程编译并开始稳态矩阵组装，随后报告默认“电荷守恒 1”缺少 \texttt{epsilonr}。这表明静电接口仍覆盖了内八个纯结构层。将 Electrostatics 限制到上下两个外压电层后，第五次运行完成 340,170 自由度线性求解，仅在恰落于外层/内层界面的电势插值点发生域归属歧义。使用已保存解将插值点向外层偏移 $10^{-9}$ m，恢复中心位移 $-0.0580492827$ mm。相同修正进入正式驱动后，第六次从头运行无错误，自动导出 $-0.0580492820$ mm。
+
+200 A 磁模型首次正式运行即完成，15×15 网格得到中心位移 $0.1904350676$ mm、外层磁场 $H_z=\pm3.333333\times10^5$ A/m 和磁致应力 $\mp16.49$ MPa，证明磁标势、场梯度和本构应力链均按预期工作。随后完成两条链路的三档网格检查。
+
+\begin{table}[H]
+\centering
+\caption{独立 COMSOL 三档网格与 MATLAB 交叉误差}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+链路 & 10×10 / mm & 15×15 / mm & 20×20 / mm & 15→20 变化 & 对 MATLAB 偏差 \\
+\midrule
+300 V 电致位移 & -0.0584219031 & -0.0580492820 & -0.0578865885 & 0.2811\% & 10.7727\% \\
+200 A 磁致位移 &  0.1900171605 &  0.1904350676 &  0.1907662164 & 0.1736\% &  9.2679\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+六个正式网格日志均无错误，六份 summary CSV 的状态均为 \texttt{completed}。两条链路已通过 $0.5\%$ 网格变化门槛，但没有通过 $1\%$ MATLAB--COMSOL 一致性门槛。继续细化网格不会解释仍稳定存在的 $9\%$--$11\%$ 差异；下一步必须审计 MATLAB 板壳广义势与 COMSOL 三维外层场/本构应力的定义口径。
+
+\section{阶段门槛与论文表述}
+\begin{table}[H]
+\centering
+\caption{当前验证门槛}
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+编号 & 内容 & 状态 \\
+\midrule
+1 & 力致位移主链路，论文同口径主点进入 $1\%$ & \pass \\
+2 & MATLAB 0.5/1/2 mm 反向链路线性与复现性 & \pass \\
+3 & 300 V 电势直接 COMSOL：运行、场量与网格收敛 & \pass \\
+  & 300 V 电势直接 COMSOL：对 MATLAB 进入 $1\%$ & \failure \\
+4 & 200 A 磁势直接 COMSOL：运行、场量与网格收敛 & \pass \\
+  & 200 A 磁势直接 COMSOL：对 MATLAB 进入 $1\%$ & \failure \\
+5 & 位移到开路电势/磁势的独立 COMSOL 反向验证 & \wait \\
+6 & 翘曲与功能梯度创新工况 & 基线闭环后开展 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+当前可以写“MATLAB 当前基线在 0.5--2.0 mm 内严格线性；独立 COMSOL 电/磁直驱模型运行正常且达到网格收敛”；不能写“MATLAB 与 COMSOL 电/磁链误差已接近零”或“反向磁势绝对量已验证正确”。
+
+\section{后续必要动作}
+\begin{enumerate}[label=\arabic*.]
+\item 逐项核对 MATLAB 板壳广义电/磁势定义与 COMSOL 三维外层场、本构应力和中心位移提取口径，解释 $9\%$--$11\%$ 系统差异；不得通过参数缩放强行追平；
+\item 建立位移到开路电势/磁势的独立反向模型，冻结参考势和位移边界；
+\item 对照钱沈云、赵亚飞同工况原始定义，解释磁势量级差异；
+\item 精度与量级闭环后再开展翘曲和功能梯度参数研究。
+\end{enumerate}
+
+\section{可复现证据}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.64\textwidth}}
+\toprule
+证据 & 路径 \\
+\midrule
+\endfirsthead
+\toprule
+证据 & 路径 \\
+\midrule
+\endhead
+三工况 CSV/MAT/日志 & \nolinkurl{outputs/paper-20260715-fgmee/experiments/results/} \\
+版本漂移对照 & \nolinkurl{outputs/paper-20260715-fgmee/experiments/current_baseline_vs_legacy.csv} \\
+旧模型审计 & \nolinkurl{outputs/paper-20260715-fgmee/experiments/model_preflight_inventory.csv} \\
+完整预检与命令 & \nolinkurl{outputs/paper-20260715-fgmee/experiments/stage2_preflight_audit.md} \\
+电直驱代码 & \nolinkurl{tools/comsol/RunDirectElectroCfffValidation.java} \\
+磁直驱代码 & \nolinkurl{tools/comsol/RunDirectMagneticCfffValidation.java} \\
+三档网格汇总 & \nolinkurl{outputs/paper-20260715-fgmee/experiments/direct_comsol_mesh_validation.csv} \\
+电模型最终汇总 & \nolinkurl{outputs/paper-20260715-fgmee/experiments/comsol/comsol_direct_electro_300V_20x20x10_summary.csv} \\
+磁模型最终汇总 & \nolinkurl{outputs/paper-20260715-fgmee/experiments/comsol/comsol_direct_magnetic_200A_20x20x10_summary.csv} \\
+正式求解日志目录 & \nolinkurl{outputs/paper-20260715-fgmee/experiments/comsol/} \\
+\bottomrule
+\end{longtable}
+
+\subsection*{AI 使用说明}
+本报告由 AI 辅助核查本地代码、模型容器和实验日志，并生成 LaTeX 文档。所有数值结论都绑定到列出的本地证据；独立 COMSOL 直驱结果仅证明运行与网格闭合，$1\%$ 交叉精度未通过，不作近零误差结论。
+\end{document}

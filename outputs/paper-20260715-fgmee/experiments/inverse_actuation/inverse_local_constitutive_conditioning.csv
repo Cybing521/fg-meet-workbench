@@ -1,0 +1,2 @@
+c11_Pa,c12_Pa,e31_C_per_m2,g_effective,k33,r33,determinant,normalized_coupling_rho,dimensionless_condition_number,verdict
+136342676220.87405,46329241379.853004,-9.87159042714329,8.136078506634354e-09,1.755e-08,7.536e-05,6.128268737599648e-13,0.02241295456018969,1.0458536243186534,well_conditioned_after_unit_scaling

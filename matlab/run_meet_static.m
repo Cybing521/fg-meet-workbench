@@ -15,7 +15,6 @@ function result = run_meet_static(caseFile, loadCase, varargin)
     addParameter(p, 'Magnetic', 200, @isnumeric);
     addParameter(p, 'OutTag', '', @(x) ischar(x) || isstring(x));
     addParameter(p, 'SolveSensors', true, @(x) islogical(x) || isnumeric(x));
-    addParameter(p, 'CorrectPyroAssembly', true, @(x) islogical(x) || isnumeric(x));
     addParameter(p, 'UseCache', true, @(x) islogical(x) || isnumeric(x));
     addParameter(p, 'Quiet', true, @(x) islogical(x) || isnumeric(x));
     parse(p, caseFile, loadCase, varargin{:});
@@ -58,7 +57,7 @@ function result = run_meet_static(caseFile, loadCase, varargin)
     Theory = 4;
     ThermalNL = 0;
 
-    [GlobMatr, FinitElemInfo] = assemble_static_case(InputFile, OutputFile, UsedDataFile, ...
+    [GlobMatr, FinitElemInfo, MateProp] = assemble_static_case(InputFile, OutputFile, UsedDataFile, ...
         IsANS, DampRatio, IntegSchem, ThermalNL, p.Results.UseCache, p.Results.Quiet);
 
     KuuT = GlobMatr.KuuT;
@@ -79,18 +78,12 @@ function result = run_meet_static(caseFile, loadCase, varargin)
 
     FinalDofM = size(KuuT, 1);
     FinalDofMEE = size(KttT, 1);
-    nLayer = count_material_layers(caseFile);
-    if nLayer < 1
-        nLayer = 10;
-    end
-    % The bundled element routine fills the full PE/PM diagonal during
-    % every physical-layer call.  Assembly therefore repeats Kft/Kzt once
-    % per layer.  Correct the duplicated pyro-electric/pyro-magnetic block
-    % here while retaining an explicit legacy switch for reproducibility.
-    if p.Results.CorrectPyroAssembly
-        KftT = KftT / nLayer;
-        KztT = KztT / nLayer;
-    end
+    layerDofMap = build_active_layer_dof_map(FinitElemInfo, MateProp, FinalDofMEE);
+    nPhysicalLayer = layerDofMap.num_physical_layers;
+    nActiveMaterialLayer = layerDofMap.num_active_material_layers;
+    % Pyroelectric and pyromagnetic terms are assembled layer-locally by
+    % SF_GetMatePropMEEP/SF_ElemComptLIN851T5MEEP_V4. No global scaling is
+    % valid for nonuniform or partially active layer stacks.
 
     PhiaMT = zeros(FinalDofMEE, 1);
     MgaT = zeros(FinalDofMEE, 1);
@@ -104,10 +97,8 @@ function result = run_meet_static(caseFile, loadCase, varargin)
             activeMagnetic = p.Results.Magnetic;
     end
 
-    PhiaMT(nLayer:nLayer:FinalDofMEE) = activeVolt;
-    PhiaMT(1:nLayer:FinalDofMEE) = -activeVolt;
-    MgaT(nLayer:nLayer:FinalDofMEE) = activeMagnetic;
-    MgaT(1:nLayer:FinalDofMEE) = -activeMagnetic;
+    PhiaMT = apply_element_boundary_values(PhiaMT, layerDofMap, activeVolt);
+    MgaT = apply_element_boundary_values(MgaT, layerDofMap, activeMagnetic);
 
     FueT = FusT * loadmax;
     FuaT = -KufMT * PhiaMT;
@@ -116,35 +107,52 @@ function result = run_meet_static(caseFile, loadCase, varargin)
 
     AA = [KuuT, KutT; KtuT, KttT];
     BB = [FueT + FuaT + FumT; FutT];
+    lastwarn('');
     CC = AA \ BB;
+    [mechanicalThermalWarning, mechanicalThermalWarningId] = lastwarn();
+    assert_finite_solution(CC, 'mechanical-thermal');
+    [mechanicalThermalRelativeResidual, mechanicalThermalBackwardError] = ...
+        linear_solve_residuals(AA, CC, BB);
+    mechanicalThermalRcondEstimate = reciprocal_condition_estimate(AA);
     Qd = CC(1:FinalDofM);
     TQd = restore_mechanical_dof(FinitElemInfo.Node, Qd);
     SensM_T = CC(FinalDofM+1:end);
     SensM_E = nan(FinalDofMEE, 1);
     SensM_M = nan(FinalDofMEE, 1);
+    sensorStatus = 'not_requested';
+    sensorRelativeResidual = NaN;
+    sensorBackwardError = NaN;
+    sensorRcondEstimate = NaN;
+    sensorWarning = '';
+    sensorWarningId = '';
 
     if p.Results.SolveSensors
-        try
-            if ~isempty(KffMT) && ~isempty(KzzT)
-                AA_MEE = [KffMT, KfzT; KzfT, KzzT];
-                BB_MEE = [-KfuMT * Qd - KftT * SensM_T; -KzuT * Qd - KztT * SensM_T];
-                CC_MEE = AA_MEE \ BB_MEE;
-                SensM_E = CC_MEE(1:FinalDofMEE);
-                SensM_M = CC_MEE(FinalDofMEE+1:end);
-            end
-        catch ME
-            warning('run_meet_static:SensorSolveFailed', ...
-                'Electric/magnetic sensor solve failed: %s', ME.message);
+        if isempty(KffMT) || isempty(KzzT)
+            error('run_meet_static:MissingSensorMatrices', ...
+                'SolveSensors=true requires nonempty electric and magnetic matrices.');
         end
+        AA_MEE = [KffMT, KfzT; KzfT, KzzT];
+        BB_MEE = [-KfuMT * Qd - KftT * SensM_T; -KzuT * Qd - KztT * SensM_T];
+        lastwarn('');
+        CC_MEE = AA_MEE \ BB_MEE;
+        [sensorWarning, sensorWarningId] = lastwarn();
+        assert_finite_solution(CC_MEE, 'electric-magnetic sensor');
+        [sensorRelativeResidual, sensorBackwardError] = ...
+            linear_solve_residuals(AA_MEE, CC_MEE, BB_MEE);
+        sensorRcondEstimate = reciprocal_condition_estimate(AA_MEE);
+        SensM_E = CC_MEE(1:FinalDofMEE);
+        SensM_M = CC_MEE(FinalDofMEE+1:end);
+        sensorStatus = 'ok';
     end
 
     coordinateBlock = FinitElemInfo.Node(:, 2:4);
     targetCenter = (min(coordinateBlock, [], 1) + max(coordinateBlock, [], 1)) / 2;
     centerIdx = find_nearest_node(FinitElemInfo.Node, targetCenter);
-    wCenter = TQd(5 * (centerIdx - 1) + 3);
-    thetaLayers = average_by_layer(SensM_T, nLayer);
-    electricLayers = average_by_layer(SensM_E, nLayer);
-    magneticLayers = average_by_layer(SensM_M, nLayer);
+    [wCenter, centerProbe] = interpolate_shell_dof_at_point( ...
+        FinitElemInfo.Node, FinitElemInfo.Element, TQd, targetCenter, 3, 5);
+    thetaLayers = average_by_physical_layer(SensM_T, layerDofMap);
+    electricLayers = average_by_physical_layer(SensM_E, layerDofMap);
+    magneticLayers = average_by_physical_layer(SensM_M, layerDofMap);
     electricSpan = span_value(electricLayers);
     magneticSpan = span_value(magneticLayers);
     thetaSpan = span_value(thetaLayers);
@@ -159,9 +167,9 @@ function result = run_meet_static(caseFile, loadCase, varargin)
     result.wCenter_m = wCenter;
     result.wCenter_mm = wCenter * 1000;
     result.theta_layers = thetaLayers;
-    result.theta_mean_K = mean(thetaLayers);
-    result.theta_min_K = min(thetaLayers);
-    result.theta_max_K = max(thetaLayers);
+    result.theta_mean_K = mean(thetaLayers, 'omitnan');
+    result.theta_min_K = min(thetaLayers, [], 'omitnan');
+    result.theta_max_K = max(thetaLayers, [], 'omitnan');
     result.theta_span_K = thetaSpan;
     result.electric_layers = electricLayers;
     result.magnetic_layers = magneticLayers;
@@ -171,11 +179,43 @@ function result = run_meet_static(caseFile, loadCase, varargin)
     result.loadScale = loadmax;
     result.volt = activeVolt;
     result.magnetic = activeMagnetic;
-    result.nLayer = nLayer;
-    result.correct_pyro_assembly = logical(p.Results.CorrectPyroAssembly);
+    result.nLayer = nPhysicalLayer;
+    result.nPhysicalLayer = nPhysicalLayer;
+    result.nActiveMaterialLayer = nActiveMaterialLayer;
+    result.active_layer_dof_count = FinalDofMEE;
+    result.active_layer_dof_map = layerDofMap;
+    result.correct_pyro_assembly = true;
+    result.pyro_assembly_mode = 'layer_local';
+    result.solver_revision = 'layer_local_pyro_v3';
+    result.solve_status = 'ok';
+    result.sensor_status = sensorStatus;
+    result.coupling_sequence = 'simultaneous_u_T_then_simultaneous_phi_psi';
+    result.mechanical_thermal_relative_residual = mechanicalThermalRelativeResidual;
+    result.mechanical_thermal_backward_error = mechanicalThermalBackwardError;
+    result.mechanical_thermal_rcond_estimate = mechanicalThermalRcondEstimate;
+    result.mechanical_thermal_warning = mechanicalThermalWarning;
+    result.mechanical_thermal_warning_id = mechanicalThermalWarningId;
+    result.sensor_relative_residual = sensorRelativeResidual;
+    result.sensor_backward_error = sensorBackwardError;
+    result.sensor_rcond_estimate = sensorRcondEstimate;
+    result.sensor_warning = sensorWarning;
+    result.sensor_warning_id = sensorWarningId;
+    result.observable_definition = ...
+        'max_minus_min_of_physical_layer_average_active_MEE_dofs';
+    result.boundary_definition = struct( ...
+        'mechanical', 'input_node_flags; bundled CFFF fixes all five shell DOFs on x=0', ...
+        'pressure', 'FusT multiplied by LoadScale as uniform transverse surface pressure', ...
+        'actuation_potential', ['per element: first retained active-layer DOF=-amplitude, ' ...
+            'last=+amplitude; one retained layer uses zero gauge'], ...
+        'sensor', ['zero external electric charge and magnetic flux right-hand sides; ' ...
+            'layer-local open-circuit algebraic solve'], ...
+        'temperature', 'reciprocal algebraic temperature DOF solved in the u-T block', ...
+        'probe', centerProbe.method);
     result.centerNodeId = FinitElemInfo.Node(centerIdx, 1);
     result.centerCoord = FinitElemInfo.Node(centerIdx, 2:4);
     result.centerTargetCoord = targetCenter;
+    result.centerProbe = centerProbe;
+    result.centerProbeMethod = centerProbe.method;
     result.timestamp = datestr(now);
 
     tag = char(p.Results.OutTag);
@@ -216,36 +256,34 @@ function nodeIndex = find_nearest_node(Node, targetCoord)
     [~, nodeIndex] = min(sum(diff .^ 2, 2));
 end
 
-function nLayer = count_material_layers(caseFile)
-    nLayer = 0;
-    raw = fileread(caseFile);
-    startTok = 'MATERIAL START';
-    endTok = 'MATERIAL END';
-    i0 = strfind(raw, startTok);
-    i1 = strfind(raw, endTok);
-    if isempty(i0) || isempty(i1)
+function values = average_by_physical_layer(vec, layerDofMap)
+    values = nan(layerDofMap.num_physical_layers, 1);
+    if isempty(vec)
         return;
     end
-    block = raw(i0(1) + length(startTok):i1(1) - 1);
-    lines = splitlines(block);
-    for i = 1:numel(lines)
-        t = strtrim(lines{i});
-        if ~isempty(regexp(t, '^\d', 'once'))
-            nLayer = nLayer + 1;
+    for i = 1:layerDofMap.num_physical_layers
+        layerVals = vec(layerDofMap.physical_layer_by_dof == i);
+        layerVals = layerVals(~isnan(layerVals));
+        if ~isempty(layerVals)
+            values(i) = mean(layerVals);
         end
     end
 end
 
-function values = average_by_layer(vec, nLayer)
-    values = nan(nLayer, 1);
-    if isempty(vec) || nLayer < 1
-        return;
-    end
-    for i = 1:nLayer
-        layerVals = vec(i:nLayer:end);
-        layerVals = layerVals(~isnan(layerVals));
-        if ~isempty(layerVals)
-            values(i) = mean(layerVals);
+function values = apply_element_boundary_values(values, layerDofMap, amplitude)
+    for elementIndex = 1:numel(layerDofMap.first_dof_by_element)
+        firstDof = layerDofMap.first_dof_by_element(elementIndex);
+        lastDof = layerDofMap.last_dof_by_element(elementIndex);
+        if isnan(firstDof)
+            continue;
+        end
+        if firstDof == lastDof
+            % One retained layer has no independent top/bottom potential
+            % difference in this layer-constant DOF model; zero is its gauge.
+            values(firstDof) = 0;
+        else
+            values(firstDof) = -amplitude;
+            values(lastDof) = amplitude;
         end
     end
 end
@@ -259,9 +297,33 @@ function s = span_value(vec)
     end
 end
 
-function [GlobMatr, FinitElemInfo] = assemble_static_case(InputFile, OutputFile, UsedDataFile, ...
+function assert_finite_solution(solution, label)
+    if any(~isfinite(solution))
+        error('run_meet_static:NonFiniteSolution', ...
+            '%s solve returned NaN or Inf.', label);
+    end
+end
+
+function [relativeResidual, backwardError] = linear_solve_residuals(A, x, b)
+    residual = A * x - b;
+    residualNorm = norm(residual, 2);
+    relativeResidual = residualNorm / max(norm(b, 2), eps);
+    backwardDenominator = norm(A, 'fro') * norm(x, 2) + norm(b, 2);
+    backwardError = residualNorm / max(backwardDenominator, eps);
+end
+
+function estimate = reciprocal_condition_estimate(A)
+    conditionEstimate = condest(A);
+    estimate = 1 / conditionEstimate;
+    if isnan(estimate)
+        error('run_meet_static:ConditionEstimateFailed', ...
+            'condest returned NaN for a solved system.');
+    end
+end
+
+function [GlobMatr, FinitElemInfo, MateProp] = assemble_static_case(InputFile, OutputFile, UsedDataFile, ...
     IsANS, DampRatio, IntegSchem, ThermalNL, useCache, quietMode)
-    persistent lastCacheKey lastGlobMatr lastFinitElemInfo
+    persistent lastCacheKey lastGlobMatr lastFinitElemInfo lastMateProp
 
     info = dir(InputFile);
     if isempty(info)
@@ -274,15 +336,16 @@ function [GlobMatr, FinitElemInfo] = assemble_static_case(InputFile, OutputFile,
         if strcmp(lastCacheKey, cacheKey)
             GlobMatr = lastGlobMatr;
             FinitElemInfo = lastFinitElemInfo;
+            MateProp = lastMateProp;
             fprintf('Reused assembled matrices for %s\n', InputFile);
             return;
         end
     end
 
     if quietMode
-        evalc('[GlobMatr, FinitElemInfo, ~] = Main_FOSDLIN851T5MEET_V4(InputFile, OutputFile, UsedDataFile, IsANS, DampRatio, IntegSchem, ThermalNL);');
+        evalc('[GlobMatr, FinitElemInfo, MateProp] = Main_FOSDLIN851T5MEET_V4(InputFile, OutputFile, UsedDataFile, IsANS, DampRatio, IntegSchem, ThermalNL);');
     else
-        [GlobMatr, FinitElemInfo, ~] = Main_FOSDLIN851T5MEET_V4( ...
+        [GlobMatr, FinitElemInfo, MateProp] = Main_FOSDLIN851T5MEET_V4( ...
             InputFile, OutputFile, UsedDataFile, IsANS, DampRatio, IntegSchem, ThermalNL);
     end
 
@@ -290,5 +353,6 @@ function [GlobMatr, FinitElemInfo] = assemble_static_case(InputFile, OutputFile,
         lastCacheKey = cacheKey;
         lastGlobMatr = GlobMatr;
         lastFinitElemInfo = FinitElemInfo;
+        lastMateProp = MateProp;
     end
 end

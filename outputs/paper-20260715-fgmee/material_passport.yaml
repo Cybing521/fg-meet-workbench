@@ -1,0 +1,307 @@
+origin_skill: deep-research
+origin_mode: full
+origin_date: "2026-07-15T10:51:58+08:00"
+verification_status: UNVERIFIED
+version_label: research_v1
+content_hash: 30248107FACAADB42830E0989AAC4AEA6175F94F0C6D50379E3AB537BD8603D9
+upstream_dependencies:
+  - force_displacement_validation_20260714
+  - five_point_validation_20260612
+  - paper_main_zh_existing
+repro_lock: null
+slr_lineage: false
+experiment_intake_declaration:
+  status: experiments_declared
+  declared_at: "2026-07-15T10:51:58+08:00"
+  declared_by: scholar
+experiment_provenance:
+  - experiment_id: exp-existing-baseline
+    title: Existing FG-MEE flat-plate validation and parameter sweeps
+    description: Existing MATLAB and COMSOL evidence brought into the full paper pipeline at intake.
+    repro_lock:
+      schema_version: "1.0"
+      stochasticity_declaration: deterministic finite-element simulations; floating-point and solver-version sensitivity remain possible
+      ars_version: "0.1.12"
+      model:
+        family: deterministic-multiphysics-simulation
+        id: MATLAB-R2026a-plus-COMSOL-6.0
+        weight_stable: true
+      prompts:
+        hash_timing: skill-load
+        skill_md_hash: 9843FB5F5954FA1DC307A20B96AB15BF88D06B8A01FC1585ABB9085631973A57
+        agents_bundle_hash: 03063B0E871AD4A4F1CC00A62B01E533A39352EAD14BD08AD2D2014096E36973
+      materials:
+        list_hash: AE8DA9F256F2D9890115238DCFB2C60E0812476F63768A92AAD52DD674B8FB36
+        count: 6
+      external_protocols:
+        s2_api_protocol_version: not-used-at-intake
+        s2_snapshot_available: false
+      cross_model:
+        enabled: false
+        secondary_model_id: null
+    planned_vs_executed:
+      - planned: Mechanical force-to-displacement MATLAB-COMSOL validation
+        executed: true
+        result_file: outputs/manual-20260714-fgmeet-validation/latex-report/force_displacement_validation_20260714.tex
+        metric: free-end midpoint relative error
+        value: 0.710707 percent
+      - planned: 300 V and 200 A forward-actuation comparison against Qian paper tables
+        executed: true
+        result_file: outputs/manual-20260611-fgmeet/electro-magneto-validation/electro_magneto_next_validation.md
+        metric: primary displacement relative difference
+        value: 0.08 to 0.92 percent
+      - planned: Displacement-to-field same-case predecessor-code rerun
+        executed: true
+        result_file: outputs/manual-20260611-fgmeet/electro-magneto-validation/displacement_to_field_recalibrated_check.md
+        metric: layer-average span difference
+        value: approximately 1E-12 absolute difference
+      - planned: Dense and porous flat-plate parameter sweeps
+        executed: true
+        result_file: output/results_static_porous.csv
+        metric: completed static rows
+        value: 390
+    negative_results:
+      - description: The 45x45 follower-pressure fully coupled COMSOL case exceeded available memory during the second nonlinear assembly and is not used as a numerical result.
+        result_file: output/comsol_elastic_validation_stage1_qian_thermal_piezo_follower_mapped45x45x10_20260714.log
+      - description: Existing porous representative 3D-solid COMSOL comparisons exceed the earlier 5 percent target at some points and remain a formulation-review item.
+        result_file: output/results_static_porous.csv
+    known_limitations:
+      - description: The existing inverse-sensing evidence is a predecessor-code rerun, not a direct paper-table or independent COMSOL validation.
+      - description: The existing paper draft uses an older 5 percent mechanical-validation narrative and must be updated to the 2026-07-14 frozen baseline.
+  - experiment_id: exp-paper-closure-20260715
+    title: Independent electric-magnetic validation and curvature-gradient closure experiments
+    description: Planned experiments required to close the small-paper evidence chain.
+    repro_lock:
+      schema_version: "1.0"
+      stochasticity_declaration: deterministic finite-element simulations; planned runs are not yet executed
+      ars_version: "0.1.12"
+      model:
+        family: deterministic-multiphysics-simulation
+        id: MATLAB-R2026a-plus-COMSOL-6.0
+        weight_stable: true
+      prompts:
+        hash_timing: skill-load
+        skill_md_hash: 9843FB5F5954FA1DC307A20B96AB15BF88D06B8A01FC1585ABB9085631973A57
+        agents_bundle_hash: 03063B0E871AD4A4F1CC00A62B01E533A39352EAD14BD08AD2D2014096E36973
+      materials:
+        list_hash: AE8DA9F256F2D9890115238DCFB2C60E0812476F63768A92AAD52DD674B8FB36
+        count: 6
+      external_protocols:
+        s2_api_protocol_version: not-used-at-intake
+        s2_snapshot_available: false
+      cross_model:
+        enabled: false
+        secondary_model_id: null
+    planned_vs_executed:
+      - planned: Independent COMSOL run for 300 V electric actuation
+        executed: false
+        skip_reason: scheduled after Phase 1 scoping and model-interface implementation
+      - planned: Independent COMSOL run for 200 A magnetic actuation
+        executed: false
+        skip_reason: scheduled after Phase 1 scoping and model-interface implementation
+      - planned: Independent or explicitly downgraded validation for displacement-to-electric-and-magnetic sensing
+        executed: false
+        skip_reason: scheduled after forward-actuation validation
+      - planned: Curvature-by-FG MATLAB sweep and representative COMSOL checks
+        executed: false
+        skip_reason: scheduled after output-point definition is frozen
+      - planned: Stratified deterministic rerun audit of at least 10 percent of historical rows
+        executed: false
+        skip_reason: scheduled before paper drafting
+    negative_results: []
+    known_limitations:
+      - description: Magnetic-potential implementation in COMSOL may require an equivalent field or user-defined PDE; evidence level will be downgraded if an isomorphic model is unavailable.
+      - description: Curved-shell center output must be defined in parametric coordinates before comparison.
+claim_intent_manifests:
+  - manifest_version: "1.0"
+    manifest_id: M-2026-07-15T03:36:00Z-a1b2
+    emitted_by: synthesis_agent
+    emitted_at: "2026-07-15T11:36:00+08:00"
+    claims:
+      - claim_id: C-001
+        claim_text: Existing literature already covers FG-MEE plates and shells, curvature, porosity, and bidirectional field response, so object-first novelty claims are not supportable.
+        intended_evidence_kind: empirical
+        planned_refs:
+          - zhang2022_fgmee_shell
+          - zhao2024_porous_shell
+          - belbachir2023_double_curved
+          - zhao2023_dissertation
+        negative_constraints:
+          - constraint_id: NC-C001-1
+            rule: Do not claim an exhaustive absence of all possible novelty.
+      - claim_id: C-002
+        claim_text: The defensible gap is a unified and independently implemented MATLAB-COMSOL-literature validation chain spanning forward actuation and inverse sensing.
+        intended_evidence_kind: theoretical
+        planned_refs:
+          - zhang2026_full
+          - gong2025_comsol3d
+          - brischetto2025_3d
+        negative_constraints:
+          - constraint_id: NC-C002-1
+            rule: Do not label predecessor-code reruns as independent validation.
+      - claim_id: C-003
+        claim_text: Existing evidence closes the mechanical displacement baseline but does not yet close independent electric, magnetic, or inverse-sensing validation.
+        intended_evidence_kind: empirical
+        planned_refs:
+          - zhang2026_full
+        planned_experiment_ids:
+          - exp-existing-baseline
+        negative_constraints:
+          - constraint_id: NC-C003-1
+            rule: Do not imply that planned COMSOL experiments have already run.
+      - claim_id: C-004
+        claim_text: The retained evidence base is entirely computational or theoretical and therefore cannot establish experimental validity.
+        intended_evidence_kind: empirical
+        planned_refs:
+          - nan2008_review
+          - zhang2026_full
+          - zhao2024_porous_shell
+        negative_constraints:
+          - constraint_id: NC-C004-1
+            rule: Do not generalize numerical agreement into physical validation.
+      - claim_id: C-005
+        claim_text: A same-denominator curvature-by-gradient-by-porosity interaction map remains a plausible research contribution only if non-additive effects are demonstrated after baseline validation.
+        intended_evidence_kind: theoretical
+        planned_refs:
+          - zhang2022_fgmee_shell
+          - zhao2024_porous_shell
+          - tarkashvand2025_moving_heat
+          - belbachir2023_double_curved
+        negative_constraints:
+          - constraint_id: NC-C005-1
+            rule: Do not claim first discovery before the interaction data exist.
+    manifest_negative_constraints:
+      - constraint_id: MNC-1
+        rule: No first-ever claims from a targeted rather than exhaustive review.
+      - constraint_id: MNC-2
+        rule: No assertion of experimental validation.
+      - constraint_id: MNC-3
+        rule: No result claim for an unexecuted planned experiment.
+  - manifest_version: "1.0"
+    manifest_id: M-2026-07-15T03:48:00Z-c3d4
+    emitted_by: report_compiler_agent
+    emitted_at: "2026-07-15T11:48:00+08:00"
+    claims:
+      - claim_id: C-101
+        claim_text: The broad novelty claim based on FG-MEE plates, shells, curvature, porosity, or bidirectional coupling is not defensible against the retained literature.
+        intended_evidence_kind: empirical
+        planned_refs:
+          - zhang2022_fgmee_shell
+          - zhao2024_porous_shell
+          - belbachir2023_double_curved
+          - zhao2023_dissertation
+        negative_constraints:
+          - constraint_id: NC-C101-1
+            rule: Use targeted-search qualifiers and never assert exhaustive novelty absence.
+      - claim_id: C-102
+        claim_text: The current project has a closed independent mechanical displacement baseline but open electric, magnetic, and inverse-sensing validation tasks.
+        intended_evidence_kind: empirical
+        planned_refs:
+          - zhang2026_full
+        planned_experiment_ids:
+          - exp-existing-baseline
+        negative_constraints:
+          - constraint_id: NC-C102-1
+            rule: Do not present planned experiments as completed findings.
+      - claim_id: C-103
+        claim_text: A reproducible cross-platform validation chain and pre-specified interaction analysis is the most defensible planned contribution.
+        intended_evidence_kind: theoretical
+        planned_refs:
+          - brischetto2025_3d
+          - gong2025_comsol3d
+          - zhang2026_full
+        negative_constraints:
+          - constraint_id: NC-C103-1
+            rule: Cross-platform consistency must not be described as experimental truth.
+      - claim_id: C-104
+        claim_text: Material-tensor mapping, coordinates, units, and reference-potential definitions are primary interfaces for explaining solver disagreement.
+        intended_evidence_kind: theoretical
+        planned_refs:
+          - tassi2022_effective
+          - vinyas2018_arrangement
+          - nan2008_review
+        negative_constraints:
+          - constraint_id: NC-C104-1
+            rule: Do not attribute a specific observed discrepancy to one interface before diagnostic evidence exists.
+      - claim_id: C-105
+        claim_text: Numerical interaction findings are reportable only when they exceed combined grid and cross-platform uncertainty and replicate under frozen contrasts.
+        intended_evidence_kind: theoretical
+        planned_refs:
+          - zhao2024_porous_shell
+          - belbachir2023_double_curved
+          - tarkashvand2025_moving_heat
+        planned_experiment_ids:
+          - exp-paper-closure-20260715
+        negative_constraints:
+          - constraint_id: NC-C105-1
+            rule: No non-additive effect claim before the planned experiment is executed.
+    manifest_negative_constraints:
+      - constraint_id: MNC-101
+        rule: No first-ever or exhaustive literature claims.
+      - constraint_id: MNC-102
+        rule: No experiment-backed result claim without executed provenance.
+      - constraint_id: MNC-103
+        rule: No physical-validation language for a numerical-only evidence base.
+  - manifest_version: "1.0"
+    manifest_id: M-2026-07-15T04:04:00Z-e5f6
+    emitted_by: report_compiler_agent
+    emitted_at: "2026-07-15T12:04:00+08:00"
+    claims:
+      - claim_id: C-201
+        claim_text: This deliverable is an evidence audit and executable validation protocol, not a completed interaction paper.
+        intended_evidence_kind: normative
+        planned_refs:
+          - zhang2026_full
+          - zhao2023_dissertation
+        negative_constraints:
+          - constraint_id: NC-C201-1
+            rule: Do not use a completed-result title for planned experiments.
+      - claim_id: C-202
+        claim_text: One percent is an engineering target within a multi-part error budget, not a universal correctness boundary.
+        intended_evidence_kind: theoretical
+        planned_refs:
+          - zhang2026_full
+          - brischetto2025_3d
+        negative_constraints:
+          - constraint_id: NC-C202-1
+            rule: Do not classify 0.99 percent as correct and 1.01 percent as wrong without context.
+      - claim_id: C-203
+        claim_text: A null interaction result remains publishable when it is bounded by numerical uncertainty and paired with transparent failure diagnostics.
+        intended_evidence_kind: normative
+        planned_refs:
+          - zhao2024_porous_shell
+          - belbachir2023_double_curved
+        planned_experiment_ids:
+          - exp-paper-closure-20260715
+        negative_constraints:
+          - constraint_id: NC-C203-1
+            rule: Do not change primary factors after observing a null result.
+      - claim_id: C-204
+        claim_text: The broad object-based novelty claim is rejected by the retained FG-MEE plate-shell, curved-shell, and porous-shell literature.
+        intended_evidence_kind: empirical
+        planned_refs:
+          - zhang2022_fgmee_shell
+          - zhao2024_porous_shell
+          - belbachir2023_double_curved
+          - zhao2023_dissertation
+        negative_constraints:
+          - constraint_id: NC-C204-1
+            rule: Retain targeted-search qualifiers until closest full texts are checked.
+      - claim_id: C-205
+        claim_text: The next mandatory work is independent electric, magnetic, and inverse-sensing closure before large parameter sweeps.
+        intended_evidence_kind: empirical
+        planned_refs:
+          - zhang2026_full
+        planned_experiment_ids:
+          - exp-existing-baseline
+          - exp-paper-closure-20260715
+        negative_constraints:
+          - constraint_id: NC-C205-1
+            rule: Do not imply that the planned closure cases are already completed.
+    manifest_negative_constraints:
+      - constraint_id: MNC-201
+        rule: Preserve all conditional and uncertainty language required by review.
+      - constraint_id: MNC-202
+        rule: Disclose AI use, inherited code, funding status, and data availability.
+      - constraint_id: MNC-203
+        rule: No physical or experimental validation claim.

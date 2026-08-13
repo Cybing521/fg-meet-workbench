@@ -1,0 +1,1 @@
+CURVED_COMSOL_CONFIG,radius_m,0.4,theta_rad,0.7499999999999999,pressure_Pa,15000.0,axial_div,2,circ_div,2,thickness_div,2,theta0_faces,1,outer_faces,1

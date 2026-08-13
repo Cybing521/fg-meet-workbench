@@ -65,10 +65,27 @@ NumLay = ElemType(3);
 DOFPerElemMEE = NumMEELay*DOFPerMEELay;
 NumNode = length(Node(:,1));
 NumElem = length(Element(:,1));
+
+%% Map physical layers to the compact MEE-layer numbering.  The original
+%% reverse-loop counter was decremented only when a layer was deleted, so a
+%% missing middle layer removed the wrong electrical/magnetic/thermal slot.
+PhysicalToMEELayer = zeros(NumLay,1);
+ActiveMEELayerIndex = 0;
+for LayIndex = 1:NumLay
+    if MateProp{LayIndex,1}.IsSmtLay == 2
+        ActiveMEELayerIndex = ActiveMEELayerIndex + 1;
+        PhysicalToMEELayer(LayIndex) = ActiveMEELayerIndex;
+    end
+end
+if ActiveMEELayerIndex ~= NumMEELay
+    error('SF_Condensation:MEELayerCountMismatch', ...
+        'ElemType declares %d MEE layers, but MateProp contains %d.', ...
+        NumMEELay,ActiveMEELayerIndex);
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Condensing-----------------------------------------------------------Start
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% First postion of mechanical dof (first one) and electrical dof (second)  MEE dof (three)  
+%% First postion of mechanical dof (first one) and electrical dof (second)  MEE dof (three)
 PosME = [5 11  12];   %?
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for NodeIndex = NumNode:-1:1
@@ -84,22 +101,22 @@ for NodeIndex = NumNode:-1:1
             CuuT(:,DeletIndex)=[];
             KuuT(DeletIndex,:)=[];
             KuuT(:,DeletIndex)=[];
-            
+
 %             MutT(DeletIndex,:)=[];
 %             MtuT(:,DeletIndex)=[];
 %             CutT(DeletIndex,:)=[];
 %             CtuT(:,DeletIndex)=[];
-            
+
             KufMT(DeletIndex,:)=[];
             KfuMT(:,DeletIndex)=[];
             KuzT(DeletIndex,:)=[];
             KzuT(:,DeletIndex)=[];
             KutT(DeletIndex,:)=[];
             KtuT(:,DeletIndex)=[];
-            
+
             FuiT(DeletIndex,:)=[];
             FusT(DeletIndex,:)=[];
-            FucT(DeletIndex,:)=[]; 
+            FucT(DeletIndex,:)=[];
         end
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -113,13 +130,13 @@ for NodeIndex = NumNode:-1:1
 %             KufPT(:,DeletIndex)=[];
 %              KufMT(:,DeletIndex)=[];
 %             KfuPT(DeletIndex,:)=[];
-%               KfuMT(DeletIndex,:)=[]; 
+%               KfuMT(DeletIndex,:)=[];
 %             KffPT(DeletIndex,:)=[];
 %             KffMT(DeletIndex,:)=[];
 %             KffPT(:,DeletIndex)=[];
 %             KffMT(:,DeletIndex)=[];
-%             GfiT(DeletIndex,:)=[]; 
-%             GfT(DeletIndex,:)=[]; 
+%             GfiT(DeletIndex,:)=[];
+%             GfT(DeletIndex,:)=[];
 %         end
 %     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -127,43 +144,55 @@ for NodeIndex = NumNode:-1:1
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LayStart: In Element Matrix, the start position of layer
-LayStart = NodePerElem+1;   % LayStart = 9          
+LayStart = NodePerElem+1;   % LayStart = 9
 for ElemIndex = NumElem:-1:1
-    MEELayIndex = NumMEELay;     % MEELayIndex: 
     for LayIndex = NumLay:-1:1
-         if   MateProp{LayIndex,1}.IsSmtLay ==2
+        MEELayIndex = PhysicalToMEELayer(LayIndex);
+         if MEELayIndex > 0
             if Element(ElemIndex,LayStart+LayIndex-1) == 0
-                DeletIndex = (ElemIndex-1)*DOFPerElemMEE+MEELayIndex;
-                KufMT(:,DeletIndex)=[];
-                KfuMT(DeletIndex,:)=[];
-                KffMT(DeletIndex,:)=[];
-                KffMT(:,DeletIndex)=[];
-                
+                for LocalDOFIndex = DOFPerMEELay:-1:1
+                    DeletIndex = (ElemIndex-1)*DOFPerElemMEE + ...
+                        (MEELayIndex-1)*DOFPerMEELay + LocalDOFIndex;
+                    KufMT(:,DeletIndex)=[];
+                    KfuMT(DeletIndex,:)=[];
+                    KuzT(:,DeletIndex)=[];
+                    KzuT(DeletIndex,:)=[];
+                    KutT(:,DeletIndex)=[];
+                    KtuT(DeletIndex,:)=[];
+
+                    KffMT(DeletIndex,:)=[];
+                    KffMT(:,DeletIndex)=[];
+
 %                 MttT(DeletIndex,:)=[];
 %                 MttT(:,DeletIndex)=[];
 %                 CttT(DeletIndex,:)=[];
 %                 CttT(:,DeletIndex)=[];
-                
-                KfzT(:,DeletIndex)=[];
-                KzfT(DeletIndex,:)=[];
-                KzzT(DeletIndex,:)=[];
-                KzzT(:,DeletIndex)=[];
-                
-                KftT(DeletIndex,:)=[];
-                KtfT(:,DeletIndex)=[];
-                KztT(DeletIndex,:)=[];
-                KtzT(:,DeletIndex)=[];
-                KttT(DeletIndex,:)=[];
-                KttT(:,DeletIndex)=[];
-                 
-                GfiMT(DeletIndex,:)=[]; 
-                GfMT(DeletIndex,:)=[];
-                MziT(DeletIndex,:)=[]; 
-                MzT(DeletIndex,:)=[];
-                FtT(DeletIndex,:)=[];
-                
-                MEELayIndex = MEELayIndex-1;
-            end    
+
+                    KfzT(DeletIndex,:)=[];
+                    KfzT(:,DeletIndex)=[];
+                    KzfT(DeletIndex,:)=[];
+                    KzfT(:,DeletIndex)=[];
+                    KzzT(DeletIndex,:)=[];
+                    KzzT(:,DeletIndex)=[];
+
+                    KftT(DeletIndex,:)=[];
+                    KftT(:,DeletIndex)=[];
+                    KtfT(DeletIndex,:)=[];
+                    KtfT(:,DeletIndex)=[];
+                    KztT(DeletIndex,:)=[];
+                    KztT(:,DeletIndex)=[];
+                    KtzT(DeletIndex,:)=[];
+                    KtzT(:,DeletIndex)=[];
+                    KttT(DeletIndex,:)=[];
+                    KttT(:,DeletIndex)=[];
+
+                    GfiMT(DeletIndex,:)=[];
+                    GfMT(DeletIndex,:)=[];
+                    MziT(DeletIndex,:)=[];
+                    MzT(DeletIndex,:)=[];
+                    FtT(DeletIndex,:)=[];
+                end
+            end
         end
     end
 end

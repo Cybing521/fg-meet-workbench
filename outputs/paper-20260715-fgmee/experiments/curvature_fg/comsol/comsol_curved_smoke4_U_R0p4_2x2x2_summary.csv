@@ -1,0 +1,2 @@
+case_id,radius_m,arc_length_m,theta_span_rad,pressure_Pa,axial_divisions,circumferential_divisions,thickness_divisions,w_center_radial_mm,u_center_magnitude_mm,total_elements,fixed_face_count,axial_edge_count,radial_edge_count,outer_face_count,inner_face_count,status
+curved_CFFF_U_R0p4,0.4,0.3,0.7499999999999999,15000.0,2,2,2,-0.1259774455468209,0.1271705395453639,8.0,1,2,2,1,1,completed

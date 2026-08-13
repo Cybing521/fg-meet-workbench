@@ -142,6 +142,16 @@ python3 tools/export_comsol_layers.py cases/Thermal_CFFF_X_Vf0.5-30x30-10layer.t
 
 已自动化的弹性基准算例：
 
+推荐直接使用单入口脚本：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\RUN_COMSOL_MAIN.ps1
+```
+
+该脚本会运行 COMSOL 批处理并在存在 `output/static_elastic_phase1_U_Vf06.mat` 时自动生成 MATLAB-vs-COMSOL 对比表。
+
+底层手动命令如下：
+
 ```powershell
 & 'D:\comsol\COMSOL60\Multiphysics\bin\win64\comsolcompile.exe' tools\comsol\RunElasticCfffValidation.java
 $env:FG_COMSOL_LOAD_MODE='forcearea'

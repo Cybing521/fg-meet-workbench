@@ -12,6 +12,11 @@
       "evidence": 0.00017690163831768046
     },
     {
+      "check": "isomorphic_free_mid_error_le_0p1pct",
+      "status": "pass",
+      "evidence": 0.00012127289258313264
+    },
+    {
       "check": "isomorphic_all_acceptance_gates",
       "status": "pass",
       "evidence": [
@@ -183,48 +188,184 @@
       ]
     },
     {
-      "check": "inverse_corrected_nine_rows",
+      "check": "inverse_actuation_three_targets",
       "status": "pass",
-      "evidence": 9
+      "evidence": 3
     },
     {
-      "check": "inverse_20x20_0p5_below_5pct",
+      "check": "inverse_actuation_target_specific_comsol_residual_le_0p001pct",
+      "status": "pass",
+      "evidence": 0.00037503631278301697
+    },
+    {
+      "check": "inverse_local_constitutive_scaled_condition_le_1p1",
       "status": "pass",
       "evidence": [
         {
-          "mesh_inplane": "20",
-          "thickness_divisions_per_layer": "5",
-          "target_w_mm": "0.5",
-          "comsol_zero_e_V": "71.29415727195605",
-          "matlab_zero_e_V": "68.9062639956534",
-          "zero_e_error_pct": "3.4654226449619676",
-          "comsol_zero_m_A": "0.05511177894304917",
-          "matlab_zero_m_A": "0.05326589070453365",
-          "zero_m_error_pct": "3.4654226449618095",
-          "comsol_corrected_e_V": "81.1999480555809",
-          "matlab_corrected_e_V": "78.4802748394657",
-          "corrected_e_error_pct": "3.465422644961939",
-          "comsol_corrected_m_A": "0.03197085607562874",
-          "matlab_corrected_m_A": "0.030900039122573032",
-          "corrected_m_error_pct": "3.4654226449618153",
-          "matlab_legacy_e_V": "164.64637243377632",
-          "matlab_legacy_m_A": "0.17039262511507253",
-          "legacy_e_inflation_vs_corrected": "2.097933178375924",
-          "legacy_m_inflation_vs_corrected": "5.51431745568884",
-          "status": "completed_corrected_crosscheck",
-          "evidence_tier": "B_nonisomorphic_3d_mechanics"
+          "c11_Pa": "136342676220.87405",
+          "c12_Pa": "46329241379.853004",
+          "e31_C_per_m2": "-9.87159042714329",
+          "g_effective": "8.136078506634354e-09",
+          "k33": "1.755e-08",
+          "r33": "7.536e-05",
+          "determinant": "6.128268737599648e-13",
+          "normalized_coupling_rho": "0.02241295456018969",
+          "dimensionless_condition_number": "1.0458536243186534",
+          "verdict": "well_conditioned_after_unit_scaling"
         }
       ]
     },
     {
-      "check": "inverse_comsol_final_model",
+      "check": "inverse_actuation_matlab_load_cross_applied_to_comsol",
       "status": "pass",
-      "evidence": "G:\\fg-meet-workbench\\outputs\\paper-20260715-fgmee\\experiments\\inverse_sensing\\comsol_inverse_sensor_20x20x5_Model.mph"
+      "evidence": [
+        {
+          "channel": "electric",
+          "target_abs_w_mm": "0.5",
+          "matlab_inverted_load": "2870.423627868996",
+          "comsol_cross_applied_w_mm": "0.5538629038121122",
+          "comsol_w_over_target": "1.1077258076242245",
+          "comsol_target_difference_pct": "10.772580762422447",
+          "interpretation": "nonisomorphic_model_form_difference_not_solver_failure"
+        },
+        {
+          "channel": "magnetic",
+          "target_abs_w_mm": "0.5",
+          "matlab_inverted_load": "572.7844432631446",
+          "comsol_cross_applied_w_mm": "0.5463396053249225",
+          "comsol_w_over_target": "1.092679210649845",
+          "comsol_target_difference_pct": "9.267921064984508",
+          "interpretation": "nonisomorphic_model_form_difference_not_solver_failure"
+        }
+      ]
+    },
+    {
+      "check": "inverse_sensing_explicitly_not_independent_phi_psi_pde",
+      "status": "pass",
+      "evidence": [
+        {
+          "target_abs_w_mm": "0.5",
+          "matlab_zero_temperature_layer_span_V": "68.9062639956534",
+          "three_d_mechanics_zero_temperature_layer_span_V": "71.29415727195605",
+          "matlab_zero_temperature_layer_span_A": "0.05326589070453365",
+          "three_d_mechanics_zero_temperature_layer_span_A": "0.05511177894304917",
+          "matlab_layer_span_V": "78.4802748394657",
+          "three_d_mechanics_postprocess_layer_span_V": "81.1999480555809",
+          "matlab_layer_span_A": "0.030900039122573032",
+          "three_d_mechanics_postprocess_layer_span_A": "0.03197085607562874",
+          "shared_mechanical_scale_difference_pct": "3.465422644961939",
+          "observable_definition": "max_minus_min_of_layerwise_potential_difference_dofs",
+          "thermal_boundary_for_corrected_span": "no_external_thermal_load_with_reciprocal_temperature_response_from_KTu_u_plus_KTT_T_equals_zero",
+          "independent_comsol_phi_psi_pde": "no",
+          "reporting_status": "exploratory_nonindependent_constitutive_postprocess"
+        },
+        {
+          "target_abs_w_mm": "1.0",
+          "matlab_zero_temperature_layer_span_V": "137.8125279913068",
+          "three_d_mechanics_zero_temperature_layer_span_V": "142.5883145439121",
+          "matlab_zero_temperature_layer_span_A": "0.1065317814090673",
+          "three_d_mechanics_zero_temperature_layer_span_A": "0.11022355788609833",
+          "matlab_layer_span_V": "156.9605496789314",
+          "three_d_mechanics_postprocess_layer_span_V": "162.3998961111618",
+          "matlab_layer_span_A": "0.061800078245146065",
+          "three_d_mechanics_postprocess_layer_span_A": "0.06394171215125748",
+          "shared_mechanical_scale_difference_pct": "3.465422644961939",
+          "observable_definition": "max_minus_min_of_layerwise_potential_difference_dofs",
+          "thermal_boundary_for_corrected_span": "no_external_thermal_load_with_reciprocal_temperature_response_from_KTu_u_plus_KTT_T_equals_zero",
+          "independent_comsol_phi_psi_pde": "no",
+          "reporting_status": "exploratory_nonindependent_constitutive_postprocess"
+        },
+        {
+          "target_abs_w_mm": "2.0",
+          "matlab_zero_temperature_layer_span_V": "275.6250559826136",
+          "three_d_mechanics_zero_temperature_layer_span_V": "285.1766290878242",
+          "matlab_zero_temperature_layer_span_A": "0.2130635628181346",
+          "three_d_mechanics_zero_temperature_layer_span_A": "0.22044711577219667",
+          "matlab_layer_span_V": "313.9210993578628",
+          "three_d_mechanics_postprocess_layer_span_V": "324.7997922223236",
+          "matlab_layer_span_A": "0.12360015649029213",
+          "three_d_mechanics_postprocess_layer_span_A": "0.12788342430251495",
+          "shared_mechanical_scale_difference_pct": "3.465422644961939",
+          "observable_definition": "max_minus_min_of_layerwise_potential_difference_dofs",
+          "thermal_boundary_for_corrected_span": "no_external_thermal_load_with_reciprocal_temperature_response_from_KTu_u_plus_KTT_T_equals_zero",
+          "independent_comsol_phi_psi_pde": "no",
+          "reporting_status": "exploratory_nonindependent_constitutive_postprocess"
+        }
+      ]
+    },
+    {
+      "check": "inverse_actuation_six_clean_comsol_logs",
+      "status": "pass",
+      "evidence": [
+        "comsol_inverse_actuation_electric_target_0p5mm.log",
+        "comsol_inverse_actuation_electric_target_1p0mm.log",
+        "comsol_inverse_actuation_electric_target_2p0mm.log",
+        "comsol_inverse_actuation_magnetic_target_0p5mm.log",
+        "comsol_inverse_actuation_magnetic_target_1p0mm.log",
+        "comsol_inverse_actuation_magnetic_target_2p0mm.log"
+      ]
+    },
+    {
+      "check": "inverse_actuation_six_comsol_models",
+      "status": "pass",
+      "evidence": [
+        [
+          "comsol_inverse_actuation_electric_target_0p5mm_Model.mph",
+          27194631
+        ],
+        [
+          "comsol_inverse_actuation_electric_target_1p0mm_Model.mph",
+          27194613
+        ],
+        [
+          "comsol_inverse_actuation_electric_target_2p0mm_Model.mph",
+          27195161
+        ],
+        [
+          "comsol_inverse_actuation_magnetic_target_0p5mm_Model.mph",
+          26189843
+        ],
+        [
+          "comsol_inverse_actuation_magnetic_target_1p0mm_Model.mph",
+          26189698
+        ],
+        [
+          "comsol_inverse_actuation_magnetic_target_2p0mm_Model.mph",
+          26189689
+        ]
+      ]
+    },
+    {
+      "check": "inverse_actuation_two_clean_cross_application_logs",
+      "status": "pass",
+      "evidence": [
+        "comsol_inverse_actuation_electric_target_0p5mm_matlab_load_crosscheck.log",
+        "comsol_inverse_actuation_magnetic_target_0p5mm_matlab_load_crosscheck.log"
+      ]
+    },
+    {
+      "check": "inverse_actuation_two_cross_application_models",
+      "status": "pass",
+      "evidence": [
+        [
+          "comsol_inverse_actuation_electric_target_0p5mm_matlab_load_crosscheck_Model.mph",
+          27194862
+        ],
+        [
+          "comsol_inverse_actuation_magnetic_target_0p5mm_matlab_load_crosscheck_Model.mph",
+          26189994
+        ]
+      ]
     },
     {
       "check": "latex_placeholders_resolved",
       "status": "pass",
       "evidence": []
+    },
+    {
+      "check": "report_model_and_load_explanation_complete",
+      "status": "pass",
+      "evidence": "geometry, potential-to-stress conversion, evidence-qualified wording, and six free-midpoint rows"
     },
     {
       "check": "latest_report_scope_wording",
@@ -276,6 +417,41 @@
       "evidence": [
         "G:\\fg-meet-workbench\\outputs\\paper-20260715-fgmee\\figures\\Fig_05_curved_comsol_validation.pdf"
       ]
+    },
+    {
+      "check": "Fig_00_curved_shell_geometry_loads_png",
+      "status": "pass",
+      "evidence": "G:\\fg-meet-workbench\\outputs\\paper-20260715-fgmee\\figures\\Fig_00_curved_shell_geometry_loads.png"
+    },
+    {
+      "check": "Fig_00_curved_shell_geometry_loads_pdf",
+      "status": "pass",
+      "evidence": "G:\\fg-meet-workbench\\outputs\\paper-20260715-fgmee\\figures\\Fig_00_curved_shell_geometry_loads.pdf"
+    },
+    {
+      "check": "Fig_00_material_boundary_loads_png",
+      "status": "pass",
+      "evidence": "G:\\fg-meet-workbench\\outputs\\paper-20260715-fgmee\\figures\\Fig_00_material_boundary_loads.png"
+    },
+    {
+      "check": "Fig_00_material_boundary_loads_pdf",
+      "status": "pass",
+      "evidence": "G:\\fg-meet-workbench\\outputs\\paper-20260715-fgmee\\figures\\Fig_00_material_boundary_loads.pdf"
+    },
+    {
+      "check": "model_figure_script_exists",
+      "status": "pass",
+      "evidence": "G:\\fg-meet-workbench\\tools\\plotting\\plot_model_geometry_loads.py"
+    },
+    {
+      "check": "model_figure_provenance_exists",
+      "status": "pass",
+      "evidence": "G:\\fg-meet-workbench\\outputs\\paper-20260715-fgmee\\figures\\model_schematic_provenance.md"
+    },
+    {
+      "check": "screenshot_requirements_R1_to_R9_traced",
+      "status": "pass",
+      "evidence": "G:\\fg-meet-workbench\\outputs\\paper-20260715-fgmee\\phase4_reporting\\fgmee_requirement_recheck_20260718.md"
     },
     {
       "check": "compiled_pdf_exists",

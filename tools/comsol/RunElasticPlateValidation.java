@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,6 +17,7 @@ public class RunElasticPlateValidation {
     private static final String BC = env("FG_COMSOL_BC", "CFFF").toUpperCase();
     private static final String RUN_TAG = env("FG_COMSOL_RUN_TAG", "plate_U_Vf06_CFFF");
     private static final int MESH_SIZE = intEnv("FG_COMSOL_MESH_SIZE", 3);
+    private static final String OUTPUT_DIR = env("FG_COMSOL_OUTPUT_DIR", defaultOutputDir());
 
     private static final double[][] POINTS = new double[][] {
         {0.050, 0.050},
@@ -36,8 +38,9 @@ public class RunElasticPlateValidation {
     };
 
     public static Model run() {
+        new File(OUTPUT_DIR).mkdirs();
         Model model = ModelUtil.create("Model");
-        model.modelPath("G:\\fg-meet-workbench\\output");
+        model.modelPath(OUTPUT_DIR);
         model.label(modelLabel());
 
         model.param().set("L", "0.3[m]");
@@ -194,7 +197,11 @@ public class RunElasticPlateValidation {
     }
 
     private static String csvPath() {
-        return "G:\\fg-meet-workbench\\output\\" + baseName() + "_points.csv";
+        return new File(OUTPUT_DIR, baseName() + "_points.csv").getPath();
+    }
+
+    private static String defaultOutputDir() {
+        return new File("output").getAbsolutePath();
     }
 
     private static String safeName(String value) {

@@ -1,0 +1,2 @@
+run_tag,case_id,comsol_csv,matlab_w_p8_mm,comsol_w_p8_mm,center_rel_err_pct,max_abs_diff_mm,max_rel_err_pct,mean_rel_err_pct,comsol_mesh,notes,date
+stage1_raw_qianC_mapped45x45x10_serp2_20260714,U_Vf06_elastic,output\comsol_elastic_validation_stage1_raw_qianC_mapped45x45x10_serp2_20260714_points.csv,-2.1275198619369178,-2.2812817955678066,7.227285459553936,0.43545568651751143,7.874454590101847,7.409923601618575,"3D solid, Qian Table 1 MEE stiffness, mapped 45x45x10 hex, quadratic serendipity, force area",raw stiffness scale 1.0; fresh MATLAB rerun,2026-07-14

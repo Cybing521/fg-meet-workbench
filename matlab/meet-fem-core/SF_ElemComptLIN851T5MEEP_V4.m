@@ -33,8 +33,8 @@ Density = MatePropCurrLay.Density;
 Lay_zC = MatePropCurrLay.Lay_zC;
 IsSmtLay = MatePropCurrLay.IsSmtLay;
 hE = MatePropCurrLay.hE;
-Mate_PyroE = MatePropCurrLay.PyroE;%PyroE,Lamdat
-Mate_PyroM = MatePropCurrLay.PyroM;%PyroM,Lamdat
+Mate_p = MatePropCurrLay.p;
+Mate_t = MatePropCurrLay.t;
 c33 = MatePropCurrLay.c33;
 % c33 = MatCurrLayer(1,22); 
 Mate_Lamdat = MatePropCurrLay.Lamdat;
@@ -181,16 +181,10 @@ for i=1:NumMEELay
         Bt(i,i)=0;
    end
 end
-%% PE
-    PE = zeros(DOFPerElemMEE,DOFPerElemMEE);
-   for ij = 1:DOFPerElemMEE
-       PE(ij,ij) = Mate_PyroE;
-   end
-   %% PM
-    PM = zeros(DOFPerElemMEE,DOFPerElemMEE);
-   for ij = 1:DOFPerElemMEE
-       PM(ij,ij) = Mate_PyroM;
-   end
+%% Pyroelectric/pyromagnetic layer selection matrices.
+% SF_GetMatePropMEEP maps the current physical layer to its active MEE DOF.
+PE = Mate_p;
+PM = Mate_t;
    %% PM
     MC = zeros(DOFPerElemMEE,DOFPerElemMEE);
    for ij = 1:DOFPerElemMEE

@@ -100,7 +100,7 @@ for i = 1:NumLay
 %         eM(MEELayIndex,:) = d;
         q1 = [q31 q32 0 0 0];
         q(MEELayIndex,:) =q1;
-        gM(MEELayIndex,MEELayIndex) = g33-d31*eM(MEELayIndex,1)-d32*eM(MEELayIndex,1); 
+        gM(MEELayIndex,MEELayIndex) = g33-d31*eM(MEELayIndex,1)-d32*eM(MEELayIndex,2);
 %         gM(MEELayIndex,MEELayIndex) = g33;
         k(MEELayIndex,MEELayIndex)=k33;
         r(MEELayIndex,MEELayIndex)=r33;
@@ -157,7 +157,7 @@ for i = 1:NumLay
     Lamdat = Lamdat*MCTran;
     
     MatStru = struct('C',C,'eM', eM, 'gM',gM,'q',q,'k',k,'r',r,'hE', hE,  ...
-    'Density',Density,'Lamdat',Lamdat,'PyroE',PyroE,'PyroM',PyroM,'c',c,'c33',c33, ...
+    'Density',Density,'Lamdat',Lamdat,'p',p,'t',t,'PyroE',PyroE,'PyroM',PyroM,'c',c,'c33',c33, ...
        'Lay_zC',Lay_zC,'IsSmtLay',IsSmtLay,'Alphat',Alphat,'HC_Current',HC_Current);            
     %% MateProp: cell varible for all layers            
     MateProp{LayIndex,1} = MatStru;

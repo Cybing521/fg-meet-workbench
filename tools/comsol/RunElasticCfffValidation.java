@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,13 +20,16 @@ public class RunElasticCfffValidation {
 
     private static final int MESH_SIZE = intEnv("FG_COMSOL_MESH_SIZE", 5);
     private static final int SWEEP_LAYERS = intEnv("FG_COMSOL_SWEEP_LAYERS", NLAYER);
+    private static final int INPLANE_DIVISIONS = intEnv("FG_COMSOL_INPLANE_DIVISIONS", 0);
     private static final String MESH_MODE = env("FG_COMSOL_MESH_MODE", "auto").toLowerCase();
     private static final String LOAD_MODE = env("FG_COMSOL_LOAD_MODE", "pressure").toLowerCase();
     private static final String RUN_TAG = env("FG_COMSOL_RUN_TAG", "");
     private static final boolean LAYERED_GEOMETRY = boolEnv("FG_COMSOL_LAYERED", false);
     private static final String SOLID_MODEL = env("FG_COMSOL_SOLID_MODEL", "isotropic").toLowerCase();
-    private static final String LAYER_CSV = env("FG_COMSOL_LAYER_CSV",
-        "G:\\fg-meet-workbench\\comsol\\export\\Thermal_CFFF_U_Vf0.6-30x30-10layer_layers.csv");
+    private static final String DISPLACEMENT_ORDER = env("FG_COMSOL_DISPLACEMENT_ORDER", "2s").toLowerCase();
+    private static final boolean GEOMETRIC_NONLINEAR = boolEnv("FG_COMSOL_GEOMETRIC_NONLINEAR", false);
+    private static final String OUTPUT_DIR = env("FG_COMSOL_OUTPUT_DIR", defaultOutputDir());
+    private static final String LAYER_CSV = env("FG_COMSOL_LAYER_CSV", defaultLayerCsv());
     private static final String CASE_ID = env("FG_COMSOL_CASE_ID", "U_Vf06_elastic");
     private static final String FG_MODE = env("FG_COMSOL_FG_MODE", "U");
     private static final String VF0 = env("FG_COMSOL_VF0", "0.6");
@@ -47,20 +51,22 @@ public class RunElasticCfffValidation {
         {0.100, 0.250, 0.0},
         {0.150, 0.250, 0.0},
         {0.200, 0.250, 0.0},
-        {0.250, 0.250, 0.0}
+        {0.250, 0.250, 0.0},
+        {0.300, 0.150, 0.0}
     };
 
     public static Model run() {
         double[][] layers = readLayers();
         if (!isSupportedSolidModel()) {
             throw new IllegalArgumentException("Unsupported FG_COMSOL_SOLID_MODEL: " + SOLID_MODEL
-                + " (use isotropic or orthotropic)");
+                + " (use isotropic, orthotropic, qian_mee, or qian_thermal_piezo)");
         }
         if (usesOrthotropicSolid() && !LAYERED_GEOMETRY) {
             throw new IllegalArgumentException("FG_COMSOL_SOLID_MODEL=orthotropic requires FG_COMSOL_LAYERED=true");
         }
+        new File(OUTPUT_DIR).mkdirs();
         Model model = ModelUtil.create("Model");
-        model.modelPath("G:\\fg-meet-workbench\\output");
+        model.modelPath(OUTPUT_DIR);
         model.label(modelLabel());
 
         model.param().set("L", "0.3[m]");
@@ -114,6 +120,15 @@ public class RunElasticCfffValidation {
         model.component("comp1").selection("sel_top").set("zmin", "0.002999999");
         model.component("comp1").selection("sel_top").set("zmax", "0.003000001");
 
+        if ((INPLANE_DIVISIONS > 0 && "sweep".equals(MESH_MODE)) || usesQianThermalPiezo()) {
+            createBoxSelection(model, "sel_mesh_bottom_face", "Mapped mesh source face", 2,
+                "-1e-9", "0.300000001", "-1e-9", "0.300000001", "-0.003000001", "-0.002999999");
+        }
+        if (INPLANE_DIVISIONS > 0 && "sweep".equals(MESH_MODE)) {
+            createBoxSelection(model, "sel_mesh_bottom_edges", "Mapped mesh source edges", 1,
+                "-1e-9", "0.300000001", "-1e-9", "0.300000001", "-0.003000001", "-0.002999999");
+        }
+
         int fixedBoundaryCount = model.component("comp1").selection("sel_fixed_x0").entities(2).length;
         if ("CFCF".equals(BC)) {
             fixedBoundaryCount += model.component("comp1").selection("sel_fixed_xL").entities(2).length;
@@ -123,13 +138,18 @@ public class RunElasticCfffValidation {
             + ",top_boundary_count," + topBoundaryCount);
         System.out.println("RUN_CONFIG,run_tag," + displayRunTag()
             + ",mesh_mode," + MESH_MODE + ",mesh_size," + MESH_SIZE
+            + ",inplane_divisions," + INPLANE_DIVISIONS
             + ",sweep_layers," + SWEEP_LAYERS + ",load_mode," + LOAD_MODE
             + ",layered_geometry," + LAYERED_GEOMETRY + ",solid_model," + SOLID_MODEL
+            + ",displacement_order," + DISPLACEMENT_ORDER
+            + ",geometric_nonlinear," + GEOMETRIC_NONLINEAR
             + ",stiffness_scale," + STIFFNESS_SCALE
             + ",layer_csv," + LAYER_CSV
             + ",case_id," + CASE_ID + ",bc," + BC);
 
-        if (LAYERED_GEOMETRY) {
+        if (usesQianThermalPiezo()) {
+            createQianThermalPiezoMaterial(model);
+        } else if (LAYERED_GEOMETRY) {
             createLayerMaterials(model, layers);
         } else {
             model.component("comp1").material().create("mat1", "Common");
@@ -141,7 +161,22 @@ public class RunElasticCfffValidation {
         }
 
         model.component("comp1").physics().create("solid", "SolidMechanics", "geom1");
-        if (usesOrthotropicSolid()) {
+        model.component("comp1").physics("solid").prop("ShapeProperty")
+            .set("order_displacement", DISPLACEMENT_ORDER);
+        if (usesQianThermalPiezo()) {
+            model.component("comp1").physics("solid").create("pzm1", "PiezoelectricMaterialModel");
+            model.component("comp1").physics("solid").feature("pzm1").selection().all();
+            model.component("comp1").physics().create("es", "Electrostatics", "geom1");
+            model.component("comp1").physics("es").create("ccnp1", "ChargeConservationPiezo");
+            model.component("comp1").physics("es").feature("ccnp1").selection().all();
+            model.component("comp1").physics("es").create("gnd1", "Ground", 2);
+            model.component("comp1").physics("es").feature("gnd1").selection().named("sel_top");
+            model.component("comp1").physics("es").create("gnd2", "Ground", 2);
+            model.component("comp1").physics("es").feature("gnd2").selection().named("sel_mesh_bottom_face");
+            model.component("comp1").multiphysics().create("pze1", "PiezoelectricEffect", 3);
+            model.component("comp1").multiphysics("pze1").set("Solid_physics", "solid");
+            model.component("comp1").multiphysics("pze1").set("Electrostatics_physics", "es");
+        } else if (usesOrthotropicSolid()) {
             model.component("comp1").physics("solid").feature("lemm1").set("SolidModel", "Orthotropic");
             model.component("comp1").physics("solid").feature("lemm1").set("OrthotropicOption", "OrthotropicStd");
         }
@@ -168,11 +203,26 @@ public class RunElasticCfffValidation {
 
         model.component("comp1").mesh().create("mesh1");
         if ("sweep".equals(MESH_MODE)) {
+            if (INPLANE_DIVISIONS > 0) {
+                model.component("comp1").mesh("mesh1").create("map1", "Map");
+                model.component("comp1").mesh("mesh1").feature("map1").selection()
+                    .named("sel_mesh_bottom_face");
+                model.component("comp1").mesh("mesh1").feature("map1").create("dis1", "Distribution");
+                model.component("comp1").mesh("mesh1").feature("map1").feature("dis1").selection()
+                    .named("sel_mesh_bottom_edges");
+                model.component("comp1").mesh("mesh1").feature("map1").feature("dis1")
+                    .set("numelem", INPLANE_DIVISIONS);
+            }
             model.component("comp1").mesh("mesh1").create("swe1", "Sweep");
             model.component("comp1").mesh("mesh1").feature("swe1").set("facemethod", "quad");
             model.component("comp1").mesh("mesh1").feature("swe1").set("sweeppath", "straight");
             model.component("comp1").mesh("mesh1").feature("swe1").create("size1", "Size");
-            model.component("comp1").mesh("mesh1").feature("swe1").feature("size1").set("hauto", MESH_SIZE);
+            if (INPLANE_DIVISIONS > 0) {
+                model.component("comp1").mesh("mesh1").feature("swe1").selection("sourceface")
+                    .named("sel_mesh_bottom_face");
+            } else {
+                model.component("comp1").mesh("mesh1").feature("swe1").feature("size1").set("hauto", MESH_SIZE);
+            }
             model.component("comp1").mesh("mesh1").feature("swe1").create("dis1", "Distribution");
             model.component("comp1").mesh("mesh1").feature("swe1").feature("dis1").set("numelem", SWEEP_LAYERS);
         } else if ("auto".equals(MESH_MODE)) {
@@ -182,10 +232,22 @@ public class RunElasticCfffValidation {
                 + " (use auto or sweep)");
         }
         model.component("comp1").mesh("mesh1").run();
+        System.out.println("MESH_STATS,total_elements," + model.component("comp1").mesh("mesh1").getNumElem());
 
         model.study().create("std1");
         model.study("std1").create("stat", "Stationary");
+        if (usesQianThermalPiezo()) {
+            model.study("std1").feature("stat").setSolveFor("/physics/solid", true);
+            model.study("std1").feature("stat").setSolveFor("/physics/es", true);
+            model.study("std1").feature("stat").setSolveFor("/multiphysics/pze1", true);
+        }
+        if (GEOMETRIC_NONLINEAR) {
+            model.study("std1").feature("stat").set("geometricNonlinearity", "on");
+        }
         model.study("std1").run();
+        if (GEOMETRIC_NONLINEAR) {
+            model.result().dataset("dset1").set("frametype", "material");
+        }
 
         double[][] coord = new double[3][POINTS.length];
         for (int i = 0; i < POINTS.length; i++) {
@@ -296,7 +358,15 @@ public class RunElasticCfffValidation {
     }
 
     private static String csvPath() {
-        return "G:\\fg-meet-workbench\\output\\" + baseName() + "_points.csv";
+        return new File(OUTPUT_DIR, baseName() + "_points.csv").getPath();
+    }
+
+    private static String defaultOutputDir() {
+        return new File("output").getAbsolutePath();
+    }
+
+    private static String defaultLayerCsv() {
+        return new File("comsol\\export\\Thermal_CFFF_U_Vf0.6-30x30-10layer_layers.csv").getPath();
     }
 
     private static void createFixedEdgeSelection(Model model, String tag, String label, String xmin, String xmax) {
@@ -310,6 +380,20 @@ public class RunElasticCfffValidation {
         model.component("comp1").selection(tag).set("ymax", "0.300000001");
         model.component("comp1").selection(tag).set("zmin", "-0.003000001");
         model.component("comp1").selection(tag).set("zmax", "0.003000001");
+    }
+
+    private static void createBoxSelection(Model model, String tag, String label, int entityDim,
+            String xmin, String xmax, String ymin, String ymax, String zmin, String zmax) {
+        model.component("comp1").selection().create(tag, "Box");
+        model.component("comp1").selection(tag).label(label);
+        model.component("comp1").selection(tag).set("entitydim", Integer.toString(entityDim));
+        model.component("comp1").selection(tag).set("condition", "allvertices");
+        model.component("comp1").selection(tag).set("xmin", xmin);
+        model.component("comp1").selection(tag).set("xmax", xmax);
+        model.component("comp1").selection(tag).set("ymin", ymin);
+        model.component("comp1").selection(tag).set("ymax", ymax);
+        model.component("comp1").selection(tag).set("zmin", zmin);
+        model.component("comp1").selection(tag).set("zmax", zmax);
     }
 
     private static String safeName(String value) {
@@ -344,22 +428,73 @@ public class RunElasticCfffValidation {
         }
     }
 
+    private static void createQianThermalPiezoMaterial(Model model) {
+        model.component("comp1").material().create("mat1", "Common");
+        model.component("comp1").material("mat1").label("Qian Table 1 thermal-piezo analogy material");
+        model.component("comp1").material("mat1").selection().all();
+        model.component("comp1").material("mat1").propertyGroup("def")
+            .set("density", "5600[kg/m^3]");
+        model.component("comp1").material("mat1").propertyGroup()
+            .create("StressCharge", "Stress-charge form");
+        model.component("comp1").material("mat1").propertyGroup("StressCharge")
+            .set("cE", new String[] {
+                stiffnessText(200e9), stiffnessText(110e9), stiffnessText(110e9), "0[Pa]", "0[Pa]", "0[Pa]",
+                stiffnessText(110e9), stiffnessText(200e9), stiffnessText(110e9), "0[Pa]", "0[Pa]", "0[Pa]",
+                stiffnessText(110e9), stiffnessText(110e9), stiffnessText(190e9), "0[Pa]", "0[Pa]", "0[Pa]",
+                "0[Pa]", "0[Pa]", "0[Pa]", stiffnessText(45e9), "0[Pa]", "0[Pa]",
+                "0[Pa]", "0[Pa]", "0[Pa]", "0[Pa]", stiffnessText(45e9), "0[Pa]",
+                "0[Pa]", "0[Pa]", "0[Pa]", "0[Pa]", "0[Pa]", stiffnessText(45e9)
+            });
+        model.component("comp1").material("mat1").propertyGroup("StressCharge")
+            .set("eES", new String[] {
+                "0[C/m^2]", "0[C/m^2]", "4857000[C/m^2]",
+                "0[C/m^2]", "0[C/m^2]", "4857000[C/m^2]",
+                "0[C/m^2]", "0[C/m^2]", "4320000[C/m^2]",
+                "0[C/m^2]", "0[C/m^2]", "0[C/m^2]",
+                "0[C/m^2]", "0[C/m^2]", "0[C/m^2]",
+                "0[C/m^2]", "0[C/m^2]", "0[C/m^2]"
+            });
+        model.component("comp1").material("mat1").propertyGroup("StressCharge")
+            .set("epsilonrS", new String[] {
+                "0", "0", "0",
+                "0", "0", "0",
+                "0", "0", "3.693e13"
+            });
+    }
+
     private static void assignLayerMaterial(Model model, String matTag, double[] layer) {
         model.component("comp1").material(matTag).propertyGroup("def")
             .set("density", Double.toString(layerDensity(layer)) + "[kg/m^3]");
         if (usesOrthotropicSolid()) {
             model.component("comp1").material(matTag).propertyGroup().create("Orthotropic", "Orthotropic");
+            double e1 = layerE1(layer);
+            double e2 = layerE2(layer);
+            double e3 = layerE2(layer);
+            double nu12 = layerNu12(layer);
+            double nu13 = layerNu12(layer);
+            double nu23 = layerNu23(layer);
+            if ("qian_mee".equals(SOLID_MODEL)) {
+                // Engineering constants obtained by inverting Qian Shenyun Table 1's
+                // MEE stiffness matrix: C11=C22=200, C12=C13=C23=110,
+                // C33=190, C44=C55=C66=45 GPa.
+                e1 = 120.57915057915058e9;
+                e2 = 120.57915057915058e9;
+                e3 = 111.93548387096773e9;
+                nu12 = 0.33976833976833987;
+                nu13 = 0.38223938223938225;
+                nu23 = 0.38223938223938225;
+            }
             model.component("comp1").material(matTag).propertyGroup("Orthotropic")
                 .set("Evector", new String[] {
-                    Double.toString(scaleStiffness(layerE1(layer))) + "[Pa]",
-                    Double.toString(scaleStiffness(layerE2(layer))) + "[Pa]",
-                    Double.toString(scaleStiffness(layerE2(layer))) + "[Pa]"
+                    Double.toString(scaleStiffness(e1)) + "[Pa]",
+                    Double.toString(scaleStiffness(e2)) + "[Pa]",
+                    Double.toString(scaleStiffness(e3)) + "[Pa]"
                 });
             model.component("comp1").material(matTag).propertyGroup("Orthotropic")
                 .set("nuvector", new String[] {
-                    Double.toString(layerNu12(layer)),
-                    Double.toString(layerNu12(layer)),
-                    Double.toString(layerNu23(layer))
+                    Double.toString(nu12),
+                    Double.toString(nu13),
+                    Double.toString(nu23)
                 });
             model.component("comp1").material(matTag).propertyGroup("Orthotropic")
                 .set("Gvector", new String[] {
@@ -463,6 +598,10 @@ public class RunElasticCfffValidation {
         return value * STIFFNESS_SCALE;
     }
 
+    private static String stiffnessText(double value) {
+        return Double.toString(scaleStiffness(value)) + "[Pa]";
+    }
+
     private static double layerZ1(double[] layer) {
         return layer[9];
     }
@@ -472,11 +611,15 @@ public class RunElasticCfffValidation {
     }
 
     private static boolean usesOrthotropicSolid() {
-        return "orthotropic".equals(SOLID_MODEL);
+        return "orthotropic".equals(SOLID_MODEL) || "qian_mee".equals(SOLID_MODEL);
+    }
+
+    private static boolean usesQianThermalPiezo() {
+        return "qian_thermal_piezo".equals(SOLID_MODEL);
     }
 
     private static boolean isSupportedSolidModel() {
-        return "isotropic".equals(SOLID_MODEL) || "orthotropic".equals(SOLID_MODEL);
+        return "isotropic".equals(SOLID_MODEL) || usesOrthotropicSolid() || usesQianThermalPiezo();
     }
 
     public static void main(String[] args) {

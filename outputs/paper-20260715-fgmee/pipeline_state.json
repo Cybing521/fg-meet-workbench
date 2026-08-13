@@ -1,0 +1,67 @@
+{
+  "topic": "Curvature and through-thickness functional-gradient effects on independently validated bidirectional FG-MEE plate-shell coupling",
+  "language": "zh-CN",
+  "pipeline_version": "academic-pipeline-3.12.0",
+  "entry_point": 1,
+  "current_stage": "2",
+  "pipeline_state": "running",
+  "consecutive_continue_count": 3,
+  "interaction_round_trips": 4,
+  "stages": {
+    "1": {
+      "name": "RESEARCH",
+      "skill": "deep-research",
+      "status": "completed",
+      "mode": "full",
+      "current_phase": "phase6_revision_complete",
+      "outputs": [
+        "phase1_scoping/research_question_brief.md",
+        "phase1_scoping/methodology_blueprint.md",
+        "phase1_scoping/devils_advocate_checkpoint1.md",
+        "phase1_scoping/experiment_matrix.csv",
+        "phase2_literature/search_strategy.md",
+        "phase2_literature/screening_log.csv",
+        "phase2_literature/annotated_bibliography.md",
+        "phase2_literature/source_quality_matrix.csv",
+        "phase2_literature/source_verification_report.md",
+        "phase2_literature/novelty_gap_report.md",
+        "phase2_literature/source_corpus.json",
+        "phase3_synthesis/synthesis_report.md",
+        "phase3_synthesis/devils_advocate_checkpoint2.md",
+        "phase4_reporting/research_report_draft.md",
+        "phase5_review/editor_in_chief_review.md",
+        "phase5_review/ethics_review.md",
+        "phase5_review/devils_advocate_checkpoint3.md",
+        "phase6_revision/final_research_report.md",
+        "stage1_checkpoint.md"
+      ],
+      "phase1_checkpoint_confirmed": true,
+      "checkpoint_confirmed": true,
+      "schema_validated": true
+    },
+    "2": {
+      "name": "WRITE",
+      "status": "in_progress",
+      "mode": "full",
+      "current_phase": "experiment_closure_direct_forward_runs_complete_mesh_converged_accuracy_gate_failed",
+      "experiment_bridge": "experiment-agent/run+validate",
+      "checkpoint_confirmed": false
+    },
+    "2.5": {"name": "INTEGRITY", "status": "pending", "mode": "pre-review"},
+    "3": {"name": "REVIEW", "status": "pending", "mode": "full"},
+    "4": {"name": "REVISE", "status": "pending", "mode": "revision"},
+    "3p": {"name": "RE-REVIEW", "status": "pending", "mode": "re-review"},
+    "4p": {"name": "RE-REVISE", "status": "pending", "mode": "revision"},
+    "4.5": {"name": "FINAL INTEGRITY", "status": "pending", "mode": "final-check"},
+    "5": {"name": "FINALIZE", "status": "pending", "mode": "latex-pdf"}
+  },
+  "materials": {
+    "rq_brief": true,
+    "methodology_blueprint": true,
+    "bibliography": true,
+    "synthesis_report": true,
+    "paper_draft": true,
+    "integrity_report_pre": false,
+    "final_paper": false
+  }
+}

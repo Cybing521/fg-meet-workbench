@@ -31,6 +31,9 @@ def main() -> None:
         ROOT / "tools" / "comsol" / "RunIsomorphicSolidCfffValidation.java",
         ROOT / "tools" / "comsol" / "RunCurvedSolidCfffValidation.java",
         ROOT / "tools" / "comsol" / "RunInverseSensorCfffValidation.java",
+        ROOT / "tools" / "comsol" / "RunDirectElectroCfffValidation.java",
+        ROOT / "tools" / "comsol" / "RunDirectMagneticCfffValidation.java",
+        ROOT / "tools" / "comsol" / "run_inverse_actuation_validation.ps1",
         ROOT / "tools" / "generate_curvature_fg_cases.py",
         ROOT / "tools" / "generate_validation_mesh_cases.py",
         ROOT / "tools" / "analyze_isomorphic_solid_validation.py",
@@ -38,6 +41,7 @@ def main() -> None:
         ROOT / "tools" / "analyze_curved_comsol_validation.py",
         ROOT / "tools" / "analyze_20x20_discrepancy_closure.py",
         ROOT / "tools" / "analyze_inverse_pyro_overcount.py",
+        ROOT / "tools" / "audit_inverse_potential_validation.py",
         ROOT / "tools" / "plotting" / "plot_stage2_extension_figures.py",
         ROOT / "tools" / "validate_stage2_extension.py",
         ROOT / "tools" / "build_stage2_extension_manifest.py",
@@ -60,6 +64,10 @@ def main() -> None:
         BASE / "experiments" / "inverse_sensing" / "qian_inverse_layer_means.csv",
         BASE / "experiments" / "inverse_sensing" / "matlab_inverse_pyro_fix_10x10.csv",
         BASE / "experiments" / "inverse_sensing" / "matlab_inverse_pyro_fix_10x10.log",
+        BASE / "experiments" / "inverse_actuation" / "inverse_actuation_comsol_validation.csv",
+        BASE / "experiments" / "inverse_actuation" / "inverse_actuation_matlab_load_comsol_crosscheck.csv",
+        BASE / "experiments" / "inverse_actuation" / "inverse_local_constitutive_conditioning.csv",
+        BASE / "experiments" / "inverse_actuation" / "inverse_sensing_evidence_status.csv",
         BASE / "experiments" / "inverse_sensing" / "comsol_inverse_sensor_10x10x1_smoke_layers.csv",
         BASE / "experiments" / "inverse_sensing" / "comsol_inverse_sensor_10x10x1_smoke_summary.csv",
         BASE / "experiments" / "inverse_sensing" / "comsol_inverse_sensor_10x10x1_smoke.log",
@@ -86,6 +94,7 @@ def main() -> None:
         BASE / "experiments" / "curvature_fg" / "curved_comsol_vs_matlab_model_form_comparison.csv",
         BASE / "phase4_reporting" / "fgmee_latest_feasible_results_report_20260715.tex",
         BASE / "phase4_reporting" / "fgmee_latest_feasible_results_report_20260715.pdf",
+        BASE / "phase4_reporting" / "inverse_potential_mathematical_audit_20260719.md",
     ]
     globs = [
         BASE / "experiments" / "isomorphic_solid" / "comsol" / "comsol_isomorphic_*_summary.csv",
@@ -95,6 +104,9 @@ def main() -> None:
         BASE / "experiments" / "curvature_fg" / "comsol" / "comsol_curved_U_R0p4_*_Model.mph",
         BASE / "experiments" / "curvature_fg" / "comsol" / "comsol_curved_U_R0p4_*.log",
         BASE / "experiments" / "curvature_fg" / "comsol" / "comsol_curved_U_R0p4_*_midarc.csv",
+        BASE / "experiments" / "inverse_actuation" / "comsol_inverse_actuation_*_summary.csv",
+        BASE / "experiments" / "inverse_actuation" / "comsol_inverse_actuation_*_Model.mph",
+        BASE / "experiments" / "inverse_actuation" / "comsol_inverse_actuation_*.log",
         BASE / "figures" / "Fig_0[3-5]_*.png",
         BASE / "figures" / "Fig_0[3-5]_*.pdf",
     ]
@@ -139,7 +151,7 @@ def main() -> None:
         writer.writerows(rows)
 
     metadata = {
-        "date": "2026-07-15",
+        "date": "2026-07-19",
         "matlab": "R2026a 26.1; base MATLAB and Simulink; PDE Toolbox absent",
         "comsol": "COMSOL Multiphysics 6.0.0.318 Java API/comsolbatch",
         "plotting_python": "Python 3.10.20; Matplotlib 3.10.9; pandas 2.3.3; NumPy 2.2.6",

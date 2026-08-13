@@ -1,0 +1,58 @@
+passport_version: "1.0"
+stage: 2
+created_at: "2026-07-15T12:30:00+08:00"
+status: direct_forward_execution_complete_mesh_converged_accuracy_gate_failed
+environment:
+  os: Windows
+  matlab:
+    executable: D:/MATLAB/R2026a/bin/matlab.exe
+    version: R2026a
+  comsol:
+    batch_executable: D:/comsol/COMSOL60/Multiphysics/bin/win64/comsolbatch.exe
+    installed_version: 6.0.0.318
+cases:
+  - case_id: E-FWD-300V
+    chain: forward_electric_to_displacement
+    geometry: plate_300mm_x_300mm_x_6mm
+    material: U_Vf0.6_10layer
+    boundary: CFFF
+    matlab_driver: top_bottom_potential_plus_minus_300_V
+    matlab_reference_center_w_mm: -0.0522570949
+    qian_present_center_w_mm: -0.0523
+    qian_comsol_center_w_mm: -0.0523
+    independent_comsol_status: completed_three_meshes_mesh_converged_relative_error_10p77pct_gate_failed
+    required_comsol_semantics: direct electric-potential boundary conditions with frozen face selection and reference potential
+  - case_id: M-FWD-200A
+    chain: forward_magnetic_to_displacement
+    geometry: plate_300mm_x_300mm_x_6mm
+    material: U_Vf0.6_10layer
+    boundary: CFFF
+    matlab_driver: top_bottom_magnetic_scalar_potential_plus_minus_200_A
+    matlab_reference_center_w_mm: 0.1745857472
+    qian_present_center_w_mm: 0.175
+    qian_comsol_center_w_mm: 0.173
+    independent_comsol_status: completed_three_meshes_mesh_converged_relative_error_9p27pct_gate_failed
+    required_comsol_semantics: magnetic scalar potential or mathematically isomorphic user PDE; equivalent pressure alone is insufficient
+  - case_id: INV-W-0P5MM
+    chain: displacement_to_electric_and_magnetic_potential
+    target_center_abs_w_mm: 0.5
+    matlab_status: completed
+    independent_comsol_status: not_implemented
+  - case_id: INV-W-1P0MM
+    chain: displacement_to_electric_and_magnetic_potential
+    target_center_abs_w_mm: 1.0
+    matlab_status: completed
+    independent_comsol_status: not_implemented
+  - case_id: INV-W-2P0MM
+    chain: displacement_to_electric_and_magnetic_potential
+    target_center_abs_w_mm: 2.0
+    matlab_status: completed
+    independent_comsol_status: predecessor_code_only_not_independent
+acceptance:
+  primary_relative_error_target: 0.01
+  interpretation: engineering_investigation_target_not_correctness_boundary
+  mesh_change_target: 0.005
+  require_sign_match: true
+  require_normal_solver_termination: true
+  near_zero_rule: use_absolute_and_characteristic_scale_error
+  failure_denominator: all_attempted_cases

@@ -1,0 +1,2 @@
+case_id,fg_mode,vf0,load_case,bc,matlab_w_mm,comsol_w_mm,rel_err_w_pct,matlab_theta_K,comsol_theta_K,rel_err_theta_pct,matlab_mesh,comsol_mesh,notes,date
+U_Vf06_elastic,U,0.6,elastic,CFFF,-2.1275198619369178,-2.2812817955678066,7.227285459553936,,,,30x30 MEET,"3D solid, Qian Table 1 MEE stiffness, mapped 45x45x10 hex, quadratic serendipity, force area",15-point comparison; max_abs_diff_mm=0.435456; max_rel_err_pct=7.87445; mean_rel_err_pct=7.40992; raw stiffness scale 1.0; fresh MATLAB rerun,2026-07-14
